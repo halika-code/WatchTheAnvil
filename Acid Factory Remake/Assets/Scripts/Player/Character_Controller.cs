@@ -5,10 +5,9 @@ using static Move;
 
 public class Character_Controller : MonoBehaviour
 {
-    private const double MoveVel = 8;
+    private const double MoveVel = 20;
     private static Rigidbody pBody;
     public static int hitPoints; //usually 2 todo implement a hitpoint system later
-    private static float grav;
 
     /**
      * <summary>Initialized the variables unique to the player</summary>
@@ -32,14 +31,20 @@ public class Character_Controller : MonoBehaviour
 
     // Update is called once per frame
     private void Update() {
-        if (Move.getMove() is CanMove.Freely) {
+        if (Move.getMove() is not CanMove.Cant) {
             move();
         }
     }
 
     private void FixedUpdate() {
-        if (getMove() is not CanMove.Jump) {
+        if (getMove() is not CanMove.CantJump) {
             jump();
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision) {
+        if (collision.gameObject.name is "Platform") {
+            Move.updateMovement(CanMove.Freely);
         }
     }
 
@@ -49,7 +54,7 @@ public class Character_Controller : MonoBehaviour
      * <remarks>I wish I could implement this into a switch statement</remarks>
     */
     private static void move() {
-        var vel = Vector3.zero; //todo the speed needs to be bigger a touch
+        var vel = Vector3.zero;
         if (Input.GetKey(KeyCode.A)) { //left
             vel.x -= (float)MoveVel;
         } if (Input.GetKey(KeyCode.D)) { //right
@@ -68,10 +73,8 @@ public class Character_Controller : MonoBehaviour
     private void jump() {
         var hop = new Vector3(pBody.velocity.x, 0, pBody.velocity.z);
         if (grounded()) {
-            if (Input.GetKeyDown(KeyCode.Space)) { //todo see why this is not working
-                Move.updateMovement(CanMove.Jump);
-                hop.y += (float)(MoveVel * 10);
-                movePlayer(hop);
+            if (Input.GetKeyDown(KeyCode.Space)) { 
+                Move.updateMovement(CanMove.CantJump);
                 StartCoroutine(flying(hop));
             } 
         }
@@ -81,25 +84,21 @@ public class Character_Controller : MonoBehaviour
      * Giving the player an arch (hopefully)
      */
     private static IEnumerator flying(Vector3 hop) {
-        hop.y += (float)MoveVel*2;
-        movePlayer(hop);
-        yield return new WaitForFixedUpdate();
-        while (!(Math.Round(hop.y, 1) <= 0)) {
-            hop.y -= (float)MoveVel;
-            yield return new WaitForFixedUpdate();
+        for (var i = 1; i < 4; i++) {
+            hop.y += (float)MoveVel*2*i;//todo this isn't perfect
+            yield return null;
             movePlayer(hop);
-        } Move.updateMovement(CanMove.Freely);
-    }
-
-    private static void updateGrav() {
-        if (grav !<= -1000f) {
-            grav -= -(10 - (float)Math.Round(grav / 5, 1)); //10 subtracted by the rounded product of the variable divided by 5, variable usually negative
-            if (grav <= -1000f) {
-                grav = -1000f;
-            }
+        }
+        
+        
+        yield return new WaitForFixedUpdate();
+        hop.y = -(float)MoveVel;
+        while (Move.getMove() is not CanMove.Freely) { //todo this is a good downwards arch
+            movePlayer(hop);
+            yield return null;
         } 
     }
-
+    
     private static void movePlayer(Vector3 movement) {
         pBody.velocity = movement;
     }
@@ -110,6 +109,6 @@ public class Character_Controller : MonoBehaviour
      * <remarks>Works remarkably but only on flat objects or slopes smaller than 60 degrees</remarks>
      */
     private static bool grounded() {
-        return Math.Abs(Math.Round(pBody.velocity.y, 1)) < 0.5f; //checks if the player isn't flying in the air
+        return Math.Abs(Math.Round(pBody.velocity.y, 1)) < 0.01f; //checks if the player isn't flying in the air
     }
 }

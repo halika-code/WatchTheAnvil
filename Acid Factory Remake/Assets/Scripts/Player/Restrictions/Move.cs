@@ -6,10 +6,10 @@ using UnityEngine;
 public class Move : MonoBehaviour {
     public enum CanMove {
         Freely,
-        Left,
-        Right,
-        Jump,
-        No
+        CantLeft,
+        CantRight,
+        CantJump,
+        Cant
     }
 
     private static CanMove controller; 
