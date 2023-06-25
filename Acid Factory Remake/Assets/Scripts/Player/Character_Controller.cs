@@ -31,7 +31,7 @@ public class Character_Controller : MonoBehaviour
 
     // Update is called once per frame
     private void Update() {
-        if (Move.getMove() is not CanMove.Cant) {
+        if (getMove() is not CanMove.Cant) {
             move();
         }
     }
@@ -54,7 +54,7 @@ public class Character_Controller : MonoBehaviour
      * <remarks>I wish I could implement this into a switch statement</remarks>
     */
     private static void move() {
-        var vel = Vector3.zero;
+        var vel = new Vector3(0f, pBody.velocity.y, 0f);
         if (Input.GetKey(KeyCode.A)) { //left
             vel.x -= (float)MoveVel;
         } if (Input.GetKey(KeyCode.D)) { //right
@@ -72,43 +72,34 @@ public class Character_Controller : MonoBehaviour
     */
     private void jump() {
         var hop = new Vector3(pBody.velocity.x, 0, pBody.velocity.z);
-        if (grounded()) {
-            if (Input.GetKeyDown(KeyCode.Space)) { 
-                Move.updateMovement(CanMove.CantJump);
-                StartCoroutine(flying(hop));
-            } 
-        }
+        if (Input.GetKey(KeyCode.Space)) {
+            Move.updateMovement(CanMove.CantJump);
+            StartCoroutine(flying(hop));
+        } 
     }
 
     /**
      * Giving the player an arch (hopefully)
      */
     private static IEnumerator flying(Vector3 hop) {
-        for (var i = 1; i < 4; i++) {
+        for (var i = 1; i < 3; i++) {
             hop.y += (float)MoveVel*2*i;//todo this isn't perfect
-            yield return null;
+            yield return new WaitForFixedUpdate();
             movePlayer(hop);
         }
-        
-        
-        yield return new WaitForFixedUpdate();
-        hop.y = -(float)MoveVel;
+
+        yield return new WaitForSeconds(0.1f);
+        while (Mathf.Sign(hop.y) is not -1) {
+            hop.y -= (float)MoveVel;
+            movePlayer(hop);
+        }
         while (Move.getMove() is not CanMove.Freely) { //todo this is a good downwards arch
             movePlayer(hop);
-            yield return null;
+            yield return new WaitForFixedUpdate();
         } 
     }
-    
+
     private static void movePlayer(Vector3 movement) {
         pBody.velocity = movement;
-    }
-
-    /**
-     * <summary><para>Evaluates if the player should be considered on the ground</para></summary>
-     * <returns>true if the player is stationary, false otherwise</returns>
-     * <remarks>Works remarkably but only on flat objects or slopes smaller than 60 degrees</remarks>
-     */
-    private static bool grounded() {
-        return Math.Abs(Math.Round(pBody.velocity.y, 1)) < 0.01f; //checks if the player isn't flying in the air
     }
 }
