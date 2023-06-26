@@ -82,17 +82,22 @@ public class Character_Controller : MonoBehaviour
      * Giving the player an arch (hopefully)
      */
     private static IEnumerator flying(Vector3 hop) {
-        for (var i = 1; i < 3; i++) {
-            hop.y += (float)MoveVel*2*i;//todo this isn't perfect
+        Debug.Log(MoveVel);
+        for (var i = 1; i < 2; i++) {
+            hop.y += (float)((float)5/(1.8*i) * MoveVel);//todo see WHY THE FUCK this isn't smooth, as fas as I have been able to test,
+                                                   //todo the (5/2f*i) is too snappy while anything above 5/2.6*i), it refuses to ramp down and just floats
             yield return new WaitForFixedUpdate();
             movePlayer(hop);
         }
 
-        yield return new WaitForSeconds(0.1f);
-        while (Mathf.Sign(hop.y) is not -1) {
-            hop.y -= (float)MoveVel;
+        yield return new WaitForSeconds(0.3f);
+        while (hop.y > -30f) {
+            Debug.Log("the jump vector is " + hop.y + ", and the sign is " + Mathf.Sign(hop.y));
+            hop.y -= (float)(0.9f*MoveVel);
+            yield return new WaitForSeconds(0.1f);
+            Debug.Log("the jump vector is " + hop.y + ", and the sign is " + Mathf.Sign(hop.y) + "Modified");
             movePlayer(hop);
-        }
+        } 
         while (Move.getMove() is not CanMove.Freely) { //todo this is a good downwards arch
             movePlayer(hop);
             yield return new WaitForFixedUpdate();
