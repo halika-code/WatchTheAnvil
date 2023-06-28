@@ -38,14 +38,25 @@ public class Character_Controller : MonoBehaviour
 
     private void FixedUpdate() {
         if (getMove() is not CanMove.CantJump) {
+            StopCoroutine(gravAmplifier(Vector3.zero));
             jump();
         }
     }
 
     private void OnCollisionEnter(Collision collision) {
-        if (collision.gameObject.name is "Platform") {
-            Move.updateMovement(CanMove.Freely);
+        switch (collision.gameObject.name) {
+            case "Platform": {
+                Move.updateMovement(CanMove.Freely);
+                break;
+            } case "DeathPlane": {
+                failSafe();
+                break;
+            }
         }
+    }
+
+    private static void failSafe() {
+        pBody.position = new Vector3(0f, 3f, 0f);
     }
 
     /**
@@ -56,13 +67,13 @@ public class Character_Controller : MonoBehaviour
     private static void move() {
         var vel = new Vector3(0f, pBody.velocity.y, 0f);
         if (Input.GetKey(KeyCode.A)) { //left
-            vel.x -= (float)MoveVel;
+            vel.x -= (float)(MoveVel*1.5);
         } if (Input.GetKey(KeyCode.D)) { //right
-            vel.x += (float)MoveVel;
+            vel.x += (float)(MoveVel*1.5);
         } if (Input.GetKey(KeyCode.W)) { //up
-            vel.z += (float)MoveVel;
+            vel.z += (float)(MoveVel*1.5);
         } if (Input.GetKey(KeyCode.S)) { //down
-            vel.z -= (float)MoveVel;
+            vel.z -= (float)(MoveVel*1.5);
         } movePlayer(vel);
     }
     
@@ -71,34 +82,31 @@ public class Character_Controller : MonoBehaviour
      * if the player presses the desired key</summary>
     */
     private void jump() {
-        var hop = new Vector3(pBody.velocity.x, 0, pBody.velocity.z);
         if (Input.GetKey(KeyCode.Space)) {
             Move.updateMovement(CanMove.CantJump);
-            StartCoroutine(flying(hop));
+            StartCoroutine(flying());
         } 
     }
 
     /**
      * Giving the player an arch (hopefully)
      */
-    private static IEnumerator flying(Vector3 hop) {
-        Debug.Log(MoveVel);
-        for (var i = 1; i < 2; i++) {
-            hop.y += (float)((float)5/(1.8*i) * MoveVel);//todo see WHY THE FUCK this isn't smooth, as fas as I have been able to test,
-                                                   //todo the (5/2f*i) is too snappy while anything above 5/2.6*i), it refuses to ramp down and just floats
+    private static IEnumerator flying() {
+        var hop = new Vector3(pBody.velocity.x, 0, pBody.velocity.z);
+        for (var i = 1; i < 2; i++) {//upward flying
+            hop.y += (float)((float)5/(1.8*i) * MoveVel); //this is somewhat of an arbitrary value
             yield return new WaitForFixedUpdate();
             movePlayer(hop);
-        }
-
-        yield return new WaitForSeconds(0.3f);
-        while (hop.y > -30f) {
-            Debug.Log("the jump vector is " + hop.y + ", and the sign is " + Mathf.Sign(hop.y));
+        } yield return new WaitForSeconds(0.3f); //gives it a bit of a time-out so the upward arch can actually play out
+        while (hop.y > -30f) { //here the arch goes from ~50 to -30
             hop.y -= (float)(0.9f*MoveVel);
-            yield return new WaitForSeconds(0.1f);
-            Debug.Log("the jump vector is " + hop.y + ", and the sign is " + Mathf.Sign(hop.y) + "Modified");
+            yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
-        } 
-        while (Move.getMove() is not CanMove.Freely) { //todo this is a good downwards arch
+        } GameObject.Find("Player").GetComponent<Character_Controller>() /*This part here is needed to find the correct instance inside this static function*/
+            .GetComponent<MonoBehaviour>().StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
+    }
+    private static IEnumerator gravAmplifier(Vector3 hop) {
+        while (Move.getMove() is not CanMove.Freely) { //here the arch is kept at a downwards angle
             movePlayer(hop);
             yield return new WaitForFixedUpdate();
         } 
