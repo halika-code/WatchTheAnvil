@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Move;
 
@@ -44,7 +45,7 @@ public class Character_Controller : MonoBehaviour
     }
 
     private void OnCollisionEnter(Collision collision) {
-        switch (collision.gameObject.name) {
+        switch (prepareObjectName(collision.gameObject.name)) {
             case "Platform": {
                 Move.updateMovement(CanMove.Freely);
                 break;
@@ -53,6 +54,10 @@ public class Character_Controller : MonoBehaviour
                 break;
             }
         }
+    }
+
+    private static string prepareObjectName(string name) {
+        return name.Contains("Platform") ? new string('P' + name.Split('P')[1].Split('m')[0] + 'm') : name;
     }
 
     private static void failSafe() {
@@ -91,7 +96,7 @@ public class Character_Controller : MonoBehaviour
     /**
      * Giving the player an arch (hopefully)
      */
-    private static IEnumerator flying() {
+    private IEnumerator flying() {
         var hop = new Vector3(pBody.velocity.x, 0, pBody.velocity.z);
         for (var i = 1; i < 2; i++) {//upward flying
             hop.y += (float)((float)5/(1.8*i) * MoveVel); //this is somewhat of an arbitrary value
@@ -102,8 +107,7 @@ public class Character_Controller : MonoBehaviour
             hop.y -= (float)(0.9f*MoveVel);
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
-        } GameObject.Find("Player").GetComponent<Character_Controller>() /*This part here is needed to find the correct instance inside this static function*/
-            .GetComponent<MonoBehaviour>().StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
+        } StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
     }
     private static IEnumerator gravAmplifier(Vector3 hop) {
         while (Move.getMove() is not CanMove.Freely) { //here the arch is kept at a downwards angle
@@ -114,5 +118,6 @@ public class Character_Controller : MonoBehaviour
 
     private static void movePlayer(Vector3 movement) {
         pBody.velocity = movement;
+        ShadowController.movePlayer(new Vector3(movement.x, 0f, movement.z));
     }
 }
