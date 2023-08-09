@@ -8,11 +8,13 @@ public class Character_Controller : MonoBehaviour {
     private const double MoveVel = 20;
     private static Rigidbody pBody;
     public static int hitPoints; //usually 2 todo implement a hitpoint system later
+    private static bool canPull;
 
     /**
      * <summary>Initialized the variables unique to the player</summary>
      */
     private static void init() {
+        canPull = false;
         points = 0;
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
@@ -34,6 +36,7 @@ public class Character_Controller : MonoBehaviour {
     private void Update() {
         if (getMove() is not CanMove.Cant) {
             move();
+            checkForVeggiePulls();
         }
     }
 
@@ -46,10 +49,10 @@ public class Character_Controller : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision) {
         var cName = collision.gameObject.name;
-        var desiredChars = cName.Contains('F') ? new[] { 'P', 'm' } : new[] { 'C', 't' };
-        if (!cName.Contains('F')) {
-            if (VegetablePull.validateVegetable(cName)) {
-                processVegetables(prepareObjectName(cName, desiredChars));
+        var desiredChars = cName.Contains('F') ? new[] { 'P', 'm' } : new[] { 'V', 'e' };
+        if (!cName.Contains('P') && canPull) { //processes a vegetable
+            if (VegetablePull.validateVegetable(collision.gameObject)) { 
+                processVegetables(prepareObjectName(cName, desiredChars)); 
             } else {
                 Debug.Log("Whoopy, tried to pull out a non-vegetable as a vegetable, the object's name is " + name);
             }
@@ -59,10 +62,11 @@ public class Character_Controller : MonoBehaviour {
     }
 
     /**
-     * <summary>Initiates the logic behind the vegetable pulls</summary>
+     * <summary>Initiates the logic behind the vegetable pulls
+     * <para>A beetroot is twice as valuable</para></summary>
      * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
      */
-    private static void processVegetables(string name) { //todo this probably needs to be a separate button action
+    private static void processVegetables(string name) {
         points += name is "Carrot" ? VegetablePull.getPoints(name) : VegetablePull.getPoints(name) * 2;
         VegetablePull.pullVegetable(name);
     }
@@ -86,10 +90,12 @@ public class Character_Controller : MonoBehaviour {
     /**
      * <summary>Parses the name of the object, cropping out the prefix and numbers (if any)</summary>
      * <returns>The corrected string, hopefully intact</returns>
-     * <remarks>This function while looking daunting, is quite simple in it's execution</remarks>
+     * <remarks>This function while looking daunting, is quite simple in it's execution
+     * <para>There is a breakdown of how this works</para></remarks>
      */
     private static string prepareObjectName(string name, char[] badChars) { //cuts out the prefix (and numbers) using chars which then are appended back
-        return name.Contains("Platform") ? new string(badChars[0] + name.Split(badChars[0])[1].Split(badChars[1])[0] + badChars[1]) : name;
+        return name.Contains("Platform") ? new string(badChars[0] + name.Split(badChars[0])[1].Split(badChars[1])[0] + badChars[1]) : name; 
+        //broken down example: P + ([FloatingPlatform1 - FloatingP] - m1 ) + m. Input: FloatingPlatform1, output: Platform
     }
 
     /**
@@ -126,6 +132,24 @@ public class Character_Controller : MonoBehaviour {
             Move.updateMovement(CanMove.CantJump);
             StartCoroutine(flying());
         } 
+    }
+
+    /**
+     * <summary>Checks if the player have pressed the E key in a non-mashy style</summary>
+     */
+    private void checkForVeggiePulls() {
+        if (Input.GetKey(KeyCode.E) && !canPull) {
+            StartCoroutine(doPullVeggies());
+        }
+    }
+
+    /**
+     * <summary>Allows the player to pull vegetables for 1 second each time</summary>
+     */
+    private static IEnumerator doPullVeggies() {
+        canPull = true;
+        yield return new WaitForSeconds(1f);
+        canPull = false;
     }
 
     /**
