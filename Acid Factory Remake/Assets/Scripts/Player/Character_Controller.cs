@@ -4,7 +4,6 @@ using UnityEngine;
 using static Move;
 
 public class Character_Controller : MonoBehaviour {
-    private static int points;
     private const double MoveVel = 20;
     private static Rigidbody pBody;
     public static int hitPoints; //usually 2 todo implement a hitpoint system later
@@ -15,7 +14,6 @@ public class Character_Controller : MonoBehaviour {
      */
     private static void init() {
         canPull = false;
-        points = 0;
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
         Physics.gravity = new Vector3(0, -30f); //I should use gravity to enforce the player and objects to stick to the surface, slow but detectable when player is falling
@@ -67,7 +65,7 @@ public class Character_Controller : MonoBehaviour {
      * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
      */
     private static void processVegetables(string name) {
-        points += name is "Carrot" ? VegetablePull.getPoints(name) : VegetablePull.getPoints(name) * 2;
+        UI.updatePoints(name is "Carrot" ? VegetablePull.getPoints(name) : VegetablePull.getPoints(name) * 2);
         VegetablePull.pullVegetable(name);
     }
 
