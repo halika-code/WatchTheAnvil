@@ -92,7 +92,7 @@ public class Character_Controller : MonoBehaviour {
      * <para>There is a breakdown of how this works</para></remarks>
      */
     private static string prepareObjectName(string name, char[] badChars) { //cuts out the prefix (and numbers) using chars which then are appended back
-        return name.Contains("Platform") ? new string(badChars[0] + name.Split(badChars[0])[1].Split(badChars[1])[0] + badChars[1]) : name; 
+        return !name.Contains("Platform") ? new string(badChars[0] + name.Split(badChars[0])[1].Split(badChars[1])[0] + badChars[1]) : name; 
         //broken down example: P + ([FloatingPlatform1 - FloatingP] - m1 ) + m. Input: FloatingPlatform1, output: Platform
     }
 
@@ -185,5 +185,13 @@ public class Character_Controller : MonoBehaviour {
     private static void movePlayer(Vector3 movement) {
         pBody.velocity = movement;
         ShadowController.movePlayer(new Vector3(movement.x, 0f, movement.z));
+    }
+
+    public static Rigidbody getPlayerBody() {
+        return pBody;
+    }
+
+    public static bool isMoving() { //todo check if this works
+        return Math.Round(pBody.velocity.x, 2) > 0.05 || Math.Round(pBody.velocity.y) > 0.05 || Math.Round(pBody.velocity.z) > 0.05; //idea here is find a threshold that can tell me if the player is moving. check what velocity correlates with 0
     }
 }
