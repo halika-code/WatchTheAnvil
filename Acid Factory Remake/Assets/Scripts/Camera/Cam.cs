@@ -1,83 +1,61 @@
 using System;
+using System.Collections;
 using UnityEngine;
-
+using static Character_Controller;
 public class Cam : MonoBehaviour {
     
-    private static Camera cam; 
-    private static Vector3 border;
-    
+    private static Camera cam;
+    private static readonly Vector3 NormalDistance = new (-1.23f, 50f, -120f); //this is the distance relative to the player where the camera has the player in the center
+
     private void Start() {
         if (cam != null) {
-            cam.transform.position = new Vector3(0f, 50f, -120f);
+            cam.transform.position = NormalDistance;
         } else {
             cam = Camera.main;
-        } border = new Vector3(50f, 50f, 50f);
+        }
     }
     
     private void Update() {
         moveCam();
-        updateBorder();
     }
 
     private static void moveCam() {
-        if (!Character_Controller.isMoving() || !haveLeftBorder()) { //if the player is stationary or inside the border
-            moveCatchup();
-        } else {
+        if (!isMoving() || !haveLeftBorder()) { //if the player is stationary or inside the border
             moveFollowPlayer();
-        }
+        } 
     }
-
-    /**
-     * <summary>Attempts to move the camera smoothly to the player</summary>
-     */
-    private static void moveCatchup() {
-        var pBody = Character_Controller.getPlayerBody();
-        while (haveLeftBorder()) {
-            var camPos = cam.transform.position;
-            var target = camPos + ((pBody.transform.position - camPos) / 2); //target is halfway between the player and the camera's position
-            Vector3.Lerp(camPos, target, 0.2f);
-        }
-    }
-
     /**
      * <summary>Follows quickly the player</summary>
      */
     private static void moveFollowPlayer() {
-        var pBody = Character_Controller.getPlayerBody().position;
+        var pBody = getPlayerBody().position;
         var camPos = cam.transform.position;
         var leftBorderAt = checkIfInBorder();
-        if (leftBorderAt[0]) {
-            camPos.x = pBody.x - border.x;
+        if (leftBorderAt[0]) { //todo now the border-check is correct, it returns all fine, this ...
+                               //todo perhaps needs to be inside a coroutine with a yield return waitforfixedupdate
+            camPos.x = NormalDistance.x + pBody.x - (Math.Sign(pBody.x) * getBorder().x);
         } if (leftBorderAt[1]) {
-            camPos.y = pBody.y - border.y;
+            camPos.y = NormalDistance.y + pBody.y - (Math.Sign(pBody.y) * getBorder().y);
         } if (leftBorderAt[2]) {
-            camPos.z = pBody.z - border.z;
+            camPos.z = NormalDistance.z + pBody.z - (Math.Sign(pBody.z) * getBorder().z);
         } cam.transform.position = camPos;
     }
 
-    private static void updateBorder() {
-        border = cam.transform.position + new Vector3(20f, 20f, 20f); //todo check the border to have a good size
+    private static Vector3 getBorder() { //todo add extra padding to the x axis to be able to see the player properly
+        return cam.transform.position + new Vector3(5f, 5f, 5f);
     }
 
     /**
      * <summary>Checks if the player is inside the border placed in the center of the camera</summary>
      * <returns>Based on player's relative position,
-     * <para>1-3 if x, y or z boundary is passed</para> 
-     * 0 if player sits inside the boundary
+     * <para>Evaluates if the player have left any of the boundaries set on the camera</para>
      * </returns>
-     * <remarks>This function checks the relative x and y position of the player</remarks>
+     * <remarks>Calculates with an extra buffer in mind for the z axis</remarks>
      */
     private static bool[] checkIfInBorder() {
-        var returnValue = new[] {false, false, false};
-        var pBodyPosRelative = cam.WorldToScreenPoint(Character_Controller.getPlayerBody().position);
-        var camCenter = new Vector2(((float)cam.pixelWidth/2), (float)cam.pixelHeight/2);
-        if (Math.Abs(pBodyPosRelative.x) > (camCenter + (Vector2)border).x) {
-            returnValue[0] = true;
-        } if (Math.Abs(pBodyPosRelative.y) > (camCenter + (Vector2)border).y) {
-            returnValue[1] = true;
-        } if (Math.Abs(pBodyPosRelative.z) > (cam.transform.position + border).z) {
-            returnValue[2] = true;
-        } return returnValue;
+        var pBodyPos = new Vector3(Math.Abs(getPlayerBody().position.x), Math.Abs(getPlayerBody().position.y), Math.Abs(getPlayerBody().position.z));
+        var camPos = new Vector3(Math.Abs(cam.transform.position.x), Math.Abs(cam.transform.position.y), Math.Abs(cam.transform.position.z));
+        return new []{pBodyPos.x + camPos.x >= 50f, pBodyPos.y + camPos.y >= 50f + 50f, pBodyPos.z + camPos.z >= 120f + 50f};
     }
 
     /**

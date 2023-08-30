@@ -191,10 +191,7 @@ public class Character_Controller : MonoBehaviour {
         return pBody;
     }
 
-    public static bool isMoving() { //todo check if this works
-        var asd = Math.Round(pBody.velocity.x, 2) > 0.05;//idea here is find a threshold that can tell me if the player is moving. check what velocity correlates with 0
-        var asd2 = Math.Round(pBody.velocity.y) > 0.05;
-        var asd3 = Math.Round(pBody.velocity.z) > 0.05;
-        return asd || asd2 || asd3;
+    public static bool isMoving() { //idea here is find a threshold that can tell me if the player is moving. check what velocity correlates with 0
+        return Math.Round(pBody.velocity.x, 2) > 0.05 || Math.Round(pBody.velocity.y) > 0.05 || Math.Round(pBody.velocity.z) > 0.05;
     }
 }
