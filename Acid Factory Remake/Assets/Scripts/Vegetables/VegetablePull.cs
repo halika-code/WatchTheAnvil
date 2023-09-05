@@ -66,8 +66,36 @@ public class VegetablePull : MonoBehaviour {
      * <summary>Checks if the vegetable has a valid parent</summary>
      */
     public static bool validateVegetable(GameObject veg) {
-        var parent = veg.GetComponentInParent<GameObject>().GetComponentInParent<GameObject>()
-            .GetComponentInParent<GameObject>(); //breakdown of the chain in an intended state: Veggie1 -> Small -> Carrot -> Vegetable
+        var parent = Character_Controller.getParentName(veg); //breakdown of the chain in an intended state: Veggie1 -> Small -> Carrot -> Vegetable
         return parent != null && parent.name.Contains("Vegetables");
+    }
+
+    public static List<string> getParents(GameObject obj) {
+        var parentList = new List<string>();
+        while (obj.transform.parent != null) { //todo here is where I'm checking for the object's parent
+            parentList.Add(obj.name);
+            obj = obj.transform.parent.gameObject;
+        } return parentList;
+    }
+
+    public static int getProfileOfVeggie(List<string> parentList) {
+        var score = 0;
+        foreach (var parents in parentList) {
+            switch (parents) {
+                case "Small" or "Carrot": {
+                    score += 1;
+                    break;
+                } case "Medium" or "Beetroot": {
+                    score *= 2;
+                    break;
+                } case "Large": {
+                    score *= 5;
+                    break;
+                } default: {
+                    Debug.Log("Whoopy while trying to decide the score of the object of name" + parentList[0]);
+                    break;
+                }
+            }
+        } return score;
     }
 }

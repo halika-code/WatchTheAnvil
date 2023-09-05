@@ -15,55 +15,44 @@ public class Cam : MonoBehaviour {
         }
     }
     
-    private void Update() {
+    private void FixedUpdate() {
         moveCam();
     }
 
     private static void moveCam() {
-        if (!isMoving() || !haveLeftBorder()) { //if the player is stationary or inside the border
+        if (!checkIfLeftBorder()) { //if the player is stationary or inside the border
             moveFollowPlayer();
         } 
     }
+    
     /**
      * <summary>Follows quickly the player</summary>
      */
     private static void moveFollowPlayer() {
         var pBody = getPlayerBody().position;
         var camPos = cam.transform.position;
-        var leftBorderAt = checkIfInBorder();
-        if (leftBorderAt[0]) { //todo now the border-check is correct, it returns all fine, this ...
-                               //todo perhaps needs to be inside a coroutine with a yield return waitforfixedupdate
-            camPos.x = NormalDistance.x + pBody.x - (Math.Sign(pBody.x) * getBorder().x);
+        var leftBorderAt = haveLeftBorder(camPos, pBody);
+        if (leftBorderAt[0]) {
+            camPos.x = Mathf.Lerp(camPos.x, pBody.x, 0.02f); //todo this works but
         } if (leftBorderAt[1]) {
-            camPos.y = NormalDistance.y + pBody.y - (Math.Sign(pBody.y) * getBorder().y);
+            camPos.y = Mathf.Lerp(camPos.y, pBody.y, 0.02f); //todo this doesn't 
         } if (leftBorderAt[2]) {
-            camPos.z = NormalDistance.z + pBody.z - (Math.Sign(pBody.z) * getBorder().z);
+            camPos.z = Mathf.Lerp(camPos.z, pBody.z, 0.02f); //todo and this doesn't even moves
         } cam.transform.position = camPos;
     }
 
-    private static Vector3 getBorder() { //todo add extra padding to the x axis to be able to see the player properly
-        return cam.transform.position + new Vector3(5f, 5f, 5f);
+    private static bool[] haveLeftBorder(Vector3 camPos, Vector3 pBody) {
+        var camPosPar = Math.Sign(camPos.x) is 1; //cameraPositionParity
+        var pBodyPar = Math.Sign(pBody.x) is 1; //playerBodyParity
+        if (camPosPar && !pBodyPar || !camPosPar && pBodyPar) { //checking here to not have a case of (45[camPos] + (-5)[pBody])
+            camPos.x *= Math.Sign(camPos.x); //doesn't matter which variable I multiply, since multiplying by 1 doesn't ruin anything
+            pBody.x *= Math.Sign(pBody.x); 
+        } return new[] { Math.Abs(camPos.x - pBody.x) > NormalDistance.x + 2f, 
+                Math.Abs(camPos.y - pBody.y) > NormalDistance.y + 2f, Math.Abs(camPos.z - pBody.z) > NormalDistance.z + 2f };
     }
 
-    /**
-     * <summary>Checks if the player is inside the border placed in the center of the camera</summary>
-     * <returns>Based on player's relative position,
-     * <para>Evaluates if the player have left any of the boundaries set on the camera</para>
-     * </returns>
-     * <remarks>Calculates with an extra buffer in mind for the z axis</remarks>
-     */
-    private static bool[] checkIfInBorder() {
-        var pBodyPos = new Vector3(Math.Abs(getPlayerBody().position.x), Math.Abs(getPlayerBody().position.y), Math.Abs(getPlayerBody().position.z));
-        var camPos = new Vector3(Math.Abs(cam.transform.position.x), Math.Abs(cam.transform.position.y), Math.Abs(cam.transform.position.z));
-        return new []{pBodyPos.x + camPos.x >= 50f, pBodyPos.y + camPos.y >= 50f + 50f, pBodyPos.z + camPos.z >= 120f + 50f};
-    }
-
-    /**
-     * <summary>Returns if the player have left any side of the border</summary>
-     * <returns>true, if the player have left any side of the border attached to the camera, false otherwise</returns>
-     */
-    public static bool haveLeftBorder() {
-        foreach (var borderSide in checkIfInBorder()) {
+    private static bool checkIfLeftBorder() {
+        foreach (var borderSide in haveLeftBorder(cam.transform.position, getPlayerBody().position)) {
             if (borderSide) {
                 return true;
             }

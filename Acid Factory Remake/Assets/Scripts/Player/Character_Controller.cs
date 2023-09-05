@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using static Move;
 
@@ -40,23 +41,29 @@ public class Character_Controller : MonoBehaviour {
 
     private void FixedUpdate() {
         if (getMove() is not CanMove.CantJump) {
-            StopCoroutine(gravAmplifier(Vector3.zero));
             jump();
         }
     }
 
     private void OnCollisionEnter(Collision collision) {
-        var cName = collision.gameObject.name;
-        var desiredChars = cName.Contains('F') ? new[] { 'P', 'm' } : new[] { 'V', 'e' };
-        if (!cName.Contains('P') && canPull) { //processes a vegetable
-            if (VegetablePull.validateVegetable(collision.gameObject)) { 
-                processVegetables(prepareObjectName(cName, desiredChars)); 
-            } else {
-                Debug.Log("Whoopy, tried to pull out a non-vegetable as a vegetable, the object's name is " + name);
-            }
+        var cObj = collision.gameObject;
+        if (VegetablePull.validateVegetable(cObj) && canPull) { //processes a vegetable
+            processVegetables(cObj);
         } else {
-            processCollision(prepareObjectName(cName, desiredChars));
+            if (getMove() is CanMove.CantJump) {
+                StopCoroutine(gravAmplifier(Vector3.zero));
+            } processCollision(getParentName(cObj).name);
         }
+    }
+
+    /**
+     * <summary>Prepares the desired characters for platforms the player can reach for further processing </summary>
+     * <summary>Used to find the start and end of the name of the platform</summary>
+     */
+    private static char[] prepChars(string cParent) {
+        if (cParent.Contains('V')) {
+            return new[] { 'V', 'e' };
+        } return cParent.Contains('P') ? new[] { 'P', 'm' } : new [] { 'D', 'e' };
     }
 
     /**
@@ -64,9 +71,9 @@ public class Character_Controller : MonoBehaviour {
      * <para>A beetroot is twice as valuable</para></summary>
      * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
      */
-    private static void processVegetables(string name) {
-        UI.updatePoints(name is "Carrot" ? VegetablePull.getPoints(name) : VegetablePull.getPoints(name) * 2);
-        VegetablePull.pullVegetable(name);
+    private static void processVegetables(GameObject veggie) {
+        UI.updatePoints(VegetablePull.getProfileOfVeggie(VegetablePull.getParents(veggie)));
+        VegetablePull.pullVegetable(veggie.name);
     }
 
     /**
@@ -78,22 +85,15 @@ public class Character_Controller : MonoBehaviour {
             case "Platform": {
                 Move.updateMovement(CanMove.Freely);
                 break;
-            } case "DeathPlane": {
+            }
+            case "Wall": { //in case I need to add stuff in here
+                break;
+            }
+            default: {
                 failSafe();
                 break;
             } 
         }
-    }
-
-    /**
-     * <summary>Parses the name of the object, cropping out the prefix and numbers (if any)</summary>
-     * <returns>The corrected string, hopefully intact</returns>
-     * <remarks>This function while looking daunting, is quite simple in it's execution
-     * <para>There is a breakdown of how this works</para></remarks>
-     */
-    private static string prepareObjectName(string name, char[] badChars) { //cuts out the prefix (and numbers) using chars which then are appended back
-        return !name.Contains("Platform") ? new string(badChars[0] + name.Split(badChars[0])[1].Split(badChars[1])[0] + badChars[1]) : name; 
-        //broken down example: P + ([FloatingPlatform1 - FloatingP] - m1 ) + m. Input: FloatingPlatform1, output: Platform
     }
 
     /**
@@ -177,6 +177,17 @@ public class Character_Controller : MonoBehaviour {
             movePlayer(hop);
             yield return new WaitForFixedUpdate();
         } 
+    }
+
+    /**
+     * <summary>Fetches the name of the root parent of the gameObject</summary>
+     * <returns>The root parent (including empties)</returns>
+     * <remarks>Will find the name no matter how deep the object is in the hierarchy</remarks>
+     */
+    public static GameObject getParentName(GameObject obj) {
+        while (obj.transform.parent != null) { //todo here is where I'm checking for the object's parent
+            obj = obj.transform.parent.gameObject;
+        } return obj;
     }
 
     /**
