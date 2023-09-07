@@ -72,7 +72,7 @@ public class VegetablePull : MonoBehaviour {
 
     public static List<string> getParents(GameObject obj) {
         var parentList = new List<string>();
-        while (obj.transform.parent != null) { //todo here is where I'm checking for the object's parent
+        while (obj.transform.parent != null) { 
             parentList.Add(obj.name);
             obj = obj.transform.parent.gameObject;
         } return parentList;

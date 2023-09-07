@@ -55,15 +55,12 @@ public class Character_Controller : MonoBehaviour {
             } processCollision(getParentName(cObj).name);
         }
     }
-
-    /**
-     * <summary>Prepares the desired characters for platforms the player can reach for further processing </summary>
-     * <summary>Used to find the start and end of the name of the platform</summary>
-     */
-    private static char[] prepChars(string cParent) {
-        if (cParent.Contains('V')) {
-            return new[] { 'V', 'e' };
-        } return cParent.Contains('P') ? new[] { 'P', 'm' } : new [] { 'D', 'e' };
+    
+    private void OnCollisionExit(Collision other) {
+        if (getParentName(other.gameObject).name is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
+            updateMovement(CanMove.CantJump);
+            StartCoroutine(falling(getPlayerBody().velocity));
+        }
     }
 
     /**
@@ -82,14 +79,12 @@ public class Character_Controller : MonoBehaviour {
      */
     private static void processCollision(string name) {
         switch (name) {
-            case "Platform": {
+            case "Platforms": {
                 Move.updateMovement(CanMove.Freely);
                 break;
-            }
-            case "Wall": { //in case I need to add stuff in here
+            } case "Walls": { //in case I need to add stuff in here
                 break;
-            }
-            default: {
+            } default: {
                 failSafe();
                 break;
             } 
@@ -156,13 +151,17 @@ public class Character_Controller : MonoBehaviour {
      */
     private IEnumerator flying() {
         var hop = new Vector3(pBody.velocity.x, 0, pBody.velocity.z);
-        for (var i = 1; i < 2; i++) {//upward flying
-            hop.y += (float)((float)5/(1.8*i) * MoveVel); //this is somewhat of an arbitrary value
-            yield return new WaitForFixedUpdate();
-            movePlayer(hop);
-        } yield return new WaitForSeconds(0.3f); //gives it a bit of a time-out so the upward arch can actually play out
+        hop.y += (float)(MoveVel / 2*6f); //x/(y*i)*MoveVel. x increases the height, y
+        movePlayer(hop);
+        return falling(hop);
+    }
+
+    /**
+     * <summary>Amplifies gravity when player walks off a platform</summary>
+     */
+    private IEnumerator falling(Vector3 hop) {
         while (hop.y > -30f) { //here the arch goes from ~50 to -30
-            hop.y -= (float)(0.9f*MoveVel);
+            hop.y -= (float)MoveVel;
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
         } StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
