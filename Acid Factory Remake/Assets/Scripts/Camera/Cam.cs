@@ -20,7 +20,7 @@ public class Cam : MonoBehaviour {
     }
 
     private static void moveCam() {
-        if (!checkIfLeftBorder()) { //if the player is stationary or inside the border
+        if (checkIfLeftBorder()) { //if the player is stationary or inside the border
             moveFollowPlayer();
         } 
     }
@@ -33,11 +33,11 @@ public class Cam : MonoBehaviour {
         var camPos = cam.transform.position;
         var leftBorderAt = haveLeftBorder(camPos, pBody);
         if (leftBorderAt[0]) {
-            camPos.x = Mathf.Lerp(camPos.x, pBody.x, 0.02f); //todo this works but
+            camPos.x = Mathf.Lerp(camPos.x, NormalDistance.x + pBody.x, 0.02f);
         } if (leftBorderAt[1]) {
-            camPos.y = Mathf.Lerp(camPos.y, pBody.y, 0.02f); //todo this doesn't 
+            camPos.y = Mathf.Lerp(camPos.y, NormalDistance.y + pBody.y, 0.02f);
         } if (leftBorderAt[2]) {
-            camPos.z = Mathf.Lerp(camPos.z, pBody.z, 0.02f); //todo and this doesn't even moves
+            camPos.z = Mathf.Lerp(camPos.z, NormalDistance.z + pBody.z, 0.02f);
         } cam.transform.position = camPos;
     }
 

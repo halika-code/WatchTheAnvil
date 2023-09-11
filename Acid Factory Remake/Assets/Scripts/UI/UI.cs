@@ -12,11 +12,6 @@ public class UI : MonoBehaviour {
         points = canv[0];
         health = canv[1];
     }
-    
-    
-    private void Update() {
-        
-    }
 
     /**
      * <summary>Updates the points with a set value</summary>
