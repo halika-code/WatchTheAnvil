@@ -27,11 +27,10 @@ public class VegetablePull : MonoBehaviour {
      * Disables the vegetable as a final step</summary>
      * <remarks></remarks>
      */
-    public static void pullVegetable(string name) {
-        veggieBank[name] = false; //here I access the boolean of the dictionary by using the name as an index (veggieBank<string, bool>)
-        var obj = GameObject.Find(name);
-        obj.GetComponent<CapsuleCollider>().isTrigger = veggieBank[name];
-        obj.SetActive(veggieBank[name]);
+    public static void pullVegetable(Collider veggie) {
+        veggieBank[veggie.name] = false; //here I access the boolean of the dictionary by using the name as an index (veggieBank<string, bool>)
+        veggie.GetComponent<CapsuleCollider>().isTrigger = veggieBank[veggie.name];
+        veggie.gameObject.SetActive(veggieBank[veggie.name]);
     }
 
     /**
@@ -72,20 +71,23 @@ public class VegetablePull : MonoBehaviour {
 
     public static List<string> getParents(GameObject obj) {
         var parentList = new List<string>();
-        while (obj.transform.parent != null) { 
+        do {
             parentList.Add(obj.name);
             obj = obj.transform.parent.gameObject;
-        } return parentList;
+        } while (obj.transform.parent != null);
+        return parentList;
     }
 
     public static int getProfileOfVeggie(List<string> parentList) {
-        var score = 0;
+        var score = 1;
         foreach (var parents in parentList) {
             switch (parents) {
                 case "Small" or "Carrot": {
-                    score += 1;
+                    break; //tryin to avoid default with basic plants
+                } case "Beetroot": {
+                    score++;
                     break;
-                } case "Medium" or "Beetroot": {
+                } case "Medium": {
                     score *= 2;
                     break;
                 } case "Large": {

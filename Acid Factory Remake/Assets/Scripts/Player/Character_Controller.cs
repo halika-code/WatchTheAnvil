@@ -2,19 +2,18 @@ using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static Move;
 
 public class Character_Controller : MonoBehaviour {
     private const double MoveVel = 20;
     private static Rigidbody pBody;
     public static int hitPoints; //usually 2 todo implement a hitpoint system later
-    private static bool canPull;
 
     /**
      * <summary>Initialized the variables unique to the player</summary>
      */
     private static void init() {
-        canPull = false;
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
         Physics.gravity = new Vector3(0, -30f); //I should use gravity to enforce the player and objects to stick to the surface, slow but detectable when player is falling
@@ -47,15 +46,21 @@ public class Character_Controller : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision) {
         var cObj = collision.gameObject;
-        if (VegetablePull.validateVegetable(cObj) && canPull) { //processes a vegetable
-            processVegetables(cObj);
-        } else {
+        if (!VegetablePull.validateVegetable(cObj)) {
             if (getMove() is CanMove.CantJump) {
                 StopCoroutine(gravAmplifier(Vector3.zero));
             } processCollision(getParentName(cObj).name);
+        } else {
+            OnCollisionStay(collision);
         }
     }
     
+    private void OnCollisionStay(Collision collisionInfo) {
+        if (checkForVeggiePulls() && VegetablePull.validateVegetable(collisionInfo.gameObject)) {
+            processVegetables(collisionInfo);
+        }
+    }
+
     private void OnCollisionExit(Collision other) {
         if (getParentName(other.gameObject).name is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
             updateMovement(CanMove.CantJump);
@@ -68,9 +73,9 @@ public class Character_Controller : MonoBehaviour {
      * <para>A beetroot is twice as valuable</para></summary>
      * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
      */
-    private static void processVegetables(GameObject veggie) {
-        UI.updatePoints(VegetablePull.getProfileOfVeggie(VegetablePull.getParents(veggie)));
-        VegetablePull.pullVegetable(veggie.name);
+    private static void processVegetables(Collision veggie) {
+        UI.updatePoints(VegetablePull.getProfileOfVeggie(VegetablePull.getParents(veggie.gameObject)));
+        VegetablePull.pullVegetable(veggie.collider);
     }
 
     /**
@@ -86,6 +91,7 @@ public class Character_Controller : MonoBehaviour {
                 break;
             } default: {
                 failSafe();
+                hurtPlayer();
                 break;
             } 
         }
@@ -130,19 +136,8 @@ public class Character_Controller : MonoBehaviour {
     /**
      * <summary>Checks if the player have pressed the E key in a non-mashy style</summary>
      */
-    private void checkForVeggiePulls() {
-        if (Input.GetKey(KeyCode.E) && !canPull) {
-            StartCoroutine(doPullVeggies());
-        }
-    }
-
-    /**
-     * <summary>Allows the player to pull vegetables for 1 second each time</summary>
-     */
-    private static IEnumerator doPullVeggies() {
-        canPull = true;
-        yield return new WaitForSeconds(1f);
-        canPull = false;
+    private static bool checkForVeggiePulls() {
+        return Input.GetKey(KeyCode.E);
     }
 
     /**
@@ -176,6 +171,18 @@ public class Character_Controller : MonoBehaviour {
             movePlayer(hop);
             yield return new WaitForFixedUpdate();
         } 
+    }
+
+    private static void hurtPlayer() {
+        if (UI.getHealthPoints() is not 1) {
+            UI.updateHealthPoint(-1);
+        } else {
+            killPlayer();
+        }
+    }
+
+    private static void killPlayer() {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     /**
