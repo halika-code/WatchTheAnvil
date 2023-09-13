@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -26,22 +27,31 @@ public class UI : MonoBehaviour {
         health.text = updateText(health, point);
     }
 
+    /**
+     * <summary>A generic function to update a text-box with a number embedded into it
+     * <para>A score will be added to the numbers embedded</para></summary>
+     * <param name="textBox">The TMP_Text to be modified</param>
+     * <param name="score">The score to be added to the textBox</param>
+     * <returns>The modified text of the text-box</returns>
+     */
     private static string updateText(TMP_Text textBox, int score) {
-        var updatedScore = new char[findNumbers(textBox.text)];
-        for (var i = textBox.text.Length - 1; i < textBox.text.Length - updatedScore.Length; i--) { //here I try to gather every number from the textbox
-            updatedScore[textBox.text.Length - i] = textBox.text[i];
-        } updatedScore = (int.Parse(updatedScore) + score).ToString().ToCharArray(); //todo test this! converts the prepared numbers into int, adds to the score then converts to string then to charArray
-
-        return textBox.text.Split(" ")[0] + updatedScore;
+        return textBox.text.Split(" ")[0] + " " + (findNumbers(textBox.text) + score).ToString(); //todo after 12 it reverts back to 4 ...
     }
 
+    /**
+     * <summary>Fetches the number embedded in the text-box</summary>
+     * <param name="name">The name of the object a number is embedded into</param>
+     * <returns>The number found</returns>
+     * <remarks>This is setup to handle text-boxes with no numbers in them</remarks>
+     */
     private static int findNumbers(string name) {
-        var counter = 0;
-        while (counter < name.Length) {
-            if (int.TryParse(name[^counter].ToString(), out counter)) { //as far as I can tell, this is a built-in counter ... cool
-                return counter;
-            }
-        } return 0;
+        var number = new List<char>();
+        for (var i = name.Length - 1; i > 0; i--) {
+            if (!int.TryParse(name[i].ToString(), out var digit)) {
+                break;
+            } number.Add(digit.ToString()[0]);
+        } number.Reverse();
+        return int.Parse(number.ToArray()); //either leaving this or using number.toStringArray
     }
 
     /**
