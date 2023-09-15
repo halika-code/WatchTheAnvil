@@ -2,65 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class VegetablePull : MonoBehaviour {
-
-    private static Dictionary<string, bool> veggieBank; //keeps the veggie's names in order to keep them accessable, note, might be obsolete
-
-    private void Start() {
-        prepareVeggies(); 
-    }
-
+    
     /**
-     * <summary> The vegetable names are all shuffled into list
-     * </summary>
-     * <remarks>This works if there is a grouping empty for the vegetables</remarks>
-     */
-    private static void prepareVeggies() {
-        var veggies = GameObject.Find("Vegetables");
-        veggieBank = new Dictionary<string, bool>(veggies.transform.childCount);
-        for (var i = 0; i < veggieBank.Count; i++) {
-            veggieBank.Add(veggies.GetComponentsInChildren<CapsuleCollider>()[i].name, true);
-        }
-    }
-
-    /**
-     * <summary>Updates the veggie-bank then sets it's trigger property.
-     * Disables the vegetable as a final step</summary>
-     * <remarks></remarks>
+     * <summary>Disables the vegetable</summary>
      */
     public static void pullVegetable(Collider veggie) {
-        veggieBank[veggie.name] = false; //here I access the boolean of the dictionary by using the name as an index (veggieBank<string, bool>)
-        veggie.GetComponent<CapsuleCollider>().isTrigger = veggieBank[veggie.name];
-        veggie.gameObject.SetActive(veggieBank[veggie.name]);
+        veggie.gameObject.SetActive(false);
     }
 
-    /**
-     * <summary>Resets the visibility of the vegetables that needs it</summary>
-     * <remarks>A quick null-check is also done here, just in case</remarks>
-     */
-    public static void resetVegetables() {
-        if (veggieBank == null) { //failsafe
-            Debug.Log("Whoopy, attempted to reset vegetables with an empty bank");
-            return;
-        } foreach (var veggies in veggieBank) {
-            if (!veggies.Value) {
-                var veg = GameObject.Find(veggies.Key);
-                veg.GetComponent<CapsuleCollider>().isTrigger = false;
-                veg.SetActive(true);
-            }
-        }
-    }
-
-    /**
-     * <summary> Attempts to get the value of a desired vegetable the player have picked up
-     * <returns>An integer of 4-2-1 based on the flag embedded inside the name of the vegetable </returns>
-     * <remarks>Example: BigCarrot</remarks></summary>
-     */
-    public static int getPoints(string name) {
-        if (name.Contains('g')) { //either Big or Large
-            return 5;
-        } return name.Contains('M') ? 2 : 1; //Medium
-    }
-    
     /**
      * <summary>Checks if the vegetable has a valid parent</summary>
      */
@@ -69,6 +18,12 @@ public class VegetablePull : MonoBehaviour {
         return parent != null && parent.name.Contains("Vegetables");
     }
 
+    /**
+     * <summary>Assembles every parent for the given object into a list up to the root object (not inclusive)</summary>
+     * <param name="obj">The object that should be examined</param>
+     * <returns>The list (of type string) of the "family tree"</returns>
+     * <remarks>Works with objects that doesn't "normally" have a gameObject attached</remarks>
+     */
     public static List<string> getParents(GameObject obj) {
         var parentList = new List<string>();
         do {
@@ -78,6 +33,13 @@ public class VegetablePull : MonoBehaviour {
         return parentList;
     }
 
+    /**
+     * <summary>Based on the parent-list of a given vegetable,
+     * calculates a score of what the object the player have pulled is worth</summary>
+     * <param name="parentList">The list (of type string) of gameObjects that are parent to the vegetable</param>
+     * <returns>A point value based on the worth of the vegetable</returns>
+     * <remarks>It is assumed that the parentList contains the "family tree" of a vegetable</remarks>
+     */
     public static int getProfileOfVeggie(List<string> parentList) {
         var score = 1;
         foreach (var parents in parentList) {

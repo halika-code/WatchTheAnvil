@@ -15,14 +15,17 @@ public class UI : MonoBehaviour {
     }
 
     /**
-     * <summary>Updates the points with a set value</summary>
+     * <summary>Updates the score of the player with a set value</summary>
      * <param name="score">Points that needed to be updated</param>
-     * <remarks>A bit convoluted, but looks more robust than just dictating</remarks>
      */
     public static void updatePoints(int score) {
         points.text = updateText(points, score);
     }
 
+    /**
+     * <summary>Updates the health of the player</summary>
+     * <param name="point">The amount to be deducted / added</param>
+     */
     public static void updateHealthPoint(int point) {
         health.text = updateText(health, point);
     }
@@ -55,16 +58,17 @@ public class UI : MonoBehaviour {
     }
 
     /**
-     * <summary>Fetches the points the player have earned so far</summary>
-     */
-    private static int getPoints(TMP_Text textBox) {
-        return int.Parse(textBox.text.Split(" ")[1]); //example expected text "Points: 0"
-    }
-
-    /**
      * <summary>Carbon copy of the <see cref="getPoints()"/> function</summary>
      */
     public static int getHealthPoints() {
         return int.Parse(health.text[^1].ToString());
+    }
+
+    /**
+     * <summary>Sets the health of the player to a predetermined amount</summary>
+     * <param name="points">The amount of health the player should have</param>
+     */
+    public static void setHealth(string points) {
+        health.text = "Health: " + points;
     }
 }

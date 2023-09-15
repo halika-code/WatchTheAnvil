@@ -19,6 +19,9 @@ public class Cam : MonoBehaviour {
         moveCam();
     }
 
+    /**
+     * <summary>Moves the cam if it is deemed to have left a border</summary>
+     */
     private static void moveCam() {
         if (checkIfLeftBorder()) { //if the player is stationary or inside the border
             moveFollowPlayer();
@@ -26,7 +29,8 @@ public class Cam : MonoBehaviour {
     }
     
     /**
-     * <summary>Follows quickly the player</summary>
+     * <summary>Follows quickly the player using smooth scrolling</summary>
+     * <remarks><see cref="Mathf.Lerp(float, float, float)"/> is used here to scroll smoothly</remarks>
      */
     private static void moveFollowPlayer() {
         var pBody = getPlayerBody().position;
@@ -41,6 +45,12 @@ public class Cam : MonoBehaviour {
         } cam.transform.position = camPos;
     }
 
+    /**
+     * <summary>Checks if the player have left a border</summary>
+     * <param name="camPos">The main camera's current position</param>
+     * <param name="pBody">The player's current position</param>
+     * <returns>A list of booleans corresponding to each cardinal sides that the player have left the border at</returns>
+     */
     private static bool[] haveLeftBorder(Vector3 camPos, Vector3 pBody) {
         var camPosPar = Math.Sign(camPos.x) is 1; //cameraPositionParity
         var pBodyPar = Math.Sign(pBody.x) is 1; //playerBodyParity
@@ -51,6 +61,11 @@ public class Cam : MonoBehaviour {
                 Math.Abs(camPos.y - pBody.y) > NormalDistance.y + 2f, Math.Abs(camPos.z - pBody.z) > NormalDistance.z + 2f };
     }
 
+    /**
+     * <summary>A simple check to check if the player have left a border at all</summary>
+     * <returns>true if the player is deemed to have passed the border at any cardinal directions, false otherwise</returns>
+     * <remarks>This function could be integrated (I imagine) with a LINQ style call into the <see cref="moveCam"/> function</remarks>
+     */
     private static bool checkIfLeftBorder() {
         foreach (var borderSide in haveLeftBorder(cam.transform.position, getPlayerBody().position)) {
             if (borderSide) {

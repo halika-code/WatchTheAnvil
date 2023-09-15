@@ -8,7 +8,6 @@ using static Move;
 public class Character_Controller : MonoBehaviour {
     private const double MoveVel = 20;
     private static Rigidbody pBody;
-    public static int hitPoints; //usually 2 todo implement a hitpoint system later
 
     /**
      * <summary>Initialized the variables unique to the player</summary>
@@ -16,8 +15,7 @@ public class Character_Controller : MonoBehaviour {
     private static void init() {
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
-        Physics.gravity = new Vector3(0, -30f); //I should use gravity to enforce the player and objects to stick to the surface, slow but detectable when player is falling
-        hitPoints = 2;
+        Physics.gravity = new Vector3(0, -30f);
     }
 
     private void OnEnable() { //singleton pattern, just in case
@@ -55,12 +53,18 @@ public class Character_Controller : MonoBehaviour {
         }
     }
     
+    /**
+     * <summary>Listens for the player to pull a vegetable</summary>
+     */
     private void OnCollisionStay(Collision collisionInfo) {
         if (checkForVeggiePulls() && VegetablePull.validateVegetable(collisionInfo.gameObject)) {
             processVegetables(collisionInfo);
         }
     }
 
+    /**
+     * <summary>Attempts to reset the player's state into "should fall"</summary>
+     */
     private void OnCollisionExit(Collision other) {
         if (getParentName(other.gameObject).name is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
             updateMovement(CanMove.CantJump);
@@ -80,7 +84,7 @@ public class Character_Controller : MonoBehaviour {
 
     /**
      * <summary>Processes platforms and Death-Planes</summary>
-     * <remarks>If the object is something uncounted for, this just falls through as if nothing happened</remarks>
+     * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
      */
     private static void processCollision(string name) {
         switch (name) {
@@ -152,7 +156,7 @@ public class Character_Controller : MonoBehaviour {
     }
 
     /**
-     * <summary>Amplifies gravity when player walks off a platform</summary>
+     * <summary>Calculates the falling velocity during the downward arch before reaching terminal (desired) velocity</summary>
      */
     private IEnumerator falling(Vector3 hop) {
         while (hop.y > -30f) { //here the arch goes from ~50 to -30
@@ -173,6 +177,9 @@ public class Character_Controller : MonoBehaviour {
         } 
     }
 
+    /**
+     * <summary>Attempts to remove one health-point. If that fails, the player is killed</summary>
+     */
     private static void hurtPlayer() {
         if (UI.getHealthPoints() is not 1) {
             UI.updateHealthPoint(-1);
@@ -181,6 +188,9 @@ public class Character_Controller : MonoBehaviour {
         }
     }
 
+    /**
+     * <summary>A simple kill-switch that reloads the game</summary>
+     */
     private static void killPlayer() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
