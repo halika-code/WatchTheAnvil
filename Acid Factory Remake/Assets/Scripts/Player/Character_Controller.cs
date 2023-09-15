@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
@@ -211,7 +210,6 @@ public class Character_Controller : MonoBehaviour {
      */
     private static void movePlayer(Vector3 movement) {
         pBody.velocity = movement;
-        ShadowController.movePlayer(new Vector3(movement.x, 0f, movement.z));
     }
 
     public static Rigidbody getPlayerBody() {

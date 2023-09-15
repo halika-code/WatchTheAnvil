@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using static Character_Controller;
 public class Cam : MonoBehaviour {
