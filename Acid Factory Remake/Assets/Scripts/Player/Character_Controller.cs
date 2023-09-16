@@ -8,6 +8,8 @@ public class Character_Controller : MonoBehaviour {
     private const double MoveVel = 20;
     private static Rigidbody pBody;
 
+    //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one value
+    
     /**
      * <summary>Initialized the variables unique to the player</summary>
      */
@@ -49,7 +51,7 @@ public class Character_Controller : MonoBehaviour {
             } processCollision(getParentName(cObj).name);
         } else {
             OnCollisionStay(collision);
-        }
+        } //StopCoroutine(findPlatform(pBody));
     }
     
     /**
@@ -68,7 +70,7 @@ public class Character_Controller : MonoBehaviour {
         if (getParentName(other.gameObject).name is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
             updateMovement(CanMove.CantJump);
             StartCoroutine(falling(getPlayerBody().velocity));
-        }
+        } ShadowController.findPlatform(pBody); //todo add a coroutine to constantly findPlatform until collision is entered
     }
 
     /**
@@ -90,11 +92,14 @@ public class Character_Controller : MonoBehaviour {
             case "Platforms": {
                 Move.updateMovement(CanMove.Freely);
                 break;
-            } case "Walls": { //in case I need to add stuff in here
+            } case "Walls" or "Shadow" or "Player": { //in case I need to add stuff in here
                 break;
-            } default: {
+            } case "DeathPane": {
                 failSafe();
                 hurtPlayer();
+                break;
+            } default: {
+                Debug.Log("Doin some uncoded things for " + name + "s");
                 break;
             } 
         }
@@ -210,6 +215,7 @@ public class Character_Controller : MonoBehaviour {
      */
     private static void movePlayer(Vector3 movement) {
         pBody.velocity = movement;
+        ShadowController.moveShadow(pBody.transform.position);
     }
 
     public static Rigidbody getPlayerBody() {
