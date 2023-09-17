@@ -51,7 +51,7 @@ public class Character_Controller : MonoBehaviour {
             } processCollision(getParentName(cObj).name);
         } else {
             OnCollisionStay(collision);
-        } //StopCoroutine(findPlatform(pBody));
+        } StopCoroutine(ShadowController.findPlatform(pBody));
     }
     
     /**
@@ -70,7 +70,7 @@ public class Character_Controller : MonoBehaviour {
         if (getParentName(other.gameObject).name is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
             updateMovement(CanMove.CantJump);
             StartCoroutine(falling(getPlayerBody().velocity));
-        } ShadowController.findPlatform(pBody); //todo add a coroutine to constantly findPlatform until collision is entered
+        } StartCoroutine(ShadowController.findPlatform(pBody)); //todo add a coroutine to constantly findPlatform until collision is entered
     }
 
     /**

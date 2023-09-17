@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using static Character_Controller;
 
@@ -13,14 +14,17 @@ public class ShadowController : MonoBehaviour {
      * <summary>Attempts to find the closest object that exists underneath the player
      * <para>If one is found, the pane will be placed to the surface of it</para></summary>
      */
-    public static void findPlatform(Rigidbody pBody) { //var hit is the container of the collider of the object that was hit 
-        var ray = new Ray(pBody.position, Vector3.down);
-        if (!Physics.Raycast(ray, out var hit, 50f)) {
-            getShadowBody().SetActive(false);
-            return;
-        }  if (getParentName(hit.collider.gameObject).name is "Platforms") {
-            setShadowPosition(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
-        } getShadowBody().SetActive(true);
+    public static IEnumerator findPlatform(Rigidbody pBody) { //var hit is the container of the collider of the object that was hit 
+        while (true) {
+            var ray = new Ray(pBody.position, Vector3.down);
+            if (!Physics.Raycast(ray, out var hit, 50f)) {
+                getShadowBody().SetActive(false);
+            } if (getParentName(hit.collider.gameObject).name is "Platforms") {
+                setShadowPosition(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
+            } if (!getShadowBody().activeSelf) {
+                getShadowBody().SetActive(true);
+            } yield return null;
+        }
     }
 
     private static void setShadowPosition(Vector3 pos) {
