@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
@@ -7,6 +8,7 @@ using static Move;
 public class Character_Controller : MonoBehaviour {
     private const double MoveVel = 20;
     private static Rigidbody pBody;
+    private static bool invincibility;
 
     //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one value
     
@@ -16,6 +18,7 @@ public class Character_Controller : MonoBehaviour {
     private static void init() {
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
+        invincibility = false;
         Physics.gravity = new Vector3(0, -30f);
     }
 
@@ -43,24 +46,25 @@ public class Character_Controller : MonoBehaviour {
         }
     }
 
+    private void OnTriggerEnter(Collider other) {
+        if (VegetablePull.validateVegetable(other.gameObject)) {
+            OnTriggerStay(other);
+        }
+    }
+
+    private void OnTriggerStay(Collider other) {
+        if (checkForVeggiePulls() && VegetablePull.validateVegetable(other.gameObject)) {
+            processVegetables(other);
+        }
+    }
+
     private void OnCollisionEnter(Collision collision) {
         var cObj = collision.gameObject;
         if (!VegetablePull.validateVegetable(cObj)) {
             if (getMove() is CanMove.CantJump) {
                 StopCoroutine(gravAmplifier(Vector3.zero));
             } processCollision(getParentName(cObj).name);
-        } else {
-            OnCollisionStay(collision);
         } StopCoroutine(ShadowController.findPlatform(pBody));
-    }
-    
-    /**
-     * <summary>Listens for the player to pull a vegetable</summary>
-     */
-    private void OnCollisionStay(Collision collisionInfo) {
-        if (checkForVeggiePulls() && VegetablePull.validateVegetable(collisionInfo.gameObject)) {
-            processVegetables(collisionInfo);
-        }
     }
 
     /**
@@ -78,26 +82,27 @@ public class Character_Controller : MonoBehaviour {
      * <para>A beetroot is twice as valuable</para></summary>
      * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
      */
-    private static void processVegetables(Collision veggie) {
+    private static void processVegetables(Collider veggie) {
         UI.updatePoints(VegetablePull.getProfileOfVeggie(VegetablePull.getParents(veggie.gameObject)));
-        VegetablePull.pullVegetable(veggie.collider);
+        VegetablePull.pullVegetable(veggie);
     }
 
     /**
      * <summary>Processes platforms and Death-Planes</summary>
      * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
      */
-    private static void processCollision(string name) {
+    private void processCollision(string name) {
         switch (name) {
             case "Platforms": {
                 Move.updateMovement(CanMove.Freely);
                 break;
-            } case "Walls" or "Shadow" or "Player": { //in case I need to add stuff in here
+            } case "Walls" or "Player": { //in case I need to add stuff in here
                 break;
-            } case "DeathPane": {
-                failSafe();
-                hurtPlayer();
-                break;
+            } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
+                if (!invincibility) {
+                    StartCoroutine(hurtPlayer());
+                    failSafe();
+                } break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");
                 break;
@@ -184,9 +189,12 @@ public class Character_Controller : MonoBehaviour {
     /**
      * <summary>Attempts to remove one health-point. If that fails, the player is killed</summary>
      */
-    private static void hurtPlayer() {
+    private static IEnumerator hurtPlayer() {
         if (UI.getHealthPoints() is not 1) {
+            invincibility = true;
             UI.updateHealthPoint(-1);
+            yield return new WaitForSeconds(2f);
+            invincibility = false;
         } else {
             killPlayer();
         }

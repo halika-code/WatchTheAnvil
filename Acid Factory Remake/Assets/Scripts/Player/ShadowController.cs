@@ -15,14 +15,14 @@ public class ShadowController : MonoBehaviour {
      * <para>If one is found, the pane will be placed to the surface of it</para></summary>
      */
     public static IEnumerator findPlatform(Rigidbody pBody) { //var hit is the container of the collider of the object that was hit 
-        while (true) {
+        if (!getShadowBody().activeSelf) {
+            getShadowBody().SetActive(true);
+        } while (true) {
             var ray = new Ray(pBody.position, Vector3.down);
-            if (!Physics.Raycast(ray, out var hit, 50f)) {
+            if (!Physics.Raycast(ray, out var hit, 50f) || hit.collider.gameObject.name is "DeathPane") {
                 getShadowBody().SetActive(false);
             } if (getParentName(hit.collider.gameObject).name is "Platforms") {
                 setShadowPosition(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
-            } if (!getShadowBody().activeSelf) {
-                getShadowBody().SetActive(true);
             } yield return null;
         }
     }

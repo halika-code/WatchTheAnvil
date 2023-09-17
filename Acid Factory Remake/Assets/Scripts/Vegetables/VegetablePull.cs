@@ -26,7 +26,9 @@ public class VegetablePull : MonoBehaviour {
      */
     public static List<string> getParents(GameObject obj) {
         var parentList = new List<string>();
-        do {
+        if (obj.name.Contains("Veggie")) {
+            obj = obj.transform.parent.gameObject;
+        } do {
             parentList.Add(obj.name);
             obj = obj.transform.parent.gameObject;
         } while (obj.transform.parent != null);
@@ -56,7 +58,7 @@ public class VegetablePull : MonoBehaviour {
                     score *= 5;
                     break;
                 } default: {
-                    Debug.Log("Whoopy while trying to decide the score of the object of name" + parentList[0]);
+                    Debug.Log("Whoopy while trying to decide the score of the object of name " + parentList[0]);
                     break;
                 }
             }
