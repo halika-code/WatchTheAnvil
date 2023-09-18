@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -46,6 +47,9 @@ public class Character_Controller : MonoBehaviour {
         }
     }
 
+    /**
+     * <summary>handles the collision behind interactible objects</summary>
+     */
     private void OnTriggerEnter(Collider other) {
         if (VegetablePull.validateVegetable(other.gameObject)) {
             OnTriggerStay(other);
@@ -58,23 +62,26 @@ public class Character_Controller : MonoBehaviour {
         }
     }
 
+    /**
+     * <summary>handles the logic behind solid object collision</summary>
+     */
     private void OnCollisionEnter(Collision collision) {
         var cObj = collision.gameObject;
         if (!VegetablePull.validateVegetable(cObj)) {
             if (getMove() is CanMove.CantJump) {
                 StopCoroutine(gravAmplifier(Vector3.zero));
-            } processCollision(getParentName(cObj).name);
-        } StopCoroutine(ShadowController.findPlatform(pBody));
+            } processCollision(getParentName(cObj.transform));
+        } StopCoroutine(ShadowController.findPlatform());
     }
 
     /**
      * <summary>Attempts to reset the player's state into "should fall"</summary>
      */
     private void OnCollisionExit(Collision other) {
-        if (getParentName(other.gameObject).name is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
+        if (getParentName(other.gameObject.transform) is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
             updateMovement(CanMove.CantJump);
             StartCoroutine(falling(getPlayerBody().velocity));
-        } StartCoroutine(ShadowController.findPlatform(pBody)); //todo add a coroutine to constantly findPlatform until collision is entered
+        } StartCoroutine(ShadowController.findPlatform()); 
     }
 
     /**
@@ -83,7 +90,7 @@ public class Character_Controller : MonoBehaviour {
      * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
      */
     private static void processVegetables(Collider veggie) {
-        UI.updatePoints(VegetablePull.getProfileOfVeggie(VegetablePull.getParents(veggie.gameObject)));
+        UI.updatePoints(VegetablePull.getProfileOfVeggie(getParentName(veggie.gameObject)));
         VegetablePull.pullVegetable(veggie);
     }
 
@@ -97,6 +104,9 @@ public class Character_Controller : MonoBehaviour {
                 Move.updateMovement(CanMove.Freely);
                 break;
             } case "Walls" or "Player": { //in case I need to add stuff in here
+                break;
+            } case "Anvils": {
+                StartCoroutine(hurtPlayer());
                 break;
             } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
                 if (!invincibility) {
@@ -168,7 +178,7 @@ public class Character_Controller : MonoBehaviour {
      * <summary>Calculates the falling velocity during the downward arch before reaching terminal (desired) velocity</summary>
      */
     private IEnumerator falling(Vector3 hop) {
-        while (hop.y > -30f) { //here the arch goes from ~50 to -30
+        while (hop.y > -50f) { //here the arch goes from ~50 to -30
             hop.y -= (float)MoveVel;
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
@@ -209,13 +219,29 @@ public class Character_Controller : MonoBehaviour {
 
     /**
      * <summary>Fetches the name of the root parent of the gameObject</summary>
-     * <returns>The root parent (including empties)</returns>
+     * <param name="obj">The transform of the original object</param>
+     * <returns>The name of the root parent</returns>
      * <remarks>Will find the name no matter how deep the object is in the hierarchy</remarks>
      */
-    public static GameObject getParentName(GameObject obj) {
-        while (obj.transform.parent != null) { //todo here is where I'm checking for the object's parent
+    public static string getParentName(Transform obj) {
+        return getParentName(obj.gameObject)[^1];
+    }
+    
+    /**
+     * <summary>Assembles every parent for the given object into a list up to the root object (not inclusive)</summary>
+     * <param name="obj">The object that should be examined</param>
+     * <returns>The list (of type string) of the "family tree"</returns>
+     * <remarks>Works with objects that doesn't "normally" have a gameObject attached</remarks>
+     */
+    private static List<string> getParentName(GameObject obj) {
+        var parentList = new List<string>();
+        if (obj.name.Contains("Veggie")) {
             obj = obj.transform.parent.gameObject;
-        } return obj;
+        } do {
+            parentList.Add(obj.name);
+            obj = obj.transform.parent.gameObject;
+        } while (obj.transform.parent != null);
+        return parentList;
     }
 
     /**

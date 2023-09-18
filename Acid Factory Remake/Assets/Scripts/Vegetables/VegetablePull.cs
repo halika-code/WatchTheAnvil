@@ -14,25 +14,8 @@ public class VegetablePull : MonoBehaviour {
      * <summary>Checks if the vegetable has a valid parent</summary>
      */
     public static bool validateVegetable(GameObject veg) {
-        var parent = Character_Controller.getParentName(veg); //breakdown of the chain in an intended state: Veggie1 -> Small -> Carrot -> Vegetable
-        return parent != null && parent.name.Contains("Vegetables");
-    }
-
-    /**
-     * <summary>Assembles every parent for the given object into a list up to the root object (not inclusive)</summary>
-     * <param name="obj">The object that should be examined</param>
-     * <returns>The list (of type string) of the "family tree"</returns>
-     * <remarks>Works with objects that doesn't "normally" have a gameObject attached</remarks>
-     */
-    public static List<string> getParents(GameObject obj) {
-        var parentList = new List<string>();
-        if (obj.name.Contains("Veggie")) {
-            obj = obj.transform.parent.gameObject;
-        } do {
-            parentList.Add(obj.name);
-            obj = obj.transform.parent.gameObject;
-        } while (obj.transform.parent != null);
-        return parentList;
+        var parent = Character_Controller.getParentName(veg.transform); //breakdown of the chain in an intended state: Veggie1 -> Small -> Carrot -> Vegetable
+        return parent != null && parent.Contains("Vegetables");
     }
 
     /**
