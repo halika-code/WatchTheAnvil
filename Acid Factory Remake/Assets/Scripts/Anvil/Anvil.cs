@@ -81,6 +81,11 @@ public class Anvil {
         return aBody.velocity.y > 0f;
     }
     
+    /**
+     * <summary>Sets the target of the anvil</summary>
+     * <remarks>Finds the proper rigidbody based on the name.
+     * <para>Anvil's name will be varying while target name is always "Target"</para></remarks>
+     */
     private void setTarget(IEnumerable<Rigidbody> shadows) {
         foreach (var shadow in shadows) {
             if (shadow.name is "Target") {

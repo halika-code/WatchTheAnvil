@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AnvilManager : MonoBehaviour {
@@ -34,6 +33,9 @@ public class AnvilManager : MonoBehaviour {
         StartCoroutine(anvil.dropAnvil());
     }
 
+    /**
+     * <summary>Runs timer for the anvil's built in timer</summary>
+     */
     private static IEnumerator helpRunTimer(Anvil anvil, int limit) {
         while (anvil.aTimer != limit) {
             anvil.aTimer--;
@@ -82,10 +84,16 @@ public class AnvilManager : MonoBehaviour {
         return currentAnvil.isFlying;
     }
 
+    /**
+     * <summary>Destroys an instance of the anvil</summary>
+     */
     public static void disableAnvil() {
         Destroy(currentAnvil.getAnvilBody().gameObject);
     }
-
+    
+    /**
+     * <summary>Turns the anvil into ground</summary>
+     */
     public static void freezeAnvil() {
         currentAnvil.getTarget().SetActive(false);
         currentAnvil.getAnvilBody().isKinematic = true;
