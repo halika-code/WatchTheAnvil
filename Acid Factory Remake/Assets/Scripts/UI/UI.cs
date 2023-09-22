@@ -5,11 +5,13 @@ using UnityEngine;
 public class UI : MonoBehaviour {
     public static TMP_Text points;
     public static TMP_Text health;
+    public static TMP_Text anvilTimer;
 
     private void Start() {
         var canv = GameObject.Find("Canvas").GetComponentsInChildren<TextMeshProUGUI>();
         points = canv[0];
         health = canv[1];
+        anvilTimer = canv[2];
     }
 
     /**
@@ -36,9 +38,13 @@ public class UI : MonoBehaviour {
      * <returns>The modified text of the text-box</returns>
      */
     private static string updateText(TMP_Text textBox, int score) {
-        return textBox.text.Split(" ")[0] + " " + (findNumbers(textBox.text) + score).ToString(); //todo after 12 it reverts back to 4 ...
+        return textBox.text.Split(" ")[0] + " " + (findNumbers(textBox.text) + score).ToString();
     }
 
+    public static void updateTimer(int time) {
+        anvilTimer.text = "Anvil in: " + time;
+    }
+    
     /**
      * <summary>Fetches the number embedded in the text-box</summary>
      * <param name="name">The name of the object a number is embedded into</param>

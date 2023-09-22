@@ -1,59 +1,100 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static AnvilManager;
 
 public class Anvil {
-    private static int aTimer;
-    private static Rigidbody aShadow;
+    public int aTimer;
+    private Rigidbody aBody;
+    private Rigidbody tBody;
+    public bool isFlying;
 
     /**
      * <summary>A default constructor for an Anvil object
      * <para>that has a default difficulty of 1</para></summary>
      */
-    public Anvil() {
+    public Anvil(GameObject anvil) {
         aTimer = setTimer(1);
+        prepAnvil(anvil);
     }
 
     /**
      * <summary>A modified constructor for an Anvil object
      * <para>that has a definable difficulty</para></summary>
      * <param name="diff">The desired difficulty ranging from 0 to 3 (and above)</param>
+     * <param name="anvil">A reference to the new gameObject</param>
      * <remarks>a difficulty score of 4 and above will be handled as 3 while a value of -1 and less will set the difficulty to impossible</remarks>
      */
-    public Anvil(int diff) {
+    public Anvil(GameObject anvil, int diff) {
         aTimer = setTimer(diff);
+        prepAnvil(anvil);
+    }
+    
+    private void prepAnvil(GameObject anvil) {
+        isFlying = false;
+        aBody = anvil.GetComponent<Rigidbody>();
+        aBody.position = new Vector3(0f, 50f, 0f);
+        setTarget(aBody.GetComponentsInChildren<Rigidbody>());
+    }
+    
+    /**
+     * <summary>Defines the timer based on the difficulty</summary>
+     * <param name="diff">An integer of difficulty ranging from 0 to 3 (and beyond)</param>
+     * <param name="diffNum">An embedded return value that returns the diff variable</param>
+     * <remarks>the out keyword is used here as an exercise, this use is not optimal</remarks>
+     */
+    private static int setTimer(int diff) {
+        switch (diff) {
+            case 0 or 1: {
+                return 20;
+            } case 2: {
+                return 10;
+            } case <= 3: {
+                return 5;
+            } default: {
+                Debug.Log("Whoopy while setting the timer for the Anvil with a difficulty of " + diff);
+                return 1;
+            }
+        }
     }
 
     /**
      * <summary>Sends the Anvil barrelling down towards the player</summary>
      */
-    private static void dropAnvil() {
-        var tarVel = aShadow.velocity;
-        aShadow.velocity = new Vector3(tarVel.x, -100f, tarVel.z);
+    public IEnumerator dropAnvil() {
+        var tarVel = aBody.velocity;
+        aBody.velocity = new Vector3(tarVel.x, -100f, tarVel.z);
+        do {
+            yield return new WaitForFixedUpdate();
+        } while (!haveLanded());
+        AnvilManager.disableAnvil();
     }
 
-    /**
-     * <summary>Starts a timer, then attempts to murder the player</summary>
-     */
-    private IEnumerator runTimer(MonoBehaviour runtime, WaitForSeconds delay) {
-        yield return genericTimer(aTimer, 3, delay);
-        runtime.StartCoroutine(trackPlayer());
-        yield return genericTimer(aTimer, 0, delay);
-        dropAnvil();
+    public GameObject getTarget() {
+        return getShadow().gameObject;
     }
 
-    public static GameObject getTarget() {
-        return aShadow.gameObject;
+    public Rigidbody getAnvilBody() {
+        return aBody;
+    }
+
+    private bool haveLanded() {
+        return aBody.velocity.y > 0f;
     }
     
-    public static void setTarget(Rigidbody shadow) {
-        aShadow = shadow;
+    private void setTarget(IEnumerable<Rigidbody> shadows) {
+        foreach (var shadow in shadows) {
+            if (shadow.name is "Target") {
+                tBody = shadow;
+            }
+        }
     }
     
-    public static void setTargetPos(Vector3 pos) {
-        aShadow.position = pos;
+    public void setTargetPos(Vector3 pos) {
+        aBody.position = new Vector3(pos.x, aBody.position.y, pos.z);
+        tBody.position = pos;
     }
 
+    private Rigidbody getShadow() {
+        return tBody;
+    }
 }
