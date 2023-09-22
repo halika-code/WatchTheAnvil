@@ -47,10 +47,10 @@ public class AnvilManager : MonoBehaviour {
      * <remarks>This is a carbon copy of <see cref="ShadowController.findPlatform()"/>, could have made it generic if iterators could accept out keyword</remarks>
      */
     private static IEnumerator trackPlayer(Anvil anvil) {
-        if (!anvil.getTarget().activeSelf) {
-            anvil.getTarget().SetActive(true);
-        } while (anvil.aTimer is not 0) {
-            if (!ShadowController.findColPoint(out var hit) || hit.collider.gameObject.name is "DeathPane") {
+        while (anvil.aTimer is not 0) {
+            if (!anvil.getTarget().activeSelf) {
+                anvil.getTarget().SetActive(true);
+            } if (!ShadowController.findColPoint(out var hit) || hit.collider.gameObject.name is "DeathPane") {
                 anvil.getTarget().SetActive(false);
             } if (Character_Controller.getParentName(hit.collider.transform) is "Platforms") {
                 anvil.setTargetPos(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
@@ -83,6 +83,10 @@ public class AnvilManager : MonoBehaviour {
     }
 
     public static void disableAnvil() {
+        Destroy(currentAnvil.getAnvilBody().gameObject);
+    }
+
+    public static void freezeAnvil() {
         currentAnvil.getTarget().SetActive(false);
         currentAnvil.getAnvilBody().isKinematic = true;
         currentAnvil.isFlying = false;

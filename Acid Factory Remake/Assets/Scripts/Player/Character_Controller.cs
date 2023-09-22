@@ -108,6 +108,7 @@ public class Character_Controller : MonoBehaviour {
             } case "Anvils": { //updates the flag
                 if (AnvilManager.isFlyin()) {
                     StartCoroutine(hurtPlayer());
+                    AnvilManager.disableAnvil();
                     break;
                 } goto case "Platforms"; //this will make execution jump to case "Platforms"
             } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
@@ -239,6 +240,8 @@ public class Character_Controller : MonoBehaviour {
         var parentList = new List<string>();
         if (obj.name.Contains("Veggie")) {
             obj = obj.transform.parent.gameObject;
+        } if (obj.transform.parent is null) {
+            return new List<string> {obj.name};
         } do {
             parentList.Add(obj.name);
             obj = obj.transform.parent.gameObject;

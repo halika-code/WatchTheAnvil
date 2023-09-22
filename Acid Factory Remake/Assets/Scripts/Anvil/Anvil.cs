@@ -66,7 +66,7 @@ public class Anvil {
         do {
             yield return new WaitForFixedUpdate();
         } while (!haveLanded());
-        AnvilManager.disableAnvil();
+        AnvilManager.freezeAnvil();
     }
 
     public GameObject getTarget() {
