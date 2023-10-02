@@ -132,7 +132,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 180804520}
-  - component: {fileID: 180804521}
   m_Layer: 0
   m_Name: Small
   m_TagString: Untagged
@@ -156,22 +155,6 @@ Transform:
   m_Father: {fileID: 231838874}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &180804521
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 180804519}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &199335480
 GameObject:
   m_ObjectHideFlags: 0
@@ -184,6 +167,7 @@ GameObject:
   - component: {fileID: 199335484}
   - component: {fileID: 199335483}
   - component: {fileID: 199335482}
+  - component: {fileID: 199335485}
   m_Layer: 0
   m_Name: Veggie3
   m_TagString: Untagged
@@ -270,6 +254,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 199335480}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &199335485
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 199335480}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &218160079
 GameObject:
   m_ObjectHideFlags: 0
@@ -282,6 +282,7 @@ GameObject:
   - component: {fileID: 218160083}
   - component: {fileID: 218160082}
   - component: {fileID: 218160081}
+  - component: {fileID: 218160084}
   m_Layer: 0
   m_Name: Veggie1
   m_TagString: Untagged
@@ -368,6 +369,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 218160079}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &218160084
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 218160079}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &231838873
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,6 +722,7 @@ GameObject:
   - component: {fileID: 590101131}
   - component: {fileID: 590101130}
   - component: {fileID: 590101129}
+  - component: {fileID: 590101132}
   m_Layer: 0
   m_Name: Veggie1
   m_TagString: Untagged
@@ -791,6 +809,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 590101127}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &590101132
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 590101127}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &653588290
 GameObject:
   m_ObjectHideFlags: 0
@@ -1360,6 +1394,7 @@ GameObject:
   - component: {fileID: 1158524179}
   - component: {fileID: 1158524178}
   - component: {fileID: 1158524177}
+  - component: {fileID: 1158524180}
   m_Layer: 0
   m_Name: Veggie2
   m_TagString: Untagged
@@ -1446,6 +1481,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1158524175}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &1158524180
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158524175}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1163762550
 GameObject:
   m_ObjectHideFlags: 0
@@ -1455,7 +1506,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1163762551}
-  - component: {fileID: 1163762552}
   m_Layer: 0
   m_Name: Large
   m_TagString: Untagged
@@ -1479,22 +1529,6 @@ Transform:
   m_Father: {fileID: 1369094198}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &1163762552
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1163762550}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &1224489021
 GameObject:
   m_ObjectHideFlags: 0
@@ -1504,7 +1538,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1224489022}
-  - component: {fileID: 1224489023}
   m_Layer: 0
   m_Name: Large
   m_TagString: Untagged
@@ -1527,22 +1560,6 @@ Transform:
   m_Father: {fileID: 231838874}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &1224489023
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1224489021}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &1238560323
 GameObject:
   m_ObjectHideFlags: 0
@@ -1668,7 +1685,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1349422078}
-  - component: {fileID: 1349422079}
   m_Layer: 0
   m_Name: Small
   m_TagString: Untagged
@@ -1694,22 +1710,6 @@ Transform:
   m_Father: {fileID: 1369094198}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &1349422079
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1349422077}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &1369094197
 GameObject:
   m_ObjectHideFlags: 0
@@ -2077,6 +2077,7 @@ GameObject:
   - component: {fileID: 1767479958}
   - component: {fileID: 1767479957}
   - component: {fileID: 1767479956}
+  - component: {fileID: 1767479959}
   m_Layer: 0
   m_Name: Veggie1
   m_TagString: Untagged
@@ -2163,6 +2164,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1767479954}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &1767479959
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767479954}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1816751664
 GameObject:
   m_ObjectHideFlags: 0
@@ -2172,7 +2189,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1816751665}
-  - component: {fileID: 1816751666}
   m_Layer: 0
   m_Name: Medium
   m_TagString: Untagged
@@ -2197,22 +2213,6 @@ Transform:
   m_Father: {fileID: 1369094198}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &1816751666
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1816751664}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &1842655775
 GameObject:
   m_ObjectHideFlags: 0
@@ -2225,6 +2225,7 @@ GameObject:
   - component: {fileID: 1842655779}
   - component: {fileID: 1842655778}
   - component: {fileID: 1842655777}
+  - component: {fileID: 1842655780}
   m_Layer: 0
   m_Name: Veggie2
   m_TagString: Untagged
@@ -2311,6 +2312,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1842655775}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &1842655780
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1842655775}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1881067628
 GameObject:
   m_ObjectHideFlags: 0
@@ -2548,6 +2565,7 @@ GameObject:
   - component: {fileID: 1960990249}
   - component: {fileID: 1960990248}
   - component: {fileID: 1960990247}
+  - component: {fileID: 1960990250}
   m_Layer: 0
   m_Name: Veggie1
   m_TagString: Untagged
@@ -2634,3 +2652,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1960990245}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &1960990250
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1960990245}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

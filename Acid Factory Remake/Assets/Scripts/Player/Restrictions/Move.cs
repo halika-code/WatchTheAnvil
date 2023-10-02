@@ -1,6 +1,8 @@
 using UnityEngine;
 
 public class Move : MonoBehaviour {
+    
+    private static CanMove controller; 
     public enum CanMove {
         Freely,
         CantLeft,
@@ -8,9 +10,7 @@ public class Move : MonoBehaviour {
         CantJump,
         Cant
     }
-
-    private static CanMove controller; 
-    // Start is called before the first frame update
+    
     private void OnEnable() { 
         controller = CanMove.Freely;
     }

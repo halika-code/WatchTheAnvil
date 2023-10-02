@@ -29,7 +29,7 @@ public class VegetablePull : MonoBehaviour {
         var score = 1;
         foreach (var parents in parentList) {
             switch (parents) {
-                case "Small" or "Carrot": {
+                case "Small" or "Carrot" or "Vegetables": {
                     break; //tryin to avoid default with basic plants
                 } case "Beetroot": {
                     score++;
