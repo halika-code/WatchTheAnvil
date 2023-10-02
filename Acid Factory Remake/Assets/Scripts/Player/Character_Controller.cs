@@ -10,17 +10,19 @@ public class Character_Controller : MonoBehaviour {
     private const double MoveVel = 20;
     private static Rigidbody pBody;
     private static bool invincibility;
+    private static float priorYVel;
 
     //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one value
     
     /**
      * <summary>Initialized the variables unique to the player</summary>
      */
-    private static void init() {
+    private static void init() { //todo the player gets stuck on the collision when jumping underneath a platform, also have the carrots appear and disappear when close / far
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
         invincibility = false;
         Physics.gravity = new Vector3(0, -30f);
+        priorYVel = 0f;
     }
 
     private void OnEnable() { //singleton pattern, just in case
@@ -43,7 +45,13 @@ public class Character_Controller : MonoBehaviour {
 
     private void FixedUpdate() {
         if (getMove() is not CanMove.CantJump) {
-            jump();
+            if (Input.GetKey(KeyCode.Space) && !isAscending()) {
+                Move.updateMovement(CanMove.CantJump);
+                StartCoroutine(flying());
+            } 
+        }
+        else {
+            updatePriorVel();
         }
     }
 
@@ -68,9 +76,7 @@ public class Character_Controller : MonoBehaviour {
     private void OnCollisionEnter(Collision collision) {
         var cObj = collision.gameObject;
         if (!VegetablePull.validateVegetable(cObj)) {
-            if (getMove() is CanMove.CantJump) {
-                StopCoroutine(gravAmplifier(Vector3.zero));
-            } processCollision(getParentName(cObj.transform));
+            processCollision(getParentName(cObj.transform));
         } StopCoroutine(ShadowController.findPlatform());
     }
 
@@ -82,6 +88,18 @@ public class Character_Controller : MonoBehaviour {
             updateMovement(CanMove.CantJump);
             StartCoroutine(falling(getPlayerBody().velocity));
         } StartCoroutine(ShadowController.findPlatform()); 
+    }
+
+    private void slapPlayerDown() {
+        StopAllCoroutines();
+        pBody.velocity = new Vector3(pBody.velocity.x, -5f, pBody.velocity.z);
+    }
+
+    /**
+     * <summary>Saves the previously calculated velocity calculated in the last physics update</summary>
+     */
+    private static void updatePriorVel() {
+        priorYVel = pBody.velocity.y;
     }
 
     /**
@@ -101,8 +119,12 @@ public class Character_Controller : MonoBehaviour {
     private void processCollision(string name) {
         switch (name) {
             case "Platforms": {
-                Move.updateMovement(CanMove.Freely);
-                break;
+                /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
+                if (getMove() is CanMove.CantJump) { //if the player is flying
+                    slapPlayerDown();
+                } if (priorYVel < 0f) {
+                    Move.updateMovement(CanMove.Freely);
+                } break;
             } case "Walls" or "Player": { //in case I need to add stuff in here
                 break;
             } case "Anvils": { //updates the flag
@@ -138,27 +160,16 @@ public class Character_Controller : MonoBehaviour {
     private static void move() {
         var vel = new Vector3(0f, pBody.velocity.y, 0f);
         if (Input.GetKey(KeyCode.A)) { //left
-            vel.x -= (float)(MoveVel*1.5);
+            vel.x = -(float)(MoveVel*1.5);
         } if (Input.GetKey(KeyCode.D)) { //right
-            vel.x += (float)(MoveVel*1.5);
+            vel.x = (float)(MoveVel*1.5);
         } if (Input.GetKey(KeyCode.W)) { //up
-            vel.z += (float)(MoveVel*1.5);
+            vel.z = (float)(MoveVel*1.5);
         } if (Input.GetKey(KeyCode.S)) { //down
-            vel.z -= (float)(MoveVel*1.5);
+            vel.z = -(float)(MoveVel*1.5);
         } movePlayer(vel);
     }
     
-    /**
-     * <summary><para>Gives the player a jump force upwards</para>
-     * if the player presses the desired key</summary>
-    */
-    private void jump() {
-        if (Input.GetKey(KeyCode.Space)) {
-            Move.updateMovement(CanMove.CantJump);
-            StartCoroutine(flying());
-        } 
-    }
-
     /**
      * <summary>Checks if the player have pressed the E key in a non-mashy style</summary>
      */
@@ -171,8 +182,7 @@ public class Character_Controller : MonoBehaviour {
      * <remarks>it has a decent arch</remarks>
      */
     private IEnumerator flying() {
-        var hop = new Vector3(pBody.velocity.x, 0, pBody.velocity.z);
-        hop.y += (float)(MoveVel / 2*6f); //x/(y*i)*MoveVel. x increases the height, y
+        var hop = new Vector3(pBody.velocity.x, (float)(MoveVel / 2*6f), pBody.velocity.z);
         movePlayer(hop);
         return falling(hop);
     }
@@ -196,7 +206,7 @@ public class Character_Controller : MonoBehaviour {
         while (Move.getMove() is not CanMove.Freely) { //here the arch is kept at a downwards angle
             movePlayer(hop);
             yield return new WaitForFixedUpdate();
-        } 
+        }
     }
 
     /**
@@ -262,7 +272,7 @@ public class Character_Controller : MonoBehaviour {
         return pBody;
     }
 
-    public static bool isMoving() { //idea here is find a threshold that can tell me if the player is moving. check what velocity correlates with 0
-        return Math.Round(pBody.velocity.x, 2) > 0.05 || Math.Round(pBody.velocity.y) > 0.05 || Math.Round(pBody.velocity.z) > 0.05;
+    public static bool isAscending() {
+        return pBody.velocity.y > 0.05f;
     }
 }

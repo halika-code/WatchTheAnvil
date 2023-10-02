@@ -21,7 +21,7 @@ public class ShadowController : MonoBehaviour {
         } while (true) {
             if (!findColPoint(out var hit) || hit.collider.gameObject.name is "DeathPane") {
                 getShadowBody().SetActive(false);
-            } if (getParentName(hit.collider.transform) is "Platforms") {
+            } if (getParentName(hit.collider.transform) is "Platforms" or "Anvils") {
                 setShadowPosition(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
             } yield return null;
         }
