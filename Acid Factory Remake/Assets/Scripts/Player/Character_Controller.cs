@@ -246,7 +246,7 @@ public class Character_Controller : MonoBehaviour {
      * <returns>The list (of type string) of the "family tree"</returns>
      * <remarks>Works with objects that doesn't "normally" have a gameObject attached</remarks>
      */
-    private static List<string> getParentName(GameObject obj) {
+    public static List<string> getParentName(GameObject obj) {
         var parentList = new List<string>();
         if (obj.name.Contains("Veggie")) {
             obj = obj.transform.parent.gameObject;
@@ -268,8 +268,15 @@ public class Character_Controller : MonoBehaviour {
         ShadowController.moveShadow(pBody.transform.position);
     }
 
+    /**
+     * <summary>Finds the rigidbody attached to the player</summary>
+     * <remarks>The component will always be found</remarks>
+     */
     public static Rigidbody getPlayerBody() {
-        return pBody;
+        if (pBody != null) {
+            return pBody;
+        } init();
+        return getPlayerBody();
     }
 
     public static bool isAscending() {

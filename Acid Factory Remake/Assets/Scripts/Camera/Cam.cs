@@ -50,7 +50,7 @@ public class Cam : MonoBehaviour {
      * <param name="pBody">The player's current position</param>
      * <returns>A list of booleans corresponding to each cardinal sides that the player have left the border at</returns>
      */
-    private static bool[] haveLeftBorder(Vector3 camPos, Vector3 pBody) {
+    public static bool[] haveLeftBorder(Vector3 camPos, Vector3 pBody) {
         var camPosPar = Math.Sign(camPos.x) is 1; //cameraPositionParity
         var pBodyPar = Math.Sign(pBody.x) is 1; //playerBodyParity
         if (camPosPar && !pBodyPar || !camPosPar && pBodyPar) { //checking here to not have a case of (45[camPos] + (-5)[pBody])

@@ -65,7 +65,7 @@ public class AnvilManager : MonoBehaviour {
      */
     private static IEnumerator startInitialWait() {
         while (waitTimer > 0) {
-            Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
+            //Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
             yield return new WaitForSeconds(1f);
             waitTimer--;
         }
