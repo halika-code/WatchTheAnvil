@@ -1,33 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using static VegetableVisibility;
 using static Character_Controller;
 
-public class VegStateController : MonoBehaviour {
-    private static List<Rigidbody> cBodyCollective;
-    private static List<VegState> vegStateCollective;
+public class VegStateController : RootVeg {
     private static Rigidbody pBody;
-    
+
     private void Start() {
-        cBodyCollective = gameObject.GetComponentsInChildren<Rigidbody>().ToList();
-        if (cBodyCollective == null) { //idea here is if there is no vegetables under this parent script, the script should disable
-            Destroy(this);
-        } init();
+        pBody = getPlayerBody();
+        init(gameObject.GetComponentsInChildren<Rigidbody>());
     }
 
-    /**
-     * <summary>Initializes all the crucial variables</summary>
-     */
-    private static void init() {
-        pBody = getPlayerBody();
-        vegStateCollective = new List<VegState>();
-        for (var i = 0; i < cBodyCollective.Count; i++) {
-            vegStateCollective.Add(VegState.Hidden);
-        }
-    }
-    
     private void FixedUpdate() {
         for (var i = 0; i < cBodyCollective.Count-1; i++) {
             checkForPlayerDistance(cBodyCollective[i], vegStateCollective[i]);
@@ -76,8 +60,8 @@ public class VegStateController : MonoBehaviour {
      * <returns>A flag for each side of the vegetable (not including the Y axis)
      * <para>true if it is close, false otherwise</para></returns>
      */
-    private static List<bool> pInBorder(float[] cPos, float[] pPos) { //todo what it looks like, when the player gets close to the empty housing the carrots, this returns both true
-        var border = new List<bool>();                              //todo far from the vegetables ... I need to have individual vegetables trigger
+    private static List<bool> pInBorder(float[] cPos, float[] pPos) {
+        var border = new List<bool>();
         for (var i = 0; i < cPos.Length; i++) {
             border.Add((Math.Abs(cPos[i]) - (Math.Abs(pPos[i]) + 2f)) < 5f); //the idea here is if the player is 3 meters in the vicinity 
         } return border;
