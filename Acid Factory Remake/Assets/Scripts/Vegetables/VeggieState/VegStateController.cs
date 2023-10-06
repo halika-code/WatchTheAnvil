@@ -29,15 +29,17 @@ public class VegStateController : MonoBehaviour {
      * <param name="state">The corresponding state to the vegetable</param>
      * <remarks>It is assumed here that the given state parameter corresponds to the object linked to the cBody parameter</remarks>
      */
-    private static void checkForPlayerDistance(Component cBody, VegState state) {
+    private void checkForPlayerDistance(Rigidbody cBody, VegState state) {
         if (pClose(pInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, 
                 new []{pBody.transform.position.x, pBody.transform.position.z}))) { 
             if (state is VegState.Hidden) { //the idea here is if the player is close, the player will be inside a border
                Debug.Log("The player is close to a carrot named " + cBody.name);
+               StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
                updateCollective(getIndexOfVeg(cBody), VegState.Visible);
             } 
         } else if (state is VegState.Visible) { 
             Debug.Log("The carrot hides away " + cBody.name);
+            StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
             updateCollective(getIndexOfVeg(cBody), VegState.Hidden);
         }
     }
@@ -49,7 +51,7 @@ public class VegStateController : MonoBehaviour {
      * <remarks>If an exact match in the hierarchy wasn't found, the 1st index is returned</remarks>
      */
     private static int getIndexOfVeg(Component cObj) {
-        for (var i = 0; i < getBodyCollective().Count; i++) { //todo I think this function has some major problems, only updates the 1st index
+        for (var i = 0; i < getBodyCollective().Count; i++) {
             if (cObj.name.Equals(getBodyCollective()[i].name)) { //preliminary check if the Veggie3 is a Veggie3
                 if (checkIfEqual(getParentName(cObj.gameObject), getParentName(getBodyCollective()[i].gameObject))) {
                     return i; //a more detailed check based on the hierarchy of the veggie, mainly to improve efficiency
@@ -58,6 +60,9 @@ public class VegStateController : MonoBehaviour {
         } return 0;
     }
 
+    /**
+     * <summary>Checks properly if two list-string's match</summary>
+     */
     private static bool checkIfEqual(List<string> cObj, List<string> vObj) {
         var retVal = true;
         for (var i = 0; i < cObj.Count; i++) {
