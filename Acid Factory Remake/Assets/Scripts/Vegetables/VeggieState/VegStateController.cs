@@ -3,18 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using static VegetableVisibility;
 using static Character_Controller;
+using static RootVeg;
 
-public class VegStateController : RootVeg {
+public class VegStateController : MonoBehaviour {
     private static Rigidbody pBody;
 
     private void Start() {
         pBody = getPlayerBody();
-        init(gameObject.GetComponentsInChildren<Rigidbody>());
+        init(); //as in initialise the lists
+        init(gameObject.GetComponentsInChildren<Rigidbody>(), out var terminate); //as in, feed in the data to the lists
+        if (terminate) {
+            Destroy(this);
+        }
     }
 
     private void FixedUpdate() {
-        for (var i = 0; i < cBodyCollective.Count-1; i++) {
-            checkForPlayerDistance(cBodyCollective[i], vegStateCollective[i]);
+        for (var i = 0; i < getBodyCollective().Count-1; i++) {
+            checkForPlayerDistance(getBodyCollective()[i], getVegStates()[i]);
         }
     }
     
@@ -29,11 +34,11 @@ public class VegStateController : RootVeg {
                 new []{pBody.transform.position.x, pBody.transform.position.z}))) { 
             if (state is VegState.Hidden) { //the idea here is if the player is close, the player will be inside a border
                Debug.Log("The player is close to a carrot named " + cBody.name);
-                vegStateCollective[getIndexOfVeg(cBody)] = VegState.Visible; 
-            }
+               updateCollective(getIndexOfVeg(cBody), VegState.Visible);
+            } 
         } else if (state is VegState.Visible) { 
             Debug.Log("The carrot hides away " + cBody.name);
-            vegStateCollective[getIndexOfVeg(cBody)] = VegState.Hidden;
+            updateCollective(getIndexOfVeg(cBody), VegState.Hidden);
         }
     }
 
@@ -44,13 +49,22 @@ public class VegStateController : RootVeg {
      * <remarks>If an exact match in the hierarchy wasn't found, the 1st index is returned</remarks>
      */
     private static int getIndexOfVeg(Component cObj) {
-        for (var i = 0; i < cBodyCollective.Count; i++) {
-            if (cObj.name.Equals(cBodyCollective[i].name)) { //preliminary check if the Veggie3 is a Veggie3
-                if (getParentName(cObj.gameObject).Equals(getParentName(cBodyCollective[i].gameObject))) {
+        for (var i = 0; i < getBodyCollective().Count; i++) { //todo I think this function has some major problems, only updates the 1st index
+            if (cObj.name.Equals(getBodyCollective()[i].name)) { //preliminary check if the Veggie3 is a Veggie3
+                if (checkIfEqual(getParentName(cObj.gameObject), getParentName(getBodyCollective()[i].gameObject))) {
                     return i; //a more detailed check based on the hierarchy of the veggie, mainly to improve efficiency
                 }
             }
         } return 0;
+    }
+
+    private static bool checkIfEqual(List<string> cObj, List<string> vObj) {
+        var retVal = true;
+        for (var i = 0; i < cObj.Count; i++) {
+            if (!cObj[i].Equals(vObj[i])) {
+                retVal = false;
+            }
+        } return retVal;
     }
 
     /**
@@ -63,7 +77,7 @@ public class VegStateController : RootVeg {
     private static List<bool> pInBorder(float[] cPos, float[] pPos) {
         var border = new List<bool>();
         for (var i = 0; i < cPos.Length; i++) {
-            border.Add((Math.Abs(cPos[i]) - (Math.Abs(pPos[i]) + 2f)) < 5f); //the idea here is if the player is 3 meters in the vicinity 
+            border.Add(Math.Abs(cPos[i] - pPos[i]) < 20f); //the idea here is if the player is 3 meters in the vicinity 
         } return border;
     }
 
