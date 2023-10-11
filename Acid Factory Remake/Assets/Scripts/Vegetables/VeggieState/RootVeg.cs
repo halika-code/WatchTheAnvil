@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,8 +5,9 @@ public static class RootVeg {
     private static List<Rigidbody> cBodyCollective;
     private static List<VegetableVisibility.VegState> vegStateCollective;
 
-    public static void init() {
-        if (cBodyCollective == null) {
+    public static void init(bool forceReset) {
+        if (cBodyCollective == null || forceReset) {
+            Debug.Log("Resetting rootveg");
             cBodyCollective = new List<Rigidbody>();
             vegStateCollective = new List<VegetableVisibility.VegState>();
         }
@@ -29,11 +29,19 @@ public static class RootVeg {
         }
     }
 
+    /**
+     * <summary>Gets the collection of veggie bodies</summary>
+     * <remarks>Loops once if the body collective isn't initialized properly</remarks>
+     */
     public static List<Rigidbody> getBodyCollective() {
         return cBodyCollective;
     }
 
-    public static List<VegetableVisibility.VegState> getVegStates() {
+    /**
+     * <summary>Gets the collection of veggie bodies</summary>
+     * <remarks>Loops once if the body collective isn't initialized properly</remarks>
+     */
+    public static List<VegetableVisibility.VegState> getVegStates() { 
         return vegStateCollective;
     }
 

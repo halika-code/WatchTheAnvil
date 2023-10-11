@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
@@ -9,7 +8,6 @@ using static Move;
 public class Character_Controller : MonoBehaviour {
     private const double MoveVel = 20;
     private static Rigidbody pBody;
-    private static bool invincibility;
     private static float priorYVel;
 
     //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one value
@@ -20,7 +18,6 @@ public class Character_Controller : MonoBehaviour {
     private static void init() { //todo the player gets stuck on the collision when jumping underneath a platform, also have the carrots appear and disappear when close / far
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
-        invincibility = false;
         Physics.gravity = new Vector3(0, -30f);
         priorYVel = 0f;
     }
@@ -44,6 +41,8 @@ public class Character_Controller : MonoBehaviour {
     }
 
     private void FixedUpdate() {
+        Debug.Log("The player can move "+ getMove()); //todo THE PLAYER GETS STUCK TO THE RIGHT OF THE VEGETABLE PATCH!
+                                                      //todo The getMove turns to Can'tJump and the controls lock up, perhaps have a separate log that triggers when the state is can'tJump
         if (getMove() is not CanMove.CantJump) {
             if (Input.GetKey(KeyCode.Space) && !isAscending()) {
                 Move.updateMovement(CanMove.CantJump);
@@ -129,15 +128,14 @@ public class Character_Controller : MonoBehaviour {
                 break;
             } case "Anvils": { //updates the flag
                 if (AnvilManager.isFlyin()) {
-                    StartCoroutine(hurtPlayer());
+                    hurtPlayer();
                     AnvilManager.disableAnvil();
                     break;
                 } goto case "Platforms"; //this will make execution jump to case "Platforms"
             } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
-                if (!invincibility) {
-                    StartCoroutine(hurtPlayer());
-                    failSafe();
-                } break;
+                hurtPlayer();
+                failSafe();
+                break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");
                 break;
@@ -212,12 +210,9 @@ public class Character_Controller : MonoBehaviour {
     /**
      * <summary>Attempts to remove one health-point. If that fails, the player is killed</summary>
      */
-    private static IEnumerator hurtPlayer() {
+    private static void hurtPlayer() {
         if (UI.getHealthPoints() is not 1) {
-            invincibility = true;
             UI.updateHealthPoint(-1);
-            yield return new WaitForSeconds(2f);
-            invincibility = false;
         } else {
             killPlayer();
         }
@@ -227,6 +222,8 @@ public class Character_Controller : MonoBehaviour {
      * <summary>A simple kill-switch that reloads the game</summary>
      */
     private static void killPlayer() {
+        GameObject.Find("Player").GetComponent<MonoBehaviour>().StopAllCoroutines(); 
+        RootVeg.init(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

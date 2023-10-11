@@ -8,14 +8,15 @@ public static class VeggieAnim {
      * <para>The carrot is supposed to shoot up then slow slightly (and naturally) before abruptly stopping, all popped out or hidden</para></summary>
      */
     public static IEnumerator animateCarrot(Rigidbody targetCBody, VegetableVisibility.VegState state) {
-        var y = 5f;
-        var cBodyP = targetCBody.position;
+        var y = targetCBody.position.y;
+        var modifier = 5f;
         if (state is VegetableVisibility.VegState.Visible) {
-            y *= -1;
-        } while (Math.Abs(y) > 1) {
-            y = Mathf.Lerp(cBodyP.y, cBodyP.y + y, 0.2f); //todo test this out, the veg jumps out THEN ducks down ... perhaps check the state if the veg is trying to wiggle between states
-            targetCBody.position = new Vector3(cBodyP.x, y, cBodyP.z);
-            yield return new WaitForSeconds(0.5f);
+            modifier *= -1;
+        } for (var i = 1; i < 7; i++) {
+            Debug.Log("The y value of " + targetCBody.name + " is " + y); 
+            targetCBody.position = new Vector3(targetCBody.position.x, 
+                Mathf.Lerp(y, y + modifier, 0.08f * i), targetCBody.position.z); 
+            yield return null;
         } 
     }
 }

@@ -10,7 +10,7 @@ public class VegStateController : MonoBehaviour {
 
     private void Start() {
         pBody = getPlayerBody();
-        init(); //as in initialise the lists
+        init(false); //as in initialise the lists
         init(gameObject.GetComponentsInChildren<Rigidbody>(), out var terminate); //as in, feed in the data to the lists
         if (terminate) {
             Destroy(this);
@@ -18,7 +18,8 @@ public class VegStateController : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        for (var i = 0; i < getBodyCollective().Count-1; i++) {
+        var asd2 = getVegStates();
+        for (var i = 0; i < getBodyCollective().Count; i++) {
             checkForPlayerDistance(getBodyCollective()[i], getVegStates()[i]);
         }
     }
@@ -33,12 +34,12 @@ public class VegStateController : MonoBehaviour {
         if (pClose(pInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, 
                 new []{pBody.transform.position.x, pBody.transform.position.z}))) { 
             if (state is VegState.Hidden) { //the idea here is if the player is close, the player will be inside a border
-               Debug.Log("The player is close to a carrot named " + cBody.name);
+               //Debug.Log("The player is close to a carrot named " + cBody.name);
                StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
                updateCollective(getIndexOfVeg(cBody), VegState.Visible);
             } 
         } else if (state is VegState.Visible) { 
-            Debug.Log("The carrot hides away " + cBody.name);
+            //Debug.Log("The carrot hides away " + cBody.name);
             StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
             updateCollective(getIndexOfVeg(cBody), VegState.Hidden);
         }
