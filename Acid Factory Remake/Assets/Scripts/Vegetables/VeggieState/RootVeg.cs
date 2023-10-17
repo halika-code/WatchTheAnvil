@@ -7,7 +7,6 @@ public static class RootVeg {
 
     public static void init(bool forceReset) {
         if (cBodyCollective == null || forceReset) {
-            Debug.Log("Resetting rootveg");
             cBodyCollective = new List<Rigidbody>();
             vegStateCollective = new List<VegetableVisibility.VegState>();
         }

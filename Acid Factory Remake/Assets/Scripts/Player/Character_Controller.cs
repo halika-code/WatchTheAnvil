@@ -38,18 +38,16 @@ public class Character_Controller : MonoBehaviour {
             move();
             checkForVeggiePulls();
         }
+        
     }
 
     private void FixedUpdate() {
-        Debug.Log("The player can move "+ getMove()); //todo THE PLAYER GETS STUCK TO THE RIGHT OF THE VEGETABLE PATCH!
-                                                      //todo The getMove turns to Can'tJump and the controls lock up, perhaps have a separate log that triggers when the state is can'tJump
         if (getMove() is not CanMove.CantJump) {
             if (Input.GetKey(KeyCode.Space) && !isAscending()) {
                 Move.updateMovement(CanMove.CantJump);
                 StartCoroutine(flying());
             } 
-        }
-        else {
+        } else {
             updatePriorVel();
         }
     }
@@ -83,10 +81,18 @@ public class Character_Controller : MonoBehaviour {
      * <summary>Attempts to reset the player's state into "should fall"</summary>
      */
     private void OnCollisionExit(Collision other) {
-        if (getParentName(other.gameObject.transform) is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
-            updateMovement(CanMove.CantJump);
-            StartCoroutine(falling(getPlayerBody().velocity));
-        } StartCoroutine(ShadowController.findPlatform()); 
+        if (checkForDistance()) {
+            if (getParentName(other.gameObject.transform) is "Platforms" or "Walls" && getMove() is not CanMove.CantJump) {
+                updateMovement(CanMove.CantJump); 
+                StartCoroutine(falling(getPlayerBody().velocity));
+            } StartCoroutine(ShadowController.findPlatform()); 
+        }
+    }
+
+    private static bool checkForDistance() {
+        if (ShadowController.findColPoint(out var hit)) {
+            return hit.distance > (getPlayerBody().GetComponent<Transform>().localScale.y/2)+1f; //the idea here is with the localScale I can get the height of the player from this data
+        } return false;
     }
 
     private void slapPlayerDown() {
