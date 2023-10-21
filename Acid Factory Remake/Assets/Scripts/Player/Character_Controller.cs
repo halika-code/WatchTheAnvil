@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,13 +8,14 @@ public class Character_Controller : MonoBehaviour {
     private const double MoveVel = 20;
     private static Rigidbody pBody;
     private static float priorYVel;
+    private static Toolbelt belt;
 
     //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one value
     
     /**
      * <summary>Initialized the variables unique to the player</summary>
      */
-    private static void init() { //todo the player gets stuck on the collision when jumping underneath a platform, also have the carrots appear and disappear when close / far
+    private static void init() {
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
         Physics.gravity = new Vector3(0, -30f);
@@ -30,13 +30,14 @@ public class Character_Controller : MonoBehaviour {
 
     private void Start() {
         init();
+        belt = GetComponent<Toolbelt>();
     }
 
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
             move();
-            checkForVeggiePulls();
+            checkForItemUse();
         }
         
     }
@@ -179,6 +180,14 @@ public class Character_Controller : MonoBehaviour {
      */
     private static bool checkForVeggiePulls() {
         return Input.GetKey(KeyCode.E);
+    }
+
+    private void checkForItemUse() {
+        if (Input.GetKey(KeyCode.F)){
+            if (belt.checkIfToolExists("StopWatch", out var watch)) {
+                StartCoroutine(belt.runStopWatch(watch, !belt.stopWatchInUse));
+            }
+        }
     }
 
     /**

@@ -69,6 +69,13 @@ public class Anvil {
         AnvilManager.freezeAnvil();
     }
 
+    /**
+     * <summary>Attempts to freeze the anvil in place while keeping it functional</summary>
+     */
+    public void freezeAnvil() {
+        aBody.velocity = new Vector3(aBody.velocity.x, 0f, aBody.velocity.z);
+    }
+
     public GameObject getTarget() {
         return getShadow().gameObject;
     }

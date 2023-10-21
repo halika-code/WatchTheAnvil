@@ -3,8 +3,8 @@ using System.Collections;
 using UnityEngine;
 
 public class AnvilManager : MonoBehaviour {
-    private static Anvil currentAnvil;
-    private static int waitTimer;
+    public static Anvil currentAnvil;
+    public static int waitTimer;
     public GameObject preFab;
 
     private void Start() {
@@ -36,7 +36,7 @@ public class AnvilManager : MonoBehaviour {
     /**
      * <summary>Runs timer for the anvil's built in timer</summary>
      */
-    private static IEnumerator helpRunTimer(Anvil anvil, int limit) {
+    public static IEnumerator helpRunTimer(Anvil anvil, int limit) {
         while (anvil.aTimer != limit) {
             anvil.aTimer--;
             yield return new WaitForSeconds(0.8f);
@@ -63,7 +63,7 @@ public class AnvilManager : MonoBehaviour {
     /**
      * <summary>Sets a period where anvils cannot spawn</summary>
      */
-    private static IEnumerator startInitialWait() {
+    public static IEnumerator startInitialWait() {
         while (waitTimer > 0) {
             //Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
             yield return new WaitForSeconds(1f);
