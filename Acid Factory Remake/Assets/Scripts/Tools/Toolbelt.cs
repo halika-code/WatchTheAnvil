@@ -20,7 +20,7 @@ public class Toolbelt : MonoBehaviour {
      * <param name="toolName">The name of the tool desired to be added</param>
      */
     public void addTool(string toolName) {
-        if (toolName is "Flower" || !checkIfToolExists(toolName, out var nullVal)) { //if the tool is flower (can be stacked infinitely) or is a unique tool
+        if (toolName is "Flower" || !checkIfToolExists(toolName, out _) /*The underscore is used as I don't have a use for the out variable*/) { //if the tool is flower (can be stacked infinitely) or is a unique tool
             var t = new Tools(toolName);
             if (toolName is "Dynamite" or "StopWatch") {
                 toolInHand = t;
