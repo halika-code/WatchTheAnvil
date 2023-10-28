@@ -1,4 +1,6 @@
 using System.Collections;
+using Script.Tools.ToolType;
+using UnityEditor;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
@@ -44,7 +46,7 @@ public class Collide : MonoBehaviour {
     }
 
     private void OnTriggerStay(Collider other) {
-        if (checkForVeggiePulls() && VegetablePull.validateVegetable(other.gameObject)) {
+        if (checkForActionButton() && VegetablePull.validateVegetable(other.gameObject)) {
             processVegetables(other);
         }
     }
@@ -74,6 +76,7 @@ public class Collide : MonoBehaviour {
      * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
      */
     private void processCollision(string name) {
+        var belt = Toolbelt.getBelt();
         switch (name) {
             case "Platforms": {
                 /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
@@ -86,13 +89,19 @@ public class Collide : MonoBehaviour {
                 break;
             } case "Anvils": { //updates the flag
                 if (AnvilManager.isFlyin()) {
-                    hurtPlayer();
-                    AnvilManager.disableAnvil();
+                    if (belt.checkIfToolExists("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
+                        belt.checkForDurability((Equipment)foundTool);
+                    } else {
+                        hurtPlayer();
+                    } AnvilManager.disableAnvil();
                     break;
                 } goto case "Platforms"; //this will make execution jump to case "Platforms"
             } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
                 hurtPlayer();
                 failSafe();
+                break;
+            } case "Tools": {
+                belt.addTool(name);
                 break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");

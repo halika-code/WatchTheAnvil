@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using Script.Tools.ToolType;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
@@ -35,7 +37,7 @@ public class Character_Controller : MonoBehaviour {
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
-            move();
+            move();                 //todo next up: add controls for the player to be able to use the items
             checkForItemUse();
         }
     }
@@ -65,16 +67,16 @@ public class Character_Controller : MonoBehaviour {
     }
     
     /**
-     * <summary>Checks if the player have pressed the E key in a non-mashy style</summary>
+     * <summary>Checks if the player have pressed the E key</summary>
      */
-    public static bool checkForVeggiePulls() {
+    public static bool checkForActionButton() {
         return Input.GetKey(KeyCode.E);
     }
 
     private void checkForItemUse() {
         if (Input.GetKey(KeyCode.F)){
-            if (belt.checkIfToolExists("StopWatch", out var watch)) {
-                StartCoroutine(belt.runStopWatch(watch, !belt.stopWatchInUse));
+            if (belt.checkIfToolExists("StopWatch", out var tool)) {
+                StartCoroutine(((StopWatch)tool).runStopWatch(!((StopWatch)tool).stopWatchInUse)); //this looks weird but I just cast tool into StopWatch and use that cast to get link to the function AND the boolean
             }
         }
     }

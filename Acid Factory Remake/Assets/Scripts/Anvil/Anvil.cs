@@ -85,7 +85,10 @@ public class Anvil {
     }
 
     private bool haveLanded() {
-        return aBody.velocity.y > 0f;
+        if (isFlying) {
+            return aBody.velocity.y > 0f;
+        } return true;
+
     }
     
     /**

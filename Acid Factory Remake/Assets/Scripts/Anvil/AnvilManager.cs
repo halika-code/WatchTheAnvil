@@ -88,6 +88,7 @@ public class AnvilManager : MonoBehaviour {
      * <summary>Destroys an instance of the anvil</summary>
      */
     public static void disableAnvil() {
+        currentAnvil.isFlying = false;
         Destroy(currentAnvil.getAnvilBody().gameObject);
     }
     
@@ -95,8 +96,10 @@ public class AnvilManager : MonoBehaviour {
      * <summary>Turns the anvil into ground</summary>
      */
     public static void freezeAnvil() {
-        currentAnvil.getTarget().SetActive(false);
-        currentAnvil.getAnvilBody().isKinematic = true;
-        currentAnvil.isFlying = false;
+        if (isFlyin()) {
+            currentAnvil.getTarget().SetActive(false);
+            currentAnvil.getAnvilBody().isKinematic = true;
+            currentAnvil.isFlying = false;
+        }
     }
 }

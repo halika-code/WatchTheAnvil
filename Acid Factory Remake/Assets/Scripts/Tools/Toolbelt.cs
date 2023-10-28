@@ -1,17 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Script.Tools.ToolType;
 using UnityEngine;
 using static AnvilManager;
+using Object = UnityEngine.Object;
 
 public class Toolbelt : MonoBehaviour {
     private List<Tools> belt;
     public Tools toolInHand;
-    public bool stopWatchInUse;
+
     
     private void Start() {
-        belt = new List<Tools> { new () };
-        stopWatchInUse = false;
+        belt = new List<Tools>();
     }
 
     /**
@@ -21,13 +22,20 @@ public class Toolbelt : MonoBehaviour {
      */
     public void addTool(string toolName) {
         if (toolName is "Flower" || !checkIfToolExists(toolName, out _) /*The underscore is used as I don't have a use for the out variable*/) { //if the tool is flower (can be stacked infinitely) or is a unique tool
-            var t = new Tools(toolName);
+            Equipment t = new(toolName);
             if (toolName is "Dynamite" or "StopWatch") {
                 toolInHand = t;
             } else {
                 belt.Add(t);
             }
         }
+    }
+
+    public void checkForDurability(Equipment tool) {
+        Equipment.useItem(tool, out var isBroken);
+        if (isBroken) {
+            removeTool(tool.name);
+        } 
     }
 
     /**
@@ -40,7 +48,7 @@ public class Toolbelt : MonoBehaviour {
             if (foundTool.name.Equals(toolInHand.name)) {
                 toolInHand = null;
             } else {
-                belt.Remove(foundTool);
+                belt.Remove((Tools)foundTool);
             }
         }
         else {
@@ -55,9 +63,10 @@ public class Toolbelt : MonoBehaviour {
      * <para>Will be null, if nothing is found</para></param>
      * <returns>True, if an instance is found, false otherwise</returns>
      */
-    public bool checkIfToolExists(string toolName, out Tools foundTool) {
+    public bool checkIfToolExists(string toolName, out Object foundTool) {
         foundTool = null;
         if (toolName.Equals(toolInHand.name)) {
+            foundTool = toolInHand;
             return true;
         } foreach (var tool in belt) {
             if ((foundTool = tool).name.Equals(toolName)) {
@@ -65,38 +74,11 @@ public class Toolbelt : MonoBehaviour {
             }
         } return false;
     }
-    
-    /**
-     * <summary>Find which state the anvil is in, saves that state and attempts to continue execution where it was left off</summary>
-     * <param name="stopWatch">The instance of the watch</param>
-     * <param name="shouldContinue">The flag that flips intended function of this script, unfreezing the anvil and terminating early</param>
-     */
-    public IEnumerator runStopWatch(Tools stopWatch, bool shouldContinue) {
-        var wait1Sec = new WaitForSeconds(1);
-        var targetScript = getTargetScript();
-        if (!shouldContinue) {
-            StartCoroutine(targetScript);
-            stopWatchInUse = false;
-            yield break;
-        } StopCoroutine(targetScript);
-        stopWatchInUse = true;
-        while (stopWatch.lifeSpanTimer is not 0) { //actual wait
-            yield return wait1Sec;
-            stopWatch.lifeSpanTimer--;
-        } StartCoroutine(targetScript);
-        stopWatchInUse = false;
-    }
 
     /**
-     * <summary>A sister-script to <see cref="runStopWatch"/>, finds the script that is currently running concerning the anvil</summary>
-     * <returns>The instance of that script in IEnumerator form</returns>
+     * <summary>Fetches the belt attached to the player</summary>
      */
-    private IEnumerator getTargetScript() {
-        if (currentAnvil.aTimer is not 0) { //if the anvil is falling
-            currentAnvil.freezeAnvil();
-            return currentAnvil.dropAnvil();
-        } if (waitTimer is 0) { //if the anvil have spawned
-            return helpRunTimer(currentAnvil, currentAnvil.aTimer is 3 ? 3 : 0); //deciding if after the freeze, the anvil should target or not
-        } return startInitialWait(); //if the anvil is just waiting to spawn
+    public static Toolbelt getBelt() {
+        return Character_Controller.getPlayerBody().GetComponent<Toolbelt>();
     }
 }
