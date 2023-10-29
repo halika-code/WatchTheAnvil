@@ -34,12 +34,10 @@ public class VegStateController : MonoBehaviour {
         if (pClose(pInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, 
                 new []{pBody.transform.position.x, pBody.transform.position.z}))) { 
             if (state is VegState.Hidden) { //the idea here is if the player is close, the player will be inside a border
-               //Debug.Log("The player is close to a carrot named " + cBody.name);
                StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
                updateCollective(getIndexOfVeg(cBody), VegState.Visible);
             } 
         } else if (state is VegState.Visible) { 
-            //Debug.Log("The carrot hides away " + cBody.name);
             StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
             updateCollective(getIndexOfVeg(cBody), VegState.Hidden);
         }
@@ -80,7 +78,7 @@ public class VegStateController : MonoBehaviour {
      * <returns>A flag for each side of the vegetable (not including the Y axis)
      * <para>true if it is close, false otherwise</para></returns>
      */
-    private static List<bool> pInBorder(float[] cPos, float[] pPos) {
+    public static List<bool> pInBorder(float[] cPos, float[] pPos) {
         var border = new List<bool>();
         for (var i = 0; i < cPos.Length; i++) {
             border.Add(Math.Abs(cPos[i] - pPos[i]) < 20f); //the idea here is if the player is 3 meters in the vicinity 
@@ -95,7 +93,7 @@ public class VegStateController : MonoBehaviour {
      * the return value will be locked to being false</para></returns>
      * <remarks>This function is setup to handle an infinite amount of axis</remarks>
      */
-    private static bool pClose(List<bool> result) {
+    public static bool pClose(List<bool> result) {
         var retVal = true;
         foreach (var borderFinding in result) {
             if (!borderFinding) {

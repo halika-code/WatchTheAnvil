@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class VegetableVisibility : MonoBehaviour {
+public class VegetableVisibility {
     public enum VegState {
         Visible,
         Hidden

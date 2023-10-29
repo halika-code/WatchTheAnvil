@@ -13,7 +13,7 @@ public static class VeggieAnim {
         if (state is VegetableVisibility.VegState.Visible) {
             modifier *= -1;
         } for (var i = 1; i < 7; i++) {
-            Debug.Log("The y value of " + targetCBody.name + " is " + y); 
+            //Debug.Log("The y value of " + targetCBody.name + " is " + y); 
             targetCBody.position = new Vector3(targetCBody.position.x, 
                 Mathf.Lerp(y, y + modifier, 0.08f * i), targetCBody.position.z); 
             yield return null;

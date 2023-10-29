@@ -1414,7 +1414,7 @@ GameObject:
   - component: {fileID: 685921319}
   - component: {fileID: 685921318}
   m_Layer: 0
-  m_Name: Slipper
+  m_Name: Flipper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2607,6 +2607,7 @@ GameObject:
   - component: {fileID: 1470679665}
   - component: {fileID: 1470679666}
   - component: {fileID: 1470679667}
+  - component: {fileID: 1470679668}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2745,6 +2746,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5781f2e76f8b43b49671997c94d44620, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1470679668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470679659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c097a93bf5ff9545973f04b714c591f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toolInHand: {fileID: 0}
 --- !u!1 &1538099063
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,6 +16,14 @@ namespace Script.Tools.ToolType {
             banquet.count++;
         }
 
+        public static void checkForFlowerDistance() {
+            var pBody = Character_Controller.getPlayerBody().position;
+            //if (VegStateController.pClose(VegStateController.pInBorder(new[] { pBody.x, pBody.y, pBody.z }, new[] {/*A specific flower supposed to be here*/ }))) {
+                //todo get a flower-controller where all the flowers are kept and IF the player is close, get a timer up where if the flower is up
+                //for 5 seconds, it will hide away
+            //}
+        }
+
         /**
          * <summary>Decides how many lives the player should receive for his/her flower bouquet</summary>
          */

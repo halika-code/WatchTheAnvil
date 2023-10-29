@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Script.Tools.ToolType;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
+using Debug = System.Diagnostics.Debug;
 
 public class Character_Controller : MonoBehaviour {
     public const double MoveVel = 20;
@@ -74,9 +76,21 @@ public class Character_Controller : MonoBehaviour {
     }
 
     private void checkForItemUse() {
-        if (Input.GetKey(KeyCode.F)){
-            if (belt.checkIfToolExists("StopWatch", out var tool)) {
-                StartCoroutine(((StopWatch)tool).runStopWatch(!((StopWatch)tool).stopWatchInUse)); //this looks weird but I just cast tool into StopWatch and use that cast to get link to the function AND the boolean
+        var hand = Toolbelt.getBelt().toolInHand;
+        if (Input.GetKey(KeyCode.F) && hand != null) {
+            switch (hand.name) {
+                case "Dynamite": {
+                    ((Dynamite)hand).useItem();
+                    break;
+                } case "Flower": {
+                    break;
+                } case "Umbrella": {
+                    ((Umbrella)hand).useItem();
+                    break;
+                } case "StopWatch": {
+                    ((StopWatch)hand).useItem();
+                    break;
+                } 
             }
         }
     }

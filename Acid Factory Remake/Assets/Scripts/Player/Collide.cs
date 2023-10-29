@@ -90,6 +90,7 @@ public class Collide : MonoBehaviour {
             } case "Anvils": { //updates the flag
                 if (AnvilManager.isFlyin()) {
                     if (belt.checkIfToolExists("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
+                        Debug.Log("Helmet used!");
                         belt.checkForDurability((Equipment)foundTool);
                     } else {
                         hurtPlayer();
@@ -102,6 +103,7 @@ public class Collide : MonoBehaviour {
                 break;
             } case "Tools": {
                 belt.addTool(name);
+                Debug.Log(name + " added!");
                 break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");
@@ -129,7 +131,10 @@ public class Collide : MonoBehaviour {
             hop.y -= (float)MoveVel;
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
-        } StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
+        } var hand = Toolbelt.getBelt().toolInHand;
+        if (!hand.name.Contains("Umbrella") || !((Umbrella)hand).isOpen) { //if the umbrella isn't open
+            StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
+        } 
     }
     
     /**

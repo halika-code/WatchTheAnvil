@@ -10,7 +10,12 @@ namespace Script.Tools.ToolType {
             lifeSpanTimer = 20;
             stopWatchInUse = false;
         }
-        
+
+        public void useItem() {
+            if (stopWatchInUse) {
+                StopCoroutine(nameof(runStopWatch));
+            } StartCoroutine(runStopWatch(!stopWatchInUse));
+        }
             
         /**
          * <summary>Find which state the anvil is in, saves that state and attempts to continue execution where it was left off</summary>
@@ -18,17 +23,17 @@ namespace Script.Tools.ToolType {
          */
         public IEnumerator runStopWatch(bool shouldContinue) {
             var wait1Sec = new WaitForSeconds(1);
-            var targetScript = getTargetScript();
+            var anvilScript = getTargetScript();
             if (!shouldContinue) {
-                StartCoroutine(targetScript);
+                StartCoroutine(anvilScript);
                 stopWatchInUse = false;
                 yield break;
-            } StopCoroutine(targetScript);
+            } StopCoroutine(anvilScript);
             stopWatchInUse = true;
             while (lifeSpanTimer is not 0) { //actual wait
                 yield return wait1Sec;
                 lifeSpanTimer--;
-            } StartCoroutine(targetScript);
+            } StartCoroutine(anvilScript);
             stopWatchInUse = false;
         }
 
