@@ -1,12 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Script.Tools.ToolType;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
-using Debug = System.Diagnostics.Debug;
 
 public class Character_Controller : MonoBehaviour {
     public const double MoveVel = 20;
@@ -75,7 +71,7 @@ public class Character_Controller : MonoBehaviour {
         return Input.GetKey(KeyCode.E);
     }
 
-    private void checkForItemUse() {
+    private static void checkForItemUse() {
         var hand = Toolbelt.getBelt().toolInHand;
         if (Input.GetKey(KeyCode.F) && hand != null) {
             switch (hand.name) {

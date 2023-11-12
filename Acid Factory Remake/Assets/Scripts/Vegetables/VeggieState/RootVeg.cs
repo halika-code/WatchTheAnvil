@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Script.Tools.ToolType;
 using UnityEngine;
 
 public static class RootVeg {
@@ -9,7 +10,8 @@ public static class RootVeg {
         if (cBodyCollective == null || forceReset) {
             cBodyCollective = new List<Rigidbody>();
             vegStateCollective = new List<VegetableVisibility.VegState>();
-        }
+            GameObject.Find("Flowers").GetComponent<FlowerController>().prepFlowers();
+        } 
     }
 
     /**
@@ -26,6 +28,11 @@ public static class RootVeg {
         } for (var i = 0; i < bCol.Length; i++) {
             vegStateCollective.Add(VegetableVisibility.VegState.Hidden);
         }
+
+        foreach (var collect in cBodyCollective) {
+            Debug.Log("name of the prepped veg: " + collect.name);
+        } 
+        
     }
 
     /**
@@ -46,5 +53,13 @@ public static class RootVeg {
 
     public static void updateCollective(int index, VegetableVisibility.VegState state) {
         vegStateCollective[index] = state;
+    }
+
+    /**
+     * <summary>Adds a single vegetable into the list </summary>
+     */
+    public static void addVeg(Rigidbody veg) {
+        cBodyCollective.Add(veg);
+        vegStateCollective.Add(VegetableVisibility.VegState.Hidden);
     }
 }

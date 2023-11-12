@@ -105,7 +105,12 @@ public class Collide : MonoBehaviour {
                 belt.addTool(name);
                 Debug.Log(name + " added!");
                 break;
-            } default: {
+            }
+            case "Flowers": {
+                FlowerController.addFlower(name);
+                break;
+            }
+            default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");
                 break;
             } 
