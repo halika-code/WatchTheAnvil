@@ -23,8 +23,9 @@ public class Toolbelt : MonoBehaviour {
     public void addTool(string toolName) {
         if (toolName is "Flower" || !checkIfToolExists(toolName, out _) /*The underscore is used as I don't have a use for the out variable*/) { //if the tool is flower (can be stacked infinitely) or is a unique tool
             Equipment t = new(toolName);
-            if (toolName is "Dynamite" or "StopWatch") {
+            if (toolName is "Dynamite" or "StopWatch" or "Flower") {
                 toolInHand = t;
+                t.gameObject.transform.parent = Character_Controller.getPlayerHand(); //todo make this have the bouquet
             } else {
                 belt.Add(t);
             }

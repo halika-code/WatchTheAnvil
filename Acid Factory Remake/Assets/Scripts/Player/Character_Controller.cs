@@ -35,9 +35,8 @@ public class Character_Controller : MonoBehaviour {
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
-            move();                 //todo next up: add controls for the player to be able to use the items
-            checkForItemUse();
-        }
+            move();
+        } checkForItemUse();
     }
 
     public static bool checkForDistance() {
@@ -158,6 +157,18 @@ public class Character_Controller : MonoBehaviour {
             return pBody;
         } init();
         return getPlayerBody();
+    }
+
+    /**
+     * <summary>Attempts to find the player's hand</summary>
+     * <returns>The empty used to store the objects designated to be "in the player's hand", the player's body's transform otherwise</returns>
+     */
+    public static Transform getPlayerHand() {
+        foreach (var hand in getPlayerBody().gameObject.GetComponentsInChildren<Transform>()) {
+            if (hand.name is "Hand") {
+                return hand;
+            }
+        } return pBody.transform;
     }
 
     public static bool isAscending() {

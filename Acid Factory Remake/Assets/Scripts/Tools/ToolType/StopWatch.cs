@@ -9,6 +9,7 @@ namespace Script.Tools.ToolType {
         public StopWatch() {
             lifeSpanTimer = 20;
             stopWatchInUse = false;
+            this.name = "StopWatch";
         }
 
         public void useItem() {

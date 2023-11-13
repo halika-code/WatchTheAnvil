@@ -46,8 +46,14 @@ public class Collide : MonoBehaviour {
     }
 
     private void OnTriggerStay(Collider other) {
-        if (checkForActionButton() && VegetablePull.validateVegetable(other.gameObject)) {
-            processVegetables(other);
+        if (checkForActionButton()) {
+            if (VegetablePull.validateVegetable(other.gameObject)) {
+                processVegetables(other);
+            } else if (FlowerController.checkIfFlowerExists(other.name)){
+                Debug.Log("flower picked up");
+                FlowerController.addFlower(other.name);
+            }
+            
         }
     }
 
@@ -105,12 +111,7 @@ public class Collide : MonoBehaviour {
                 belt.addTool(name);
                 Debug.Log(name + " added!");
                 break;
-            }
-            case "Flowers": {
-                FlowerController.addFlower(name);
-                break;
-            }
-            default: {
+            } default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");
                 break;
             } 

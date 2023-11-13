@@ -7,7 +7,7 @@ public class VegetablePull : MonoBehaviour {
      * <summary>Disables the vegetable</summary>
      */
     public static void pullVegetable(Collider veggie) {
-        veggie.gameObject.SetActive(false);
+        veggie.gameObject.SetActive(false); //todo create placement for the carrots to fly to
     }
 
     /**

@@ -12,6 +12,7 @@ namespace Script.Tools.ToolType {
             flowerBody = flowerObj;
             lifeSpanTimer = -1;
             havePulled = true;
+            this.name = flowerObj.name;
         }
     }
 }

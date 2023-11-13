@@ -11,6 +11,7 @@ namespace Script.Tools.ToolType {
             inUse = false;
             //new Anvil(Instantiate(preFab, transform, true), 3);
             tnt = obj;
+            this.name = obj.name;
         }
 
         public void useItem() {

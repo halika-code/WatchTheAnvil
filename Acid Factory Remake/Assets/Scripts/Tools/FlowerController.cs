@@ -8,13 +8,12 @@ using UnityEngine;
 
 namespace Script.Tools.ToolType {
     public class FlowerController : MonoBehaviour {
-        private static List<Flower> flowerArray = new();
-        public static List<Flower> bouquet = new();
+        private static readonly List<Flower> FlowerArray = new();
+        public static readonly List<Flower> Bouquet = new();
         
         public void prepFlowers() {
-            var flowerCollection = GameObject.Find("Flowers").GetComponentsInChildren<BoxCollider>();
-            foreach (var flower in flowerCollection) {
-                flowerArray.Add(gameObject.AddComponent<Flower>());
+            foreach (var flower in gameObject.GetComponentsInChildren<Rigidbody>()) {
+                FlowerArray.Add(flower.AddComponent<Flower>());
                 RootVeg.addVeg(flower.gameObject.GetComponent<Rigidbody>());
             }
         }
@@ -31,12 +30,14 @@ namespace Script.Tools.ToolType {
             if (tulip == null) {
                 Debug.Log("Couldn't find the flower in the array");
                 return;
-            } flowerArray.Remove(tulip);
-            bouquet.Add(tulip);
+            } FlowerArray.Remove(tulip);
+            Bouquet.Add(tulip);
+            
+            Debug.Log("Flower Added");
         }
 
         private static Flower findFlower(string tulip) {
-            foreach (var flower in flowerArray) {
+            foreach (var flower in FlowerArray) {
                 if (flower.name.Equals(tulip)) {
                     return flower;
                 }
@@ -44,11 +45,20 @@ namespace Script.Tools.ToolType {
         }
 
         /**
+         * <summary>Checks if a valid flower based on the flower-name exists in the list kept here
+         * </summary>
+         * <returns>true if a flower with the exact name is found, false otherwise</returns>
+         */
+        public static bool checkIfFlowerExists(string flowerName) {
+            return findFlower(flowerName) != null;
+        }
+
+        /**
          * <summary>Decides how many lives the player should receive for his/her flower bouquet</summary>
          */
         public static void useItem() {
             var hp = UI.getHealthPoints();
-            switch (bouquet.Count) {
+            switch (Bouquet.Count) {
                 case 0: {
                     break;
                 } case 1: {
@@ -61,7 +71,7 @@ namespace Script.Tools.ToolType {
                     hp += 5;
                     break;
                 } default: {
-                    Debug.Log("Whoopy in trying to get hearts for " + bouquet.Count + " flowers");
+                    Debug.Log("Whoopy in trying to get hearts for " + Bouquet.Count + " flowers");
                     break;
                 }
             } UI.updateHealthPoint(hp);

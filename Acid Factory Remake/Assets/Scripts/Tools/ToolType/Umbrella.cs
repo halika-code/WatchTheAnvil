@@ -6,6 +6,7 @@ namespace Script.Tools.ToolType {
         public Umbrella() {
             lifeSpanTimer = -1;
             isOpen = false;
+            this.name = "Umbrella";
         }
 
         public void useItem() {
