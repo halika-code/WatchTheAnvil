@@ -1,5 +1,6 @@
 using System.Collections;
 using Script.Tools.ToolType;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using static Character_Controller;
@@ -51,9 +52,8 @@ public class Collide : MonoBehaviour {
                 processVegetables(other);
             } else if (FlowerController.checkIfFlowerExists(other.name)){
                 Debug.Log("flower picked up");
-                FlowerController.addFlower(other.name);
+                FlowerController.addFlower(FlowerController.findFlower(other.gameObject.name));
             }
-            
         }
     }
 
@@ -95,7 +95,7 @@ public class Collide : MonoBehaviour {
                 break;
             } case "Anvils": { //updates the flag
                 if (AnvilManager.isFlyin()) {
-                    if (belt.checkIfToolExists("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
+                    if (belt.checkIfToolIsObtained("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
                         Debug.Log("Helmet used!");
                         belt.checkForDurability((Equipment)foundTool);
                     } else {
@@ -108,9 +108,11 @@ public class Collide : MonoBehaviour {
                 failSafe();
                 break;
             } case "Tools": {
-                belt.addTool(name);
-                Debug.Log(name + " added!");
-                break;
+                var desiredTool = Toolbelt.createTool(name);
+                if (desiredTool != null) {
+                    belt.addTool(desiredTool);
+                    Debug.Log(name + " added!");
+                } break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");
                 break;

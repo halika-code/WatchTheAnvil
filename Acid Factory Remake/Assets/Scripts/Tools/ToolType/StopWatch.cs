@@ -6,13 +6,13 @@ namespace Script.Tools.ToolType {
     public class StopWatch : global::Tools{
         
         public bool stopWatchInUse;
-        public StopWatch() {
+        public void prepStopWatch() {
             lifeSpanTimer = 20;
             stopWatchInUse = false;
             this.name = "StopWatch";
         }
 
-        public void useItem() {
+        public override void useItem() {
             if (stopWatchInUse) {
                 StopCoroutine(nameof(runStopWatch));
             } StartCoroutine(runStopWatch(!stopWatchInUse));

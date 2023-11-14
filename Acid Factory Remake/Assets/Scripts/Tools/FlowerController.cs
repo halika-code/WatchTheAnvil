@@ -13,7 +13,8 @@ namespace Script.Tools.ToolType {
         
         public void prepFlowers() {
             foreach (var flower in gameObject.GetComponentsInChildren<Rigidbody>()) {
-                FlowerArray.Add(flower.AddComponent<Flower>());
+                FlowerArray.Add(gameObject.AddComponent<Flower>());
+                FlowerArray[^1].prepFlower(flower.gameObject);
                 RootVeg.addVeg(flower.gameObject.GetComponent<Rigidbody>());
             }
         }
@@ -25,18 +26,22 @@ namespace Script.Tools.ToolType {
         /**
          * <summary>Adds a single flower into the collection</summary>
          */
-        public static void addFlower(string name) {
-            var tulip = findFlower(name);
-            if (tulip == null) {
+        public static void addFlower(Flower tulip) {
+            var flower = findFlower(tulip.name);
+            if (flower == null) {
                 Debug.Log("Couldn't find the flower in the array");
                 return;
-            } FlowerArray.Remove(tulip);
-            Bouquet.Add(tulip);
+            } FlowerArray.Remove(flower);
+            flower.havePulled = true;
+            Bouquet.Add(flower);
             
             Debug.Log("Flower Added");
         }
 
-        private static Flower findFlower(string tulip) {
+        /**
+         * <summary>Attempts to find the flower in the list based on the given name</summary>
+         */
+        public static Flower findFlower(string tulip) {
             foreach (var flower in FlowerArray) {
                 if (flower.name.Equals(tulip)) {
                     return flower;

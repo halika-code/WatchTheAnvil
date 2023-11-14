@@ -6,7 +6,7 @@ namespace Script.Tools.ToolType {
         private bool inUse;
         private GameObject tnt;
 
-        public Dynamite(GameObject obj) {
+        public void prepDynamite(GameObject obj) {
             lifeSpanTimer = 5;
             inUse = false;
             //new Anvil(Instantiate(preFab, transform, true), 3);
@@ -14,7 +14,7 @@ namespace Script.Tools.ToolType {
             this.name = obj.name;
         }
 
-        public void useItem() {
+        public override void useItem() {
             inUse = true;
             StartCoroutine(nameof(explode));
         }

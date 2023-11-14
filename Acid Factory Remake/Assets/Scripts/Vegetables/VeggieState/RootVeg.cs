@@ -56,7 +56,7 @@ public static class RootVeg {
     }
 
     /**
-     * <summary>Adds a single vegetable into the list </summary>
+     * <summary>Adds a single vegetable into the list to be animated upon the player's proximity </summary>
      */
     public static void addVeg(Rigidbody veg) {
         cBodyCollective.Add(veg);

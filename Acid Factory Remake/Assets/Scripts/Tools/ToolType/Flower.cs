@@ -8,11 +8,15 @@ namespace Script.Tools.ToolType {
         /**
          * <summary>Adds a flower to the bouquet</summary>
          */
-        public Flower(GameObject flowerObj) {
+        public void prepFlower(GameObject flowerObj) {
             flowerBody = flowerObj;
             lifeSpanTimer = -1;
-            havePulled = true;
+            havePulled = false;
             this.name = flowerObj.name;
+        }
+
+        public override void useItem() {
+            
         }
     }
 }

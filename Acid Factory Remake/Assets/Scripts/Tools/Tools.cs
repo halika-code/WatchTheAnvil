@@ -4,5 +4,7 @@ using UnityEngine;
 
 public abstract class Tools : MonoBehaviour {
     protected int lifeSpanTimer;
-    protected new string name;
+    public new string name;
+
+    public abstract void useItem();
 }
