@@ -41,6 +41,11 @@ public class Collide : MonoBehaviour {
      * <summary>handles the collision behind interactible objects</summary>
      */
     private void OnTriggerEnter(Collider other) {
+        if (other.name.Contains("Flower")) {
+            if (FlowerController.haveFlowerBeenPulled(other.name)) {
+                
+            }
+        }
         if (VegetablePull.validateVegetable(other.gameObject)) {
             OnTriggerStay(other);
         }

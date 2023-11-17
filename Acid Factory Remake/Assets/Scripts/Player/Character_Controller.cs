@@ -164,11 +164,7 @@ public class Character_Controller : MonoBehaviour {
      * <returns>The empty used to store the objects designated to be "in the player's hand", the player's body's transform otherwise</returns>
      */
     public static Transform getPlayerHand() {
-        foreach (var hand in getPlayerBody().gameObject.GetComponentsInChildren<Transform>()) {
-            if (hand.name is "Hand") {
-                return hand;
-            }
-        } return pBody.transform;
+        return GameObject.Find("Hand").transform;
     }
 
     public static bool isAscending() {

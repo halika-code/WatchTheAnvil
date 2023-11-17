@@ -16,7 +16,7 @@ namespace Script.Tools.ToolType {
         }
 
         public override void useItem() {
-            
+            FlowerController.useItem();
         }
     }
 }
