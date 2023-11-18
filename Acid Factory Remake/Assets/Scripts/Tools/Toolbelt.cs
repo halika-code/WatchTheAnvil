@@ -10,6 +10,13 @@ using Object = UnityEngine.Object;
 
 public class Toolbelt : MonoBehaviour {
     private List<Equipment> belt;
+    /**
+     * <summary>
+     * <para>A variable that can only hold 1 item at a time (except flowers, those are kept in a bouquet)</para>
+     * <para>Possible items held includes: Flowers (bouquet), Dynamite, Magnet, Umbrella, StopWatch</para>
+     * <para>Items that should never be kept in hand: Any type of Equipment (as in Helmet, Vest or Slippers), Carrots, Beetroot</para>
+     * </summary>
+     */ 
     public Tools toolInHand;
 
     
@@ -99,7 +106,7 @@ public class Toolbelt : MonoBehaviour {
      */
     public bool checkIfToolIsObtained(string toolName, out Object foundTool) {
         foundTool = null;
-        if (toolName.Equals(toolInHand.name)) {
+        if (toolInHand != null && toolName.Equals(toolInHand.name)) {
             foundTool = toolInHand;
             return true;
         } foreach (var tool in belt) {

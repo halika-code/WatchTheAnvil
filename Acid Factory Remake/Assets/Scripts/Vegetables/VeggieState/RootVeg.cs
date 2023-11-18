@@ -28,11 +28,6 @@ public static class RootVeg {
         } for (var i = 0; i < bCol.Length; i++) {
             vegStateCollective.Add(VegetableVisibility.VegState.Hidden);
         }
-
-        foreach (var collect in cBodyCollective) {
-            Debug.Log("name of the prepped veg: " + collect.name);
-        } 
-        
     }
 
     /**
@@ -61,5 +56,19 @@ public static class RootVeg {
     public static void addVeg(Rigidbody veg) {
         cBodyCollective.Add(veg);
         vegStateCollective.Add(VegetableVisibility.VegState.Hidden);
+    }
+
+    /**
+     * <summary>Removes a given vegetable from an entry</summary>
+     */
+    public static void removeVeg(Rigidbody veg, out bool didItSucceed) {
+        didItSucceed = false;
+        for (var i = 0; i < cBodyCollective.Count; i++) {
+            if (cBodyCollective[i] == veg) {
+                didItSucceed = cBodyCollective.Remove(veg);
+                vegStateCollective.RemoveAt(i);
+                break;
+            }
+        }
     }
 }

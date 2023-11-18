@@ -27,17 +27,23 @@ namespace Script.Tools.ToolType {
          * <summary>Adds a single flower into the collection</summary>
          */
         public static void addFlower(Flower tulip) {
-            var flower = findFlower(tulip.name);
-            if (flower == null) {
+            if (tulip == null) {
                 Debug.Log("Couldn't find the flower in the array");
                 return;
-            } flower.havePulled = true;
-            tulip.gameObject.transform.parent = Character_Controller.getPlayerHand(); //todo remove the instance of the flower from the vegStateCollective array in RootVeg
-            Bouquet.Add(flower);
+            } tulip.havePulled = true;
+            RootVeg.removeVeg(tulip.GetComponent<Rigidbody>(), out var success);
+            if (!success) {
+                Debug.Log("Couldn't remove the flower");
+                return;
+            } var tulipTrans = tulip.flowerBody.transform;
+            tulipTrans.SetParent(Character_Controller.getPlayerHand(), false);
+            tulipTrans.position = Character_Controller.getPlayerHand().position; //todo watch a setting where the flower is anchored to the player's hand
+            Bouquet.Add(tulip);
         }
 
         /**
          * <summary>Transforms a given name to an instance of a Flower object with a matching name</summary>
+         * <returns>The instance of the flower found, or a null instance</returns>
          */
         public static Flower findFlower(string tulip) {
             foreach (var flower in FlowerArray) {

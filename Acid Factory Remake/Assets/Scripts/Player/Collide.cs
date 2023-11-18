@@ -55,9 +55,12 @@ public class Collide : MonoBehaviour {
         if (checkForActionButton()) {
             if (VegetablePull.validateVegetable(other.gameObject)) {
                 processVegetables(other);
-            } else if (FlowerController.checkIfFlowerExists(other.name)){
-                Debug.Log("flower picked up");
-                FlowerController.addFlower(FlowerController.findFlower(other.gameObject.name));
+            } else if (FlowerController.checkIfFlowerExists(other.name)) {
+                var flower = FlowerController.findFlower(other.gameObject.name);
+                if (flower != null && !flower.havePulled) {
+                    Debug.Log("flower picked up");
+                    FlowerController.addFlower(flower);
+                }
             }
         }
     }
@@ -145,7 +148,8 @@ public class Collide : MonoBehaviour {
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
         } var hand = Toolbelt.getBelt().toolInHand;
-        if (!hand.name.Contains("Umbrella") || !((Umbrella)hand).isOpen) { //if the umbrella isn't open
+        
+        if (hand == null || !((Umbrella)hand).isOpen) { //if the player's hand is not empty the umbrella isn't open
             StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
         } 
     }
