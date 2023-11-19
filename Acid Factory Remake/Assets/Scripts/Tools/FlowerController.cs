@@ -36,8 +36,9 @@ namespace Script.Tools.ToolType {
                 Debug.Log("Couldn't remove the flower");
                 return;
             } var tulipTrans = tulip.flowerBody.transform;
-            tulipTrans.SetParent(Character_Controller.getPlayerHand(), false);
-            tulipTrans.position = Character_Controller.getPlayerHand().position; //todo watch a setting where the flower is anchored to the player's hand
+            tulip.flowerBody.GetComponent<Rigidbody>().isKinematic = true; //todo move this block into the toolBelt's addTool() function, generalize this
+            tulipTrans.SetParent(Character_Controller.getPlayerHand(), false); 
+            tulipTrans.position = Character_Controller.getPlayerHand().position;
             Bouquet.Add(tulip);
         }
 

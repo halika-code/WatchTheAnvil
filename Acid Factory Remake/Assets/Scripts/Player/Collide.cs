@@ -90,44 +90,58 @@ public class Collide : MonoBehaviour {
      * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
      */
     private void processCollision(string name) {
-        var belt = Toolbelt.getBelt();
         switch (name) {
             case "Platforms": {
-                /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
-                if (getMove() is CanMove.CantJump) { //if the player is flying
-                    slapPlayerDown();
-                } if (priorYVel < 0f) {
-                    Move.updateMovement(CanMove.Freely);
-                } break;
+                processPlatforms(); 
+                break;
             } case "Walls" or "Player": { //in case I need to add stuff in here
                 break;
             } case "Anvils": { //updates the flag
-                if (AnvilManager.isFlyin()) {
-                    if (belt.checkIfToolIsObtained("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
-                        Debug.Log("Helmet used!");
-                        belt.checkForDurability((Equipment)foundTool);
-                    } else {
-                        hurtPlayer();
-                    } AnvilManager.disableAnvil();
-                    break;
-                } goto case "Platforms"; //this will make execution jump to case "Platforms"
+                if (!processAnvil()) {
+                    goto case "Platforms"; //this will make the anvil act like a platform
+                } break;
             } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
                 hurtPlayer();
                 failSafe();
                 break;
             } case "Tools": {
-                var desiredTool = Toolbelt.createTool(name);
-                if (desiredTool != null) {
-                    belt.addTool(desiredTool);
-                    Debug.Log(name + " added!");
-                } break;
+                processTools(name);
+                break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");
                 break;
             } 
         }
     }
-    
+
+    private void processPlatforms() {
+        /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
+        if (getMove() is CanMove.CantJump) { //if the player is flying
+            slapPlayerDown();
+        } if (priorYVel < 0f) {
+            Move.updateMovement(CanMove.Freely);
+        }
+    }
+
+    private static bool processAnvil() {
+        if (AnvilManager.isFlyin()) {
+            if (Toolbelt.getBelt().checkIfToolIsObtained("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
+                Debug.Log("Helmet used!");
+                Toolbelt.getBelt().checkForDurability((Equipment)foundTool);
+            } else {
+                hurtPlayer();
+            } AnvilManager.disableAnvil();
+            return true;
+        } return false;
+    }
+
+    private static void processTools(string name) {
+        var desiredTool = Toolbelt.createTool(name);
+        if (desiredTool != null) {
+            Toolbelt.getBelt().addTool(desiredTool);
+            Debug.Log(name + " added!");
+        } 
+    }
     
     /**
      * <summary>Handles the player's y velocity for the whole duration of the player's flight</summary>
@@ -148,7 +162,6 @@ public class Collide : MonoBehaviour {
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
         } var hand = Toolbelt.getBelt().toolInHand;
-        
         if (hand == null || !((Umbrella)hand).isOpen) { //if the player's hand is not empty the umbrella isn't open
             StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
         } 

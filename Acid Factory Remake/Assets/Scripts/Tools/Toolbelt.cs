@@ -25,6 +25,29 @@ public class Toolbelt : MonoBehaviour {
     }
 
     /**
+     * <summary>Places the tool into the player's hand</summary>
+     */
+    public void putToolInHand(Object tool) {
+        if (tool.name.Contains("Flower") || !checkIfToolIsObtained(tool.name, out _)) {
+            if (checkForCorrectToolType(tool.name)) {
+                if (toolInHand != null) {
+                    throwToolFromHand();
+                } toolInHand = (Tools)tool;
+            }
+        }
+    }
+
+    /**
+     * <summary>Checks the given name against the set type of tools that can fit into the player's hand</summary>
+     * <returns>true if the item's name is any of the following: Flower, Dynamite, Magnet, Umbrella, StopWatch
+     * <para>false otherwise</para></returns>
+     */
+    private static bool checkForCorrectToolType(string name) {
+        return name.Contains("Flower") || !name.Contains("Dynamite") || !name.Contains("Magnet") ||
+               !name.Contains("Umbrella") || !name.Contains("StopWatch");
+    }
+
+    /**
      * <summary>After checking if the player have already has a tool of the same type
      * <para>(can't have multiple helmets), the new tool will be added to the list</para></summary>
      * <param name="tool">The tool desired to be added</param>
@@ -38,6 +61,10 @@ public class Toolbelt : MonoBehaviour {
         } else {
             belt.Add((Equipment)tool);
         }
+    }
+
+    public static void throwToolFromHand() {
+        //todo create code that makes the object use gravity and give it a velocity of a random position
     }
 
     public void checkForDurability(Equipment tool) {
