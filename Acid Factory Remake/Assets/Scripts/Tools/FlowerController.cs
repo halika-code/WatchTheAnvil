@@ -19,26 +19,24 @@ namespace Script.Tools.ToolType {
             }
         }
 
-        private bool checkIfFlowersInHand() {
-            return Toolbelt.getBelt().toolInHand.name.Contains("Flower");
+        /**
+         * <summary>Attempts to remove a flower from the collection</summary>
+         * <remarks>Will fall through if flower is not found or is pulled</remarks>
+         */
+        public static void pullFlower(Flower tulip) {
+            if (tulip == null) {
+                Debug.Log("Couldn't find the flower in the array");
+            } else if (!tulip.havePulled) {
+                tulip.havePulled = true;
+                RootVeg.removeVeg(tulip.GetComponent<Rigidbody>(), out _);
+                addFlower(tulip);
+            } 
         }
 
         /**
          * <summary>Adds a single flower into the collection</summary>
          */
         public static void addFlower(Flower tulip) {
-            if (tulip == null) {
-                Debug.Log("Couldn't find the flower in the array");
-                return;
-            } tulip.havePulled = true;
-            RootVeg.removeVeg(tulip.GetComponent<Rigidbody>(), out var success);
-            if (!success) {
-                Debug.Log("Couldn't remove the flower");
-                return;
-            } var tulipTrans = tulip.flowerBody.transform;
-            tulip.flowerBody.GetComponent<Rigidbody>().isKinematic = true; //todo move this block into the toolBelt's addTool() function, generalize this
-            tulipTrans.SetParent(Character_Controller.getPlayerHand(), false); 
-            tulipTrans.position = Character_Controller.getPlayerHand().position;
             Bouquet.Add(tulip);
         }
 
@@ -77,6 +75,7 @@ namespace Script.Tools.ToolType {
          * <summary>Decides how many lives the player should receive for his/her flower bouquet</summary>
          */
         public static void useItem() {
+            Bouquet.Clear();
             var hp = UI.getHealthPoints();
             switch (Bouquet.Count) {
                 case 0: {

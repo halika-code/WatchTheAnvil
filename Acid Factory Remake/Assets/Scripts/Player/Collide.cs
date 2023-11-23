@@ -43,25 +43,23 @@ public class Collide : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         if (other.name.Contains("Flower")) {
             if (FlowerController.haveFlowerBeenPulled(other.name)) {
-                
+                FlowerController.addFlower(FlowerController.findFlower(other.name));
             }
-        }
-        if (VegetablePull.validateVegetable(other.gameObject)) {
+        } if (VegetablePull.validateVegetable(other.gameObject)) {
             OnTriggerStay(other);
         }
     }
 
+    /**
+     * <remarks>It is assumed that an object with a trigger flag set is a kind of tool</remarks>
+     */
     private void OnTriggerStay(Collider other) {
         if (checkForActionButton()) {
             if (VegetablePull.validateVegetable(other.gameObject)) {
                 processVegetables(other);
-            } else if (FlowerController.checkIfFlowerExists(other.name)) {
-                var flower = FlowerController.findFlower(other.gameObject.name);
-                if (flower != null && !flower.havePulled) {
-                    Debug.Log("flower picked up");
-                    FlowerController.addFlower(flower);
-                }
-            }
+            } else if (Toolbelt.checkForCorrectToolType(other.name)) {
+                Toolbelt.getBelt().putToolInHand(other); //only flowers have triggers assigned to them yet
+            } 
         }
     }
 
@@ -105,7 +103,7 @@ public class Collide : MonoBehaviour {
                 failSafe();
                 break;
             } case "Tools": {
-                processTools(name);
+                processTools(name); //tools without triggers include helmet, vest, slippers ...
                 break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + name + "s");
@@ -135,10 +133,13 @@ public class Collide : MonoBehaviour {
         } return false;
     }
 
+    /**
+     * <summary></summary>
+     */
     private static void processTools(string name) {
         var desiredTool = Toolbelt.createTool(name);
         if (desiredTool != null) {
-            Toolbelt.getBelt().addTool(desiredTool);
+            Toolbelt.getBelt().putToolInHand(desiredTool);
             Debug.Log(name + " added!");
         } 
     }

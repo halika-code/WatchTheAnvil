@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using static AnvilManager;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 public class Toolbelt : MonoBehaviour {
     private List<Equipment> belt;
@@ -25,15 +26,18 @@ public class Toolbelt : MonoBehaviour {
     }
 
     /**
-     * <summary>Places the tool into the player's hand</summary>
+     * <summary>Attempts to place the tool in the player's hand
+     * <para>If the tool is found to be safety equipment, the tool is placed on the player instead</para></summary>
      */
     public void putToolInHand(Object tool) {
-        if (tool.name.Contains("Flower") || !checkIfToolIsObtained(tool.name, out _)) {
-            if (checkForCorrectToolType(tool.name)) {
-                if (toolInHand != null) {
-                    throwToolFromHand();
-                } toolInHand = (Tools)tool;
-            }
+        if (checkForCorrectToolType(tool.name)) {
+            if (toolInHand != null) {
+                throwToolFromHand();
+            } addTool(tool);
+        }
+        else {
+            belt.Add((Equipment)tool);
+            Destroy(tool);//removes the tool from the field
         }
     }
 
@@ -42,9 +46,9 @@ public class Toolbelt : MonoBehaviour {
      * <returns>true if the item's name is any of the following: Flower, Dynamite, Magnet, Umbrella, StopWatch
      * <para>false otherwise</para></returns>
      */
-    private static bool checkForCorrectToolType(string name) {
-        return name.Contains("Flower") || !name.Contains("Dynamite") || !name.Contains("Magnet") ||
-               !name.Contains("Umbrella") || !name.Contains("StopWatch");
+    public static bool checkForCorrectToolType(string name) {
+        return name.Contains("Flower") || name.Contains("Dynamite") || name.Contains("Magnet") ||
+               name.Contains("Umbrella") || name.Contains("StopWatch");
     }
 
     /**
@@ -52,21 +56,26 @@ public class Toolbelt : MonoBehaviour {
      * <para>(can't have multiple helmets), the new tool will be added to the list</para></summary>
      * <param name="tool">The tool desired to be added</param>
      */
-    public void addTool(Object tool) {
-        if (tool.name.Contains("Flower") || tool.name.Contains("Dynamite") || tool.name.Contains("StopWatch")) {
-            if (tool.name.Contains("Flower")) {
-                FlowerController.addFlower(FlowerController.findFlower(tool.name));
-            } toolInHand = (Tools)tool;
-            toolInHand.gameObject.transform.parent = Character_Controller.getPlayerHand();
-        } else {
-            belt.Add((Equipment)tool);
-        }
+    private void addTool(Object tool) {
+        if (tool.name.Contains("Flower")) {
+            FlowerController.pullFlower(FlowerController.findFlower(tool.name));
+        } toolInHand = (Tools)tool;
+        var handTrans = toolInHand.gameObject.transform;
+        toolInHand.gameObject.GetComponent<Rigidbody>().isKinematic = true;
+        handTrans.SetParent(Character_Controller.getPlayerHand());
     }
 
-    public static void throwToolFromHand() {
-        //todo create code that makes the object use gravity and give it a velocity of a random position
+    /**
+     * <summary>Gives the object a velo</summary>
+     */
+    public void throwToolFromHand() {
+        var handBody = toolInHand.gameObject.GetComponent<Rigidbody>();
+        if (handBody == null) {
+            Debug.Log("Whoopy, tried to throw away an object with no rigidbody");
+        } handBody.useGravity = true;
+        handBody.transform.position = new Vector3(Random.Range(-3f, 3f), 5f, Random.Range(-3f, 3f));
     }
-
+    
     public void checkForDurability(Equipment tool) {
         Equipment.useItem(tool, out var isBroken);
         if (isBroken) {
@@ -122,6 +131,18 @@ public class Toolbelt : MonoBehaviour {
                 break;
             }
         } return tool;
+    }
+
+    /**
+     * <summary>Removes any number found in the name of the objects</summary>
+     * <returns>The purified number</returns>
+     * <remarks>Will return the name itself if no number is in the name</remarks>
+     */
+    private static string refineObjectName(string name) {
+        var index = 1;
+        while (int.TryParse(name[^index].ToString(), out _)) { //the idea here is the int.TryParse should return true as long as there is a number in the name
+            index++;                                            //the ^index will reach farther back for as long as only numbers are reached
+        } return name.Substring(0, name.Length-index); //then the same logic is applied but in the reverse
     }
 
     /**
