@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using Script.Tools.ToolType;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -41,7 +42,7 @@ public class Collide : MonoBehaviour {
      * <summary>handles the collision behind interactible objects</summary>
      */
     private void OnTriggerEnter(Collider other) {
-        if (other.name.Contains("Flower")) {
+        if (other.name.Contains("Flower")) {  //todo modify this to be "universal" to the rest of the "pickupable" items
             if (FlowerController.haveFlowerBeenPulled(other.name)) {
                 FlowerController.addFlower(FlowerController.findFlower(other.name));
             }
@@ -58,7 +59,7 @@ public class Collide : MonoBehaviour {
             if (VegetablePull.validateVegetable(other.gameObject)) {
                 processVegetables(other);
             } else if (Toolbelt.checkForCorrectToolType(other.name)) {
-                Toolbelt.getBelt().putToolInHand(other); //only flowers have triggers assigned to them yet
+                processTools(other.name);
             } 
         }
     }
@@ -69,7 +70,7 @@ public class Collide : MonoBehaviour {
     private void OnCollisionEnter(Collision collision) {
         var cObj = collision.gameObject;
         if (!VegetablePull.validateVegetable(cObj)) {
-            processCollision(getParentName(cObj.transform));
+            processCollision(getParentName(cObj.transform), cObj.name);
         } StopCoroutine(ShadowController.findPlatform());
     }
     
@@ -87,8 +88,8 @@ public class Collide : MonoBehaviour {
      * <summary>Processes platforms and Death-Planes</summary>
      * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
      */
-    private void processCollision(string name) {
-        switch (name) {
+    private void processCollision(string parentName, string objectName) {
+        switch (parentName) {
             case "Platforms": {
                 processPlatforms(); 
                 break;
@@ -103,10 +104,10 @@ public class Collide : MonoBehaviour {
                 failSafe();
                 break;
             } case "Tools": {
-                processTools(name); //tools without triggers include helmet, vest, slippers ...
+                processTools(objectName); //tools without triggers include helmet, vest, slippers ...
                 break;
             } default: {
-                Debug.Log("Doin some uncoded things for " + name + "s");
+                Debug.Log("Doin some uncoded things for " + parentName + "s");
                 break;
             } 
         }
@@ -162,10 +163,22 @@ public class Collide : MonoBehaviour {
             hop.y -= (float)MoveVel;
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
-        } var hand = Toolbelt.getBelt().toolInHand;
-        if (hand == null || !((Umbrella)hand).isOpen) { //if the player's hand is not empty the umbrella isn't open
-            StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping 
-        } 
+        } if (checkForUmbrellaInHand()) { 
+            StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
+        }
+    }
+
+    /**
+     * <summary>Checks the status of the hand of the player</summary>
+     * <returns>True if: the hand is empty,
+     * <para>the name of the object is not the umbrella,</para>
+     * the umbrella is not open
+     * <para>False only if the umbrella is open</para></returns>
+     */
+    private static bool checkForUmbrellaInHand() {
+        var hand = Toolbelt.getBelt().toolInHand;
+        return hand == null || !hand.name.Contains("Umbrella") ||
+               hand.name.Contains("Umbrella") && !((Umbrella)hand).isOpen;
     }
     
     /**

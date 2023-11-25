@@ -34,8 +34,7 @@ public class Toolbelt : MonoBehaviour {
             if (toolInHand != null) {
                 throwToolFromHand();
             } addTool(tool);
-        }
-        else {
+        } else {
             belt.Add((Equipment)tool);
             Destroy(tool);//removes the tool from the field
         }
@@ -102,28 +101,32 @@ public class Toolbelt : MonoBehaviour {
     }
 
     /**
-     * <summary>Attempts to create a new instance of the tool</summary>
+     * <summary>Attempts to fetches an existing instance of a tool</summary>
      * <returns>The newly added tool, or null if the tool is found to exists already</returns>
      * <remarks>If a flower is attempted to be created, the instance of the flower found will be returned</remarks>
      */
     public static Object createTool(string toolName) {
+        var gObj = GameObject.Find(toolName);
         if (getBelt().checkIfToolIsObtained(toolName, out var tool)) {
             return null;
         } switch (toolName) {
             case "Helmet" or "Vest" or "Slippers": {
-                tool = getBelt().gameObject.AddComponent<Equipment>();
-                ((Equipment)tool).initTool(toolName);
+                tool = gObj == null ? getBelt().gameObject.AddComponent<Equipment>() : 
+                    gObj.GetComponent<Equipment>(); ((Equipment)tool).initTool(toolName); //either get the tool-in-ground or create a new tool
                 break;
             } case "StopWatch": {
-                tool = GameObject.Find("StopWatch").GetComponent<StopWatch>();
-                ((StopWatch)tool).prepStopWatch();
+                if (gObj == null) {
+                    //todo create code that makes a brand new stopwatch, do the same for the rest
+                } else {
+                    tool = gObj.GetComponent<StopWatch>();
+                } ((StopWatch)tool).prepStopWatch();
                 break;
             } case "Dynamite": {
-                tool = GameObject.Find("Dynamite").GetComponent<Dynamite>();
+                tool = gObj.GetComponent<Dynamite>();
                 ((Dynamite)tool).prepDynamite(((Dynamite)tool).gameObject);
                 break;
             } case "Umbrella": {
-                tool = GameObject.Find("Umbrella").GetComponent<Umbrella>();
+                tool = gObj.GetComponent<Umbrella>();
                 ((Umbrella)tool).prepUmbrella();
                 break; 
             } case "Flower": {

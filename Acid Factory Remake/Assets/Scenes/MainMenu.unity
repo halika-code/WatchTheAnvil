@@ -328,6 +328,7 @@ GameObject:
   - component: {fileID: 161928547}
   - component: {fileID: 161928546}
   - component: {fileID: 161928545}
+  - component: {fileID: 161928548}
   m_Layer: 0
   m_Name: Helmet
   m_TagString: Untagged
@@ -413,6 +414,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 161928543}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &161928548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161928543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f221e746c1a44cd8a9d1a5ab6219947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  name: 
 --- !u!1 &180804519
 GameObject:
   m_ObjectHideFlags: 0
@@ -980,8 +994,9 @@ GameObject:
   - component: {fileID: 436378015}
   - component: {fileID: 436378014}
   - component: {fileID: 436378013}
+  - component: {fileID: 436378016}
   m_Layer: 0
-  m_Name: Clock
+  m_Name: StopWatch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1065,6 +1080,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 436378011}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &436378016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 436378011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5941228d2eb94ad3b4c8abade0ee3c7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  name: 
+  stopWatchInUse: 0
 --- !u!1 &454489791
 GameObject:
   m_ObjectHideFlags: 0
@@ -1476,8 +1505,9 @@ GameObject:
   - component: {fileID: 685921320}
   - component: {fileID: 685921319}
   - component: {fileID: 685921318}
+  - component: {fileID: 685921321}
   m_Layer: 0
-  m_Name: Flipper
+  m_Name: Slipper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1561,6 +1591,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 685921316}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &685921321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 685921316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f221e746c1a44cd8a9d1a5ab6219947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  name: 
 --- !u!1 &700989288
 GameObject:
   m_ObjectHideFlags: 0
@@ -1764,6 +1807,7 @@ GameObject:
   - component: {fileID: 870315128}
   - component: {fileID: 870315127}
   - component: {fileID: 870315126}
+  - component: {fileID: 870315129}
   m_Layer: 0
   m_Name: Vest
   m_TagString: Untagged
@@ -1849,6 +1893,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 870315124}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &870315129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 870315124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f221e746c1a44cd8a9d1a5ab6219947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  name: 
 --- !u!1 &915219195
 GameObject:
   m_ObjectHideFlags: 0
@@ -1861,6 +1918,7 @@ GameObject:
   - component: {fileID: 915219199}
   - component: {fileID: 915219198}
   - component: {fileID: 915219197}
+  - component: {fileID: 915219200}
   m_Layer: 0
   m_Name: Dynamite
   m_TagString: Untagged
@@ -1946,6 +2004,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 915219195}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &915219200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 915219195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8b9ae51056644209237b207a8fb8c77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  name: 
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
