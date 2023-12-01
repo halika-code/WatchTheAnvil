@@ -12,7 +12,7 @@ public class ShadowController : MonoBehaviour {
 
     /**
      * <summary>Attempts to find the closest solid object that exists underneath the player
-     * <para>If one is found, the pane will be placed to the surface of it</para></summary>
+     * <para>If one is found, the pane will be placed on the surface of it</para></summary>
      * <remarks>This is designed to run forever and is supposed to get killed as soon as the player lands</remarks>
      */
     public static IEnumerator findPlatform() { //var hit is the container of the collider of the object that was hit 

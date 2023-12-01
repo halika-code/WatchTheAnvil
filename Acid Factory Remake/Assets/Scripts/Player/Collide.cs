@@ -27,6 +27,16 @@ public class Collide : MonoBehaviour {
     }
     
     /**
+     * <summary>handles the logic behind solid object collision</summary>
+     */
+    private void OnCollisionEnter(Collision collision) {
+        var cObj = collision.gameObject;
+        if (!VegetablePull.validateVegetable(cObj)) {
+            processCollision(getParentName(cObj.transform), cObj);
+        } StopCoroutine(nameof(ShadowController.findPlatform)); //turns off ray-casting while the y coordinate will not change
+    }
+    
+    /**
      * <summary>Attempts to reset the player's state into "should fall"</summary>
      */
     private void OnCollisionExit(Collision other) {
@@ -34,24 +44,24 @@ public class Collide : MonoBehaviour {
             if (getParentName(other.gameObject.transform) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
                 Move.updateMovement(Move.CanMove.CantJump); 
                 StartCoroutine(falling(getPlayerBody().velocity));
-            } StartCoroutine(ShadowController.findPlatform()); 
+            } StartCoroutine(nameof(ShadowController.findPlatform)); 
         }
     }
     
     /**
-     * <summary>handles the collision behind interactible objects</summary>
+     * <summary>Attempts to pick-up items that are pickup-able</summary>
      */
     private void OnTriggerEnter(Collider other) {
-        if (other.name.Contains("Flower")) {  //todo modify this to be "universal" to the rest of the "pickupable" items
-            if (FlowerController.haveFlowerBeenPulled(other.name)) {
-                FlowerController.addFlower(FlowerController.findFlower(other.name));
-            }
-        } if (VegetablePull.validateVegetable(other.gameObject)) {
-            OnTriggerStay(other);
+        if (Toolbelt.checkForCorrectToolType(other.name) || getParentName(other.transform) is "Tools") {
+            var flow = FlowerController.findFlower(other.name);
+            if (flow == null || flow.havePulled) {
+                Toolbelt.getBelt().putToolInHand(Toolbelt.getBelt().getTool(other, true));
+            } 
         }
     }
 
     /**
+     * <summary>Handles items that aren't supposed to be vacuumed up immediately</summary>
      * <remarks>It is assumed that an object with a trigger flag set is a kind of tool</remarks>
      */
     private void OnTriggerStay(Collider other) {
@@ -59,19 +69,9 @@ public class Collide : MonoBehaviour {
             if (VegetablePull.validateVegetable(other.gameObject)) {
                 processVegetables(other);
             } else if (Toolbelt.checkForCorrectToolType(other.name)) {
-                processTools(other.name);
+                processTools(other.gameObject);
             } 
         }
-    }
-
-    /**
-     * <summary>handles the logic behind solid object collision</summary>
-     */
-    private void OnCollisionEnter(Collision collision) {
-        var cObj = collision.gameObject;
-        if (!VegetablePull.validateVegetable(cObj)) {
-            processCollision(getParentName(cObj.transform), cObj.name);
-        } StopCoroutine(ShadowController.findPlatform());
     }
     
     /**
@@ -88,7 +88,7 @@ public class Collide : MonoBehaviour {
      * <summary>Processes platforms and Death-Planes</summary>
      * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
      */
-    private void processCollision(string parentName, string objectName) {
+    private void processCollision(string parentName, GameObject obj) {
         switch (parentName) {
             case "Platforms": {
                 processPlatforms(); 
@@ -104,7 +104,7 @@ public class Collide : MonoBehaviour {
                 failSafe();
                 break;
             } case "Tools": {
-                processTools(objectName); //tools without triggers include helmet, vest, slippers ...
+                processTools(obj); //tools without triggers include helmet, vest, slippers ...
                 break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + parentName + "s");
@@ -136,13 +136,10 @@ public class Collide : MonoBehaviour {
 
     /**
      * <summary></summary>
+     * <remarks>It is assumed that an item exists in the field for this function to trigger</remarks>
      */
-    private static void processTools(string name) {
-        var desiredTool = Toolbelt.createTool(name);
-        if (desiredTool != null) {
-            Toolbelt.getBelt().putToolInHand(desiredTool);
-            Debug.Log(name + " added!");
-        } 
+    private static void processTools(Object obj) {
+        var tool = Toolbelt.getBelt().getTool(obj, true);
     }
     
     /**
@@ -163,22 +160,9 @@ public class Collide : MonoBehaviour {
             hop.y -= (float)MoveVel;
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
-        } if (checkForUmbrellaInHand()) { 
+        } if (Umbrella.checkIfInHand()) { 
             StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
         }
-    }
-
-    /**
-     * <summary>Checks the status of the hand of the player</summary>
-     * <returns>True if: the hand is empty,
-     * <para>the name of the object is not the umbrella,</para>
-     * the umbrella is not open
-     * <para>False only if the umbrella is open</para></returns>
-     */
-    private static bool checkForUmbrellaInHand() {
-        var hand = Toolbelt.getBelt().toolInHand;
-        return hand == null || !hand.name.Contains("Umbrella") ||
-               hand.name.Contains("Umbrella") && !((Umbrella)hand).isOpen;
     }
     
     /**

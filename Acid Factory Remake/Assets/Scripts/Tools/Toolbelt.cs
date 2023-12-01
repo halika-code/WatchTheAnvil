@@ -28,6 +28,7 @@ public class Toolbelt : MonoBehaviour {
     /**
      * <summary>Attempts to place the tool in the player's hand
      * <para>If the tool is found to be safety equipment, the tool is placed on the player instead</para></summary>
+     * <remarks>This function is equipped to handle flowers properly as well</remarks>
      */
     public void putToolInHand(Object tool) {
         if (checkForCorrectToolType(tool.name)) {
@@ -58,10 +59,9 @@ public class Toolbelt : MonoBehaviour {
     private void addTool(Object tool) {
         if (tool.name.Contains("Flower")) {
             FlowerController.pullFlower(FlowerController.findFlower(tool.name));
-        } toolInHand = (Tools)tool;
-        var handTrans = toolInHand.gameObject.transform;
-        toolInHand.gameObject.GetComponent<Rigidbody>().isKinematic = true;
-        handTrans.SetParent(Character_Controller.getPlayerHand());
+            tool.GameObject().GetComponent<Rigidbody>().isKinematic = true;
+        } toolInHand = tool.GetComponent<Tools>();
+        toolInHand.gameObject.transform.SetParent(Character_Controller.getPlayerHand());
     }
 
     /**
@@ -105,32 +105,37 @@ public class Toolbelt : MonoBehaviour {
      * <returns>The newly added tool, or null if the tool is found to exists already</returns>
      * <remarks>If a flower is attempted to be created, the instance of the flower found will be returned</remarks>
      */
-    public static Object createTool(string toolName) {
-        var gObj = GameObject.Find(toolName);
-        if (getBelt().checkIfToolIsObtained(toolName, out var tool)) {
+    public Object getTool(Object gObj, bool collided) {
+        if (getBelt().checkIfToolIsObtained(gObj.name, out var tool)) {
             return null;
-        } switch (toolName) {
+        } switch (gObj.name) {
             case "Helmet" or "Vest" or "Slippers": {
-                tool = gObj == null ? getBelt().gameObject.AddComponent<Equipment>() : 
-                    gObj.GetComponent<Equipment>(); ((Equipment)tool).initTool(toolName); //either get the tool-in-ground or create a new tool
+                tool = !collided ? getBelt().gameObject.AddComponent<Equipment>() : 
+                    gObj.GetComponent<Equipment>(); 
+                ((Equipment)tool).initTool(gObj.name); //either get the tool-in-ground or create a new tool
+                putToolInHand(gObj);
                 break;
             } case "StopWatch": {
-                if (gObj == null) {
-                    //todo create code that makes a brand new stopwatch, do the same for the rest
+                if (!collided) {
+                    //todo potentially create spawner for any item for the rest of the places down except flower
                 } else {
                     tool = gObj.GetComponent<StopWatch>();
                 } ((StopWatch)tool).prepStopWatch();
+                putToolInHand(gObj);
                 break;
             } case "Dynamite": {
                 tool = gObj.GetComponent<Dynamite>();
                 ((Dynamite)tool).prepDynamite(((Dynamite)tool).gameObject);
+                putToolInHand(gObj);
                 break;
             } case "Umbrella": {
                 tool = gObj.GetComponent<Umbrella>();
                 ((Umbrella)tool).prepUmbrella();
+                putToolInHand(gObj);
                 break; 
             } case "Flower": {
-                tool = FlowerController.findFlower(toolName);
+                tool = FlowerController.findFlower(gObj.name);
+                putToolInHand(gObj);
                 break;
             }
         } return tool;
