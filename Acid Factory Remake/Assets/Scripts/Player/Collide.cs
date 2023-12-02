@@ -44,7 +44,7 @@ public class Collide : MonoBehaviour {
             if (getParentName(other.gameObject.transform) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
                 Move.updateMovement(Move.CanMove.CantJump); 
                 StartCoroutine(falling(getPlayerBody().velocity));
-            } StartCoroutine(nameof(ShadowController.findPlatform)); 
+            } StartCoroutine(ShadowController.findPlatform()); 
         }
     }
     

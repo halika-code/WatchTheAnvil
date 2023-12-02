@@ -36,7 +36,7 @@ namespace Script.Tools.ToolType {
         /**
          * <summary>Adds a single flower into the collection</summary>
          */
-        public static void addFlower(Flower tulip) {
+        private static void addFlower(Flower tulip) {
             Bouquet.Add(tulip);
         }
 

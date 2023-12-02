@@ -31,8 +31,8 @@ public class VegStateController : MonoBehaviour {
      * <remarks>It is assumed here that the given state parameter corresponds to the object linked to the cBody parameter</remarks>
      */
     private void checkForPlayerDistance(Rigidbody cBody, VegState state) {
-        if (pClose(pInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, 
-                new []{pBody.transform.position.x, pBody.transform.position.z}))) { 
+        if (checkIfPlayerIsInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, 
+                new []{pBody.transform.position.x, pBody.transform.position.z}, 20)) { 
             if (state is VegState.Hidden) { //the idea here is if the player is close, the player will be inside a border
                StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
                updateCollective(getIndexOfVeg(cBody), VegState.Visible);
@@ -75,13 +75,14 @@ public class VegStateController : MonoBehaviour {
      * <summary>Check if the player have entered the vicinity of a vegetable</summary>
      * <param name="cPos">The array of the positions for the vegetable to be inspected</param>
      * <param name="pPos">The array of the positions for the player to be inspected</param>
+     * <param name="borderLenght">The radius of the border (from the center)</param>
      * <returns>A flag for each side of the vegetable (not including the Y axis)
      * <para>true if it is close, false otherwise</para></returns>
      */
-    public static List<bool> pInBorder(float[] cPos, float[] pPos) {
+    private static List<bool> pInBorder(float[] cPos, float[] pPos, int borderLenght) {
         var border = new List<bool>();
         for (var i = 0; i < cPos.Length; i++) {
-            border.Add(Math.Abs(cPos[i] - pPos[i]) < 20f); //the idea here is if the player is 3 meters in the vicinity 
+            border.Add(Math.Abs(cPos[i] - pPos[i]) < borderLenght); //the idea here is if the player is 3 meters in the vicinity 
         } return border;
     }
 
@@ -93,12 +94,20 @@ public class VegStateController : MonoBehaviour {
      * the return value will be locked to being false</para></returns>
      * <remarks>This function is setup to handle an infinite amount of axis</remarks>
      */
-    public static bool pClose(List<bool> result) {
+    private static bool pClose(List<bool> result) {
         var retVal = true;
         foreach (var borderFinding in result) {
             if (!borderFinding) {
                 retVal = false;
             }
         } return retVal;
+    }
+
+    /**
+     * <summary>Checks if the player is close to a border</summary>
+     * <remarks>This is a shorthand using <see cref="pClose"/> and <see cref="pInBorder"/> functions</remarks>
+     */
+    public static bool checkIfPlayerIsInBorder(float[] objPos, float[] pPos, int borderLength) {
+        return pClose(pInBorder(objPos, pPos, borderLength));
     }
 }

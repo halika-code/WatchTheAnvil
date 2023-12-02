@@ -1,11 +1,8 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Script.Tools.ToolType;
 using Unity.VisualScripting;
 using UnityEngine;
-using static AnvilManager;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -20,9 +17,11 @@ public class Toolbelt : MonoBehaviour {
      */ 
     public Tools toolInHand;
 
+    private bool canPickup;
     
     private void Start() {
         belt = new List<Equipment>();
+        canPickup = true;
     }
 
     /**
@@ -31,10 +30,13 @@ public class Toolbelt : MonoBehaviour {
      * <remarks>This function is equipped to handle flowers properly as well</remarks>
      */
     public void putToolInHand(Object tool) {
+        tool.GameObject().GetComponent<Collider>().enabled = false; //todo for some reason the trigger flag refuses to get disabled fast enough
         if (checkForCorrectToolType(tool.name)) {
-            if (toolInHand != null) {
-                throwToolFromHand();
-            } addTool(tool);
+            if (canPickup || toolInHand == null) { //if the hand is empty of the hand just have been emptied
+                if (toolInHand != null && !tool.name.Equals(toolInHand.gameObject.name)) {
+                    throwToolFromHand();
+                } addTool(tool);
+            }
         } else {
             belt.Add((Equipment)tool);
             Destroy(tool);//removes the tool from the field
@@ -59,20 +61,26 @@ public class Toolbelt : MonoBehaviour {
     private void addTool(Object tool) {
         if (tool.name.Contains("Flower")) {
             FlowerController.pullFlower(FlowerController.findFlower(tool.name));
-            tool.GameObject().GetComponent<Rigidbody>().isKinematic = true;
+            tool.GetComponent<Rigidbody>().isKinematic = true;
         } toolInHand = tool.GetComponent<Tools>();
         toolInHand.gameObject.transform.SetParent(Character_Controller.getPlayerHand());
+        toolInHand.gameObject.GetComponent<Collider>().enabled = false;
+        toolInHand.transform.position = Character_Controller.getPlayerHand().position;
     }
 
     /**
      * <summary>Gives the object a velo</summary>
      */
-    public void throwToolFromHand() {
-        var handBody = toolInHand.gameObject.GetComponent<Rigidbody>();
+    private void throwToolFromHand() {
+        var handBody = toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>();
         if (handBody == null) {
             Debug.Log("Whoopy, tried to throw away an object with no rigidbody");
+            return;
         } handBody.useGravity = true;
-        handBody.transform.position = new Vector3(Random.Range(-3f, 3f), 5f, Random.Range(-3f, 3f));
+        handBody.isKinematic = false;
+        removeTool(toolInHand.gameObject.name);
+        StartCoroutine(pickupDelay());
+        handBody.GetComponent<Collider>().enabled = true;
     }
     
     public void checkForDurability(Equipment tool) {
@@ -87,17 +95,19 @@ public class Toolbelt : MonoBehaviour {
      * <para>If the tool is found it will be removed, an error message will be thrown otherwise</para></summary>
      * <param name="toolName">The name of the tool desired to be deleted</param>
      */
-    public void removeTool(string toolName) {
-        if (checkIfToolIsObtained(toolName, out var foundTool)) {
-            if (foundTool.name.Equals(toolInHand.name)) {
-                toolInHand = null;
-            } else {
-                belt.Remove((Equipment)foundTool);
-            }
-        }
-        else {
-            Debug.Log("Whoopy while attempting to remove an item I couldn't find with a name of " + toolName);
-        }
+    private void removeTool(string toolName) {
+        if (toolName.Equals(toolInHand.gameObject.name)) {
+            toolInHand.transform.parent = null;
+            toolInHand = null;
+        } else {
+            checkIfToolIsObtained(toolName, out var tool);
+            belt.Remove((Equipment)tool);
+        } 
+    }
+
+    private IEnumerator pickupDelay() {
+        yield return new WaitForSeconds(3);
+        canPickup = true;
     }
 
     /**
@@ -162,7 +172,7 @@ public class Toolbelt : MonoBehaviour {
      */
     public bool checkIfToolIsObtained(string toolName, out Object foundTool) {
         foundTool = null;
-        if (toolInHand != null && toolName.Equals(toolInHand.name)) {
+        if (toolInHand != null && toolName.Equals(toolInHand.gameObject.name)) {
             foundTool = toolInHand;
             return true;
         } foreach (var tool in belt) {
