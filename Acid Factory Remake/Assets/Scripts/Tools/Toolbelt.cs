@@ -54,33 +54,44 @@ public class Toolbelt : MonoBehaviour {
     }
 
     /**
-     * <summary>After checking if the player have already has a tool of the same type
-     * <para>(can't have multiple helmets), the new tool will be added to the list</para></summary>
+     * <summary>Puts the tool in the player's hand after modifying it's flags to not interact with anything while in the player's hand</summary>
      * <param name="tool">The tool desired to be added</param>
      */
     private void addTool(Object tool) {
         if (tool.name.Contains("Flower")) {
             FlowerController.pullFlower(FlowerController.findFlower(tool.name));
-            tool.GetComponent<Rigidbody>().isKinematic = true;
         } toolInHand = tool.GetComponent<Tools>();
-        toolInHand.gameObject.transform.SetParent(Character_Controller.getPlayerHand());
-        toolInHand.gameObject.GetComponent<Collider>().enabled = false;
+        transferToolState(false);
         toolInHand.transform.position = Character_Controller.getPlayerHand().position;
     }
 
     /**
-     * <summary>Gives the object a velo</summary>
+     * <summary>Lets the tool kept in the hand go from the player's letting it fall down</summary>
      */
     private void throwToolFromHand() {
-        var handBody = toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>();
-        if (handBody == null) {
-            Debug.Log("Whoopy, tried to throw away an object with no rigidbody");
+        if (toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>() == null) {
+            Debug.Log("Whoopy, tried to throw an item from hand that doesn't have a rigidbody");
             return;
-        } handBody.useGravity = true;
-        handBody.isKinematic = false;
-        removeTool(toolInHand.gameObject.name);
+        } transferToolState(true);
         StartCoroutine(pickupDelay());
-        handBody.GetComponent<Collider>().enabled = true;
+    }
+
+    /**
+     * <summary>Changes the variables of a tool specific to interactions in the map.
+     * <para>By defining the <see cref="whereTo"/> variable,
+     * this function can make the given tool to be admitted into the player's hand or thrown to the ground</para></summary>
+     * <param name="whereTo">True: to the ground,
+     * <para>False: to the player's hand</para></param>
+     */
+    private void transferToolState(bool whereTo) {
+        var handBody = toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>();
+        handBody.useGravity = whereTo;
+        handBody.isKinematic = !whereTo;
+        handBody.GetComponent<Collider>().enabled = handBody.useGravity;
+        toolInHand.transform.parent = handBody.useGravity ? null : Character_Controller.getPlayerHand();
+        if (handBody.useGravity) {
+            removeTool(toolInHand.gameObject.name);
+        }
     }
     
     public void checkForDurability(Equipment tool) {
@@ -105,8 +116,12 @@ public class Toolbelt : MonoBehaviour {
         } 
     }
 
+    /**
+     * <summary>Stops the player from being able to pickup an another tool immediately</summary>
+     * <remarks>The stop is 1 seconds long</remarks>
+     */
     private IEnumerator pickupDelay() {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1);
         canPickup = true;
     }
 

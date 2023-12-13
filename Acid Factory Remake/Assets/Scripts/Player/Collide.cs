@@ -1,15 +1,12 @@
 using System.Collections;
-using System.Linq;
 using Script.Tools.ToolType;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
 
 public class Collide : MonoBehaviour {
     
-    private static float priorYVel; //todo !!! ADD THIS SCRIPT TO THE PLAYER
+    private static float priorYVel;
 
     public static void init() {
         priorYVel = 0f;
@@ -25,7 +22,8 @@ public class Collide : MonoBehaviour {
             updatePriorVel();
         }
     }
-    
+
+    #region PlatformCollision
     /**
      * <summary>handles the logic behind solid object collision</summary>
      */
@@ -48,17 +46,31 @@ public class Collide : MonoBehaviour {
         }
     }
     
-    /**
-     * <summary>Attempts to pick-up items that are pickup-able</summary>
-     */
-    private void OnTriggerEnter(Collider other) {
-        if (Toolbelt.checkForCorrectToolType(other.name) || getParentName(other.transform) is "Tools") {
-            var flow = FlowerController.findFlower(other.name);
-            if (flow == null || flow.havePulled) {
-                Toolbelt.getBelt().putToolInHand(Toolbelt.getBelt().getTool(other, true));
-            } 
+    private void processPlatforms() {
+        /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
+        if (getMove() is CanMove.CantJump) { //if the player is flying
+            slapPlayerDown();
+        } if (priorYVel < 0f) {
+            Move.updateMovement(CanMove.Freely);
         }
     }
+    #endregion
+
+    #region ToolCollision
+    /** 
+     * <summary>Attempts to pick-up item from the floor that are pickup-able</summary>
+     * <remarks>Added an override that jumps straight to OnTriggerStay instead of processing logic</remarks>
+     */
+    private void OnTriggerEnter(Collider other) {
+        /*
+        if (Toolbelt.checkForCorrectToolType(other.name) || getParentName(other.transform) is "Tools") {
+            var flow = FlowerController.findFlower(other.name);
+            if (flow == null || !flow.gameObject.GetComponent<Collider>().enabled && flow.havePulled) { //if the item have not been acquired OR is a flower and have been pulled (need to check against the collider being turned)
+                Toolbelt.getBelt().putToolInHand(Toolbelt.getBelt().getTool(other, true));
+            } 
+        }*/ //removed function: ensures the player will not have annoying moments of unintentionally juggling items
+        OnTriggerStay(other);
+    } 
 
     /**
      * <summary>Handles items that aren't supposed to be vacuumed up immediately</summary>
@@ -74,18 +86,10 @@ public class Collide : MonoBehaviour {
         }
     }
     
+    #endregion
+    
     /**
-     * <summary>Initiates the logic behind the vegetable pulls
-     * <para>A beetroot is twice as valuable</para></summary>
-     * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
-     */
-    private static void processVegetables(Collider veggie) {
-        UI.updatePoints(VegetablePull.getProfileOfVeggie(getParentName(veggie.gameObject)));
-        VegetablePull.pullVegetable(veggie);
-    }
-
-    /**
-     * <summary>Processes platforms and Death-Planes</summary>
+     * <summary>Processes platforms, Death-Planes and Equipment type tools</summary>
      * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
      */
     private void processCollision(string parentName, GameObject obj) {
@@ -108,18 +112,19 @@ public class Collide : MonoBehaviour {
                 break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + parentName + "s");
-                break;
+                goto case "DeathPane";
             } 
         }
     }
-
-    private void processPlatforms() {
-        /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
-        if (getMove() is CanMove.CantJump) { //if the player is flying
-            slapPlayerDown();
-        } if (priorYVel < 0f) {
-            Move.updateMovement(CanMove.Freely);
-        }
+        
+    /**
+     * <summary>Initiates the logic behind the vegetable pulls
+     * <para>A beetroot is twice as valuable</para></summary>
+     * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
+     */
+    private static void processVegetables(Collider veggie) {
+        UI.updatePoints(VegetablePull.getProfileOfVeggie(getParentName(veggie.gameObject)));
+        VegetablePull.pullVegetable(veggie);
     }
 
     private static bool processAnvil() {
@@ -139,13 +144,15 @@ public class Collide : MonoBehaviour {
      * <remarks>It is assumed that an item exists in the field for this function to trigger</remarks>
      */
     private static void processTools(Object obj) {
-        var tool = Toolbelt.getBelt().getTool(obj, true);
+        Toolbelt.getBelt().getTool(obj, true);
     }
-    
+
+    #region ExtrasICouldn'tMoveToSeparateCollision
+
     /**
-     * <summary>Handles the player's y velocity for the whole duration of the player's flight</summary>
-     * <remarks>it has a decent arch</remarks>
-     */
+    * <summary>Handles the player's y velocity for the whole duration of the player's flight</summary>
+    * <remarks>it has a decent arch</remarks>
+    */
     private IEnumerator flying() {
         var hop = new Vector3(getPlayerBody().velocity.x, (float)(MoveVel / 2*6f), getPlayerBody().velocity.z);
         movePlayer(hop);
@@ -188,6 +195,7 @@ public class Collide : MonoBehaviour {
     private static void updatePriorVel() {
         priorYVel = getPlayerBody().velocity.y;
     }
+    #endregion
     
     /**
      * <summary>Warps the player back in bounds if the player ever manages to fall under the map</summary>

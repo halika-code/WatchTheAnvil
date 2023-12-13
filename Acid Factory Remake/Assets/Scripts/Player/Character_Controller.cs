@@ -45,6 +45,8 @@ public class Character_Controller : MonoBehaviour {
         } return false;
     }
 
+    #region InputProcessing
+
     /**
      * <summary><para>Evaluates the movement vector of the player</para>
      * Based on the keys supplied by the currently active gimmick.</summary>
@@ -89,7 +91,9 @@ public class Character_Controller : MonoBehaviour {
             }
         }
     }
-
+    
+    #endregion
+    
     /**
      * <summary>Attempts to remove one health-point. If that fails, the player is killed</summary>
      */
