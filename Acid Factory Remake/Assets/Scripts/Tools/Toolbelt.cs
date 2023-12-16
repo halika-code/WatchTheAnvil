@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 public class Toolbelt : MonoBehaviour {
-    private List<Equipment> belt;
+    public List<Equipment> belt;
     /**
      * <summary>
      * <para>A variable that can only hold 1 item at a time (except flowers, those are kept in a bouquet)</para>
@@ -30,16 +30,21 @@ public class Toolbelt : MonoBehaviour {
      * <remarks>This function is equipped to handle flowers properly as well</remarks>
      */
     public void putToolInHand(Object tool) {
-        tool.GameObject().GetComponent<Collider>().enabled = false; //todo for some reason the trigger flag refuses to get disabled fast enough
+        tool.GameObject().GetComponent<Collider>().enabled = false;
         if (checkForCorrectToolType(tool.name)) {
             if (canPickup || toolInHand == null) { //if the hand is empty of the hand just have been emptied
                 if (toolInHand != null && !tool.name.Equals(toolInHand.gameObject.name)) {
                     throwToolFromHand();
                 } addTool(tool);
             }
-        } else {
-            belt.Add((Equipment)tool);
-            Destroy(tool);//removes the tool from the field
+        } else {      //todo create a state machine that keeps track of the player's toolset and changes equipments when necessary
+            if (!belt.Contains((Equipment)tool)) { //brainstorming: this could be done by having a sprite / 3D version of the object kept as an apallel like the player's shadow 
+                belt.Add((Equipment)tool); tool.GameObject().transform.parent = Character_Controller.getPlayerBody().transform;
+                if (tool.name is not "Vest") {  //then playing an animation of the player getting it on then toggling the mesh renderer of the object (or pane housing the sprite)
+                    tool.GameObject().transform.localPosition = tool.name is "Helmet" ? new Vector3(0f, 0.7f, 0f) : new Vector3(0f, -0.5f, -0.4f);
+                    return;
+                } tool.GameObject().transform.localPosition = new Vector3(0f, 0f, -0.6f);
+            }
         }
     }
 
@@ -77,7 +82,7 @@ public class Toolbelt : MonoBehaviour {
     }
 
     /**
-     * <summary>Changes the variables of a tool specific to interactions in the map.
+     * <summary>Changes the variables of a tool the player can have in its hand in the map.
      * <para>By defining the <see cref="whereTo"/> variable,
      * this function can make the given tool to be admitted into the player's hand or thrown to the ground</para></summary>
      * <param name="whereTo">True: to the ground,
@@ -88,8 +93,11 @@ public class Toolbelt : MonoBehaviour {
         handBody.useGravity = whereTo;
         handBody.isKinematic = !whereTo;
         handBody.GetComponent<Collider>().enabled = handBody.useGravity;
-        toolInHand.transform.parent = handBody.useGravity ? null : Character_Controller.getPlayerHand();
         if (handBody.useGravity) {
+            toolInHand.transform.parent = GameObject.Find("Tools").transform;
+        } else {
+            toolInHand.transform.parent = Character_Controller.getPlayerHand();
+        } if (handBody.useGravity) {
             removeTool(toolInHand.gameObject.name);
         }
     }
@@ -107,12 +115,13 @@ public class Toolbelt : MonoBehaviour {
      * <param name="toolName">The name of the tool desired to be deleted</param>
      */
     private void removeTool(string toolName) {
-        if (toolName.Equals(toolInHand.gameObject.name)) {
+        if (toolInHand != null && toolName.Equals(toolInHand.gameObject.name)) {
             toolInHand.transform.parent = null;
             toolInHand = null;
         } else {
             checkIfToolIsObtained(toolName, out var tool);
             belt.Remove((Equipment)tool);
+            Destroy(tool.GameObject());
         } 
     }
 
@@ -134,48 +143,25 @@ public class Toolbelt : MonoBehaviour {
         if (getBelt().checkIfToolIsObtained(gObj.name, out var tool)) {
             return null;
         } switch (gObj.name) {
-            case "Helmet" or "Vest" or "Slippers": {
-                tool = !collided ? getBelt().gameObject.AddComponent<Equipment>() : 
-                    gObj.GetComponent<Equipment>(); 
-                ((Equipment)tool).initTool(gObj.name); //either get the tool-in-ground or create a new tool
-                putToolInHand(gObj);
+            case "Helmet" or "Vest" or "Slipper": { //if an instance of the equipment is found in the overworld, it is destroyed and the code acts like a new instance is purchased
+                ((Equipment)(tool = gObj.GetComponent<Equipment>())).initTool(gObj.name);
                 break;
             } case "StopWatch": {
                 if (!collided) {
                     //todo potentially create spawner for any item for the rest of the places down except flower
-                } else {
-                    tool = gObj.GetComponent<StopWatch>();
-                } ((StopWatch)tool).prepStopWatch();
-                putToolInHand(gObj);
+                }  ((StopWatch)(tool = gObj.GetComponent<StopWatch>())).prepStopWatch();
                 break;
             } case "Dynamite": {
-                tool = gObj.GetComponent<Dynamite>();
-                ((Dynamite)tool).prepDynamite(((Dynamite)tool).gameObject);
-                putToolInHand(gObj);
+                ((Dynamite)(tool = gObj.GetComponent<Dynamite>())).prepDynamite(tool.GameObject());
                 break;
             } case "Umbrella": {
-                tool = gObj.GetComponent<Umbrella>();
-                ((Umbrella)tool).prepUmbrella();
-                putToolInHand(gObj);
+                ((Umbrella)(tool = gObj.GetComponent<Umbrella>())).prepUmbrella();
                 break; 
             } case "Flower": {
                 tool = FlowerController.findFlower(gObj.name);
-                putToolInHand(gObj);
                 break;
             }
         } return tool;
-    }
-
-    /**
-     * <summary>Removes any number found in the name of the objects</summary>
-     * <returns>The purified number</returns>
-     * <remarks>Will return the name itself if no number is in the name</remarks>
-     */
-    private static string refineObjectName(string name) {
-        var index = 1;
-        while (int.TryParse(name[^index].ToString(), out _)) { //the idea here is the int.TryParse should return true as long as there is a number in the name
-            index++;                                            //the ^index will reach farther back for as long as only numbers are reached
-        } return name.Substring(0, name.Length-index); //then the same logic is applied but in the reverse
     }
 
     /**
@@ -191,7 +177,8 @@ public class Toolbelt : MonoBehaviour {
             foundTool = toolInHand;
             return true;
         } foreach (var tool in belt) {
-            if ((foundTool = tool).name.Equals(toolName)) {
+            if (tool.name.Equals(toolName)) {
+                foundTool = tool;
                 return true;
             }
         } return false;

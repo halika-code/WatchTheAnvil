@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Script.Tools.ToolType;
 using UnityEngine;
@@ -47,6 +48,8 @@ public class Character_Controller : MonoBehaviour {
 
     #region InputProcessing
 
+    private static bool itemCoolDown = false; //true if the cooldown is activated
+    
     /**
      * <summary><para>Evaluates the movement vector of the player</para>
      * Based on the keys supplied by the currently active gimmick.</summary>
@@ -72,9 +75,9 @@ public class Character_Controller : MonoBehaviour {
         return Input.GetKey(KeyCode.E);
     }
 
-    private static void checkForItemUse() {
+    private void checkForItemUse() {
         var hand = Toolbelt.getBelt().toolInHand;
-        if (Input.GetKey(KeyCode.F) && hand != null) {
+        if (Input.GetKey(KeyCode.F) && hand != null && !itemCoolDown) {
             switch (hand.name) {
                 case "Dynamite": {
                     ((Dynamite)hand).useItem();
@@ -88,8 +91,14 @@ public class Character_Controller : MonoBehaviour {
                     ((StopWatch)hand).useItem();
                     break;
                 } 
-            }
+            } itemCoolDown = true;
+            StartCoroutine(runItemCoolDown());
         }
+    }
+
+    private static IEnumerator runItemCoolDown() {
+        yield return new WaitForSeconds(1f);
+        itemCoolDown = false;
     }
     
     #endregion

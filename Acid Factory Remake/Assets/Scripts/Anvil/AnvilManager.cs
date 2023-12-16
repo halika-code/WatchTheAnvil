@@ -1,35 +1,40 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
+using Script.Tools.ToolType;
 using UnityEngine;
 
 public class AnvilManager : MonoBehaviour {
     public static Anvil currentAnvil;
     public static int waitTimer;
+    private int anvilCounter;
     public GameObject preFab;
 
     private void Start() {
         waitTimer = 5;
-        StartCoroutine(startInitialWait());
+        anvilCounter = 0;
+        StartCoroutine(runWait());
     }
 
-    // Update is called once per frame
-    private void FixedUpdate() {
-        if (waitTimer is 0) {
-            currentAnvil = new Anvil(Instantiate(preFab, transform, true), 3);
-            StartCoroutine(runTimer(currentAnvil));
-            var aCount = getAnvilCount();
-            waitTimer = 21 - (int)Math.Ceiling((double)aCount*3/2);
-            StartCoroutine(startInitialWait());
-        }
+    /**
+     * <summary>This is the main loop of the anvil, where the <see cref="runWait"/> calls this function</summary>
+     * <remarks>Manual implementation of a <see cref="Collide.FixedUpdate"/> event-function</remarks>
+     */
+    private IEnumerator runAnvils() {
+        anvilCounter++;
+        currentAnvil = new Anvil(Instantiate(preFab, transform, true), 3);
+        yield return runTimer(currentAnvil);
+        waitTimer = 20 - (int)Math.Ceiling((double)anvilCounter*3/2);
+        StartCoroutine(runWait()); 
     }
 
     /**
      * <summary>Starts a timer, then attempts to murder the player</summary>
      */
     private IEnumerator runTimer(Anvil anvil) {
-        yield return helpRunTimer(anvil, 3);
+        yield return helpRunTimer(anvil, 3);  //wait until the aTimer is 3
         StartCoroutine(trackPlayer(anvil));
-        yield return helpRunTimer(anvil, 0);
+        yield return helpRunTimer(anvil, 0); //spend the rest of the timer
         StartCoroutine(anvil.dropAnvil());
     }
 
@@ -38,7 +43,11 @@ public class AnvilManager : MonoBehaviour {
      */
     public static IEnumerator helpRunTimer(Anvil anvil, int limit) {
         while (anvil.aTimer != limit) {
+            while (StopWatch.stopWatchInUse) { //will skip over this IF the stopWatch is not in use
+                yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
+            }
             anvil.aTimer--;
+            Debug.Log("Anvil droppin in " + anvil.aTimer + " seconds");
             yield return new WaitForSeconds(0.8f);
             UI.updateTimer(anvil.aTimer);
         }
@@ -63,21 +72,15 @@ public class AnvilManager : MonoBehaviour {
     /**
      * <summary>Sets a period where anvils cannot spawn</summary>
      */
-    public static IEnumerator startInitialWait() {
+    public IEnumerator runWait() {
         while (waitTimer > 0) {
-            //Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
-            yield return new WaitForSeconds(1f);
+            while (StopWatch.stopWatchInUse) { //will skip over this IF the stopWatch is not in use
+                yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
+            }
+            Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
+            yield return new WaitForSeconds(0.5f);
             waitTimer--;
-        }
-    }
-
-    /**
-     * <summary>Returns the amount of Anvils present in the stage</summary>
-     * <returns>From 0 to integer limit</returns>
-     * <remarks>Should return a count of EVERY anvil littered on the stage</remarks>
-     */
-    public static int getAnvilCount() {
-        return GameObject.Find("Anvils").transform.childCount;
+        } StartCoroutine(runAnvils()); //keep in mind, execution returns here as soon as the 1st timer starts ticking
     }
 
     public static bool isFlyin() {
@@ -93,11 +96,11 @@ public class AnvilManager : MonoBehaviour {
     }
     
     /**
-     * <summary>Turns the anvil into ground</summary>
+     * <summary>Stops the Anvil from trying to fall through the floor</summary>
      */
     public static void freezeAnvil() {
         if (isFlyin()) {
-            currentAnvil.getTarget().SetActive(false);
+            Destroy(currentAnvil.getTarget());
             currentAnvil.getAnvilBody().isKinematic = true;
             currentAnvil.isFlying = false;
         }

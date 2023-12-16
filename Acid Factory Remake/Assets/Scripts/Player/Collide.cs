@@ -130,7 +130,6 @@ public class Collide : MonoBehaviour {
     private static bool processAnvil() {
         if (AnvilManager.isFlyin()) {
             if (Toolbelt.getBelt().checkIfToolIsObtained("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
-                Debug.Log("Helmet used!");
                 Toolbelt.getBelt().checkForDurability((Equipment)foundTool);
             } else {
                 hurtPlayer();
@@ -144,7 +143,7 @@ public class Collide : MonoBehaviour {
      * <remarks>It is assumed that an item exists in the field for this function to trigger</remarks>
      */
     private static void processTools(Object obj) {
-        Toolbelt.getBelt().getTool(obj, true);
+        Toolbelt.getBelt().putToolInHand(Toolbelt.getBelt().getTool(obj, true));
     }
 
     #region ExtrasICouldn'tMoveToSeparateCollision
