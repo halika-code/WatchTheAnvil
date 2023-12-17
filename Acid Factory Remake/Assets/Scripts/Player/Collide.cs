@@ -1,5 +1,6 @@
 using System.Collections;
 using Script.Tools.ToolType;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
@@ -110,6 +111,12 @@ public class Collide : MonoBehaviour {
             } case "Tools": {
                 processTools(obj); //tools without triggers include helmet, vest, slippers ...
                 break;
+            } case "Burrow": {
+                if (obj.name is "Exit") {
+                    LevelManager.advanceLevel();
+                } else {
+                    goto case "Platforms";
+                } break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + parentName + "s");
                 goto case "DeathPane";

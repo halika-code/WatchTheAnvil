@@ -36,7 +36,7 @@ namespace Script.Tools.ToolType {
             } destroyWatch();
         }
 
-        private void destroyWatch() {
+        private static void destroyWatch() {
             Debug.Log("Removing spent stopwatch");
             Destroy(Toolbelt.getBelt().toolInHand.gameObject); //if the while loop falls through, destroy the item
         }

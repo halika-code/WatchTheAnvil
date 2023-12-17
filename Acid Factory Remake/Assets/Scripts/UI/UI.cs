@@ -22,6 +22,10 @@ public class UI : MonoBehaviour {
         points.text = updateText(points, score);
     }
 
+    public static int getCurrentPoints() {
+        return findNumbers(points.text);
+    }
+
     /**
      * <summary>Updates the health of the player</summary>
      * <param name="point">The amount to be deducted / added</param>

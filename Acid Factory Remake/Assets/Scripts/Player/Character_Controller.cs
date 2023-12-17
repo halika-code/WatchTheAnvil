@@ -117,7 +117,7 @@ public class Character_Controller : MonoBehaviour {
     /**
      * <summary>A simple kill-switch that reloads the game</summary>
      */
-    private static void killPlayer() {
+    public static void killPlayer() {
         GameObject.Find("Player").GetComponent<MonoBehaviour>().StopAllCoroutines(); 
         RootVeg.init(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
