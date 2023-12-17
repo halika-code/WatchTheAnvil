@@ -45,11 +45,10 @@ public class AnvilManager : MonoBehaviour {
         while (anvil.aTimer != limit) {
             while (StopWatch.stopWatchInUse) { //will skip over this IF the stopWatch is not in use
                 yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
-            }
-            anvil.aTimer--;
+            } anvil.aTimer--;
             Debug.Log("Anvil droppin in " + anvil.aTimer + " seconds");
-            yield return new WaitForSeconds(0.8f);
             UI.updateTimer(anvil.aTimer);
+            yield return new WaitForSeconds(0.8f);
         }
     }
 
@@ -76,8 +75,7 @@ public class AnvilManager : MonoBehaviour {
         while (waitTimer > 0) {
             while (StopWatch.stopWatchInUse) { //will skip over this IF the stopWatch is not in use
                 yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
-            }
-            Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
+            } Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
             yield return new WaitForSeconds(0.5f);
             waitTimer--;
         } StartCoroutine(runAnvils()); //keep in mind, execution returns here as soon as the 1st timer starts ticking

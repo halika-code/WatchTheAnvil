@@ -17,8 +17,10 @@ namespace Script.Tools.ToolType {
             if (stopWatchInUse) {
                 StopCoroutine(stopWatchFuncContainer);
                 stopWatchInUse = false;
-            } else {
+            } else if (lifeSpanTimer > 0){
                 stopWatchFuncContainer = StartCoroutine(runStopWatch());
+            } else { //I expect a stop-watch is in the player's hand
+                destroyWatch();
             }
         }
             
@@ -31,7 +33,12 @@ namespace Script.Tools.ToolType {
                 yield return new WaitForSeconds(0.5f);
                 Debug.Log("StopWatch has " + lifeSpanTimer + " seconds left");
                 lifeSpanTimer--;
-            } stopWatchInUse = false;
+            } destroyWatch();
+        }
+
+        private void destroyWatch() {
+            Debug.Log("Removing spent stopwatch");
+            Destroy(Toolbelt.getBelt().toolInHand.gameObject); //if the while loop falls through, destroy the item
         }
 
         #region GetCurrentlyRunningIEnumeratorScript
