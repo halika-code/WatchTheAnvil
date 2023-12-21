@@ -150,7 +150,7 @@ public class Collide : MonoBehaviour {
      * <remarks>It is assumed that an item exists in the field for this function to trigger</remarks>
      */
     private static void processTools(Object obj) {
-        Toolbelt.getBelt().putToolInHand(Toolbelt.getBelt().getTool(obj, true));
+        Toolbelt.getBelt().handleTool(Toolbelt.getBelt().getTool(obj, true));
     }
 
     #region ExtrasICouldn'tMoveToSeparateCollision
@@ -173,7 +173,7 @@ public class Collide : MonoBehaviour {
             hop.y -= (float)MoveVel;
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
-        } if (Umbrella.checkIfInHand()) { 
+        } if (Umbrella.checkIfOpen()) { 
             StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
         }
     }

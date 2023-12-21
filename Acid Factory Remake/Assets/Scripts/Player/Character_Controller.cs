@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Script.Tools.ToolType;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -92,12 +93,12 @@ public class Character_Controller : MonoBehaviour {
                     break;
                 } 
             } itemCoolDown = true;
-            StartCoroutine(runItemCoolDown());
+            runItemCoolDown();
         }
     }
 
-    private static IEnumerator runItemCoolDown() {
-        yield return new WaitForSeconds(1f);
+    private static async void runItemCoolDown() {
+        await Task.Delay(1000);
         itemCoolDown = false;
     }
     

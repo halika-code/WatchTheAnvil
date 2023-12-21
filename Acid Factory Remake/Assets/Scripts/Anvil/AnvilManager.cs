@@ -24,7 +24,7 @@ public class AnvilManager : MonoBehaviour {
         anvilCounter++;
         currentAnvil = new Anvil(Instantiate(preFab, transform, true), 3);
         yield return runTimer(currentAnvil);
-        waitTimer = 20 - (int)Math.Ceiling((double)anvilCounter*3/2);
+        waitTimer = 20 - (int)Math.Ceiling((double)anvilCounter*3/2); //resets the wait timer
         StartCoroutine(runWait()); 
     }
 

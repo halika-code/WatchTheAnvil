@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Script.Tools.ToolType;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -29,22 +30,36 @@ public class Toolbelt : MonoBehaviour {
      * <para>If the tool is found to be safety equipment, the tool is placed on the player instead</para></summary>
      * <remarks>This function is equipped to handle flowers properly as well</remarks>
      */
-    public void putToolInHand(Object tool) {
+    public void handleTool(Object tool) {
         tool.GameObject().GetComponent<Collider>().enabled = false;
         if (checkForCorrectToolType(tool.name)) {
-            if (canPickup || toolInHand == null) { //if the hand is empty of the hand just have been emptied
-                if (toolInHand != null && !tool.name.Equals(toolInHand.gameObject.name)) {
-                    throwToolFromHand(); //todo there needs to be a cooldown (or make it function better)
-                } addTool(tool);
-            }
-        } else {      //todo create a state machine that keeps track of the player's toolset and changes equipments when necessary
-            if (!belt.Contains((Equipment)tool)) { //brainstorming: this could be done by having a sprite / 3D version of the object kept as an apallel like the player's shadow 
-                belt.Add((Equipment)tool); tool.GameObject().transform.parent = Character_Controller.getPlayerBody().transform;
-                if (tool.name is not "Vest") {  //then playing an animation of the player getting it on then toggling the mesh renderer of the object (or pane housing the sprite)
-                    tool.GameObject().transform.localPosition = tool.name is "Helmet" ? new Vector3(0f, 0.7f, 0f) : new Vector3(0f, -0.5f, -0.4f);
-                    return;
-                } tool.GameObject().transform.localPosition = new Vector3(0f, 0f, -0.6f);
-            }
+            putToolInHand((Tools)tool);
+        } else {
+            putToolOnBelt((Equipment)tool);
+        }
+    }
+
+    /**
+     * <summary>Puts tool into an object that is child of the player to be used as a tool</summary>
+     */
+    private void putToolInHand(Tools tool) {
+        if (canPickup || toolInHand == null) { //if the hand is empty of the hand just have been emptied
+            if (toolInHand != null && !tool.name.Equals(toolInHand.gameObject.name)) {
+                throwToolFromHand(tool);
+            } addTool(tool);
+        }
+    }
+    
+    /**
+     * <summary>Puts item on the player as armor</summary>
+     */
+    private void putToolOnBelt(Equipment tool) {
+        if (!belt.Contains(tool)) { //brainstorming: this could be done by having a sprite / 3D version of the object kept as an apallel like the player's shadow 
+            belt.Add(tool); tool.GameObject().transform.parent = Character_Controller.getPlayerBody().transform;
+            if (tool.name is not "Vest") {  //then playing an animation of the player getting it on then toggling the mesh renderer of the object (or pane housing the sprite)
+                tool.GameObject().transform.localPosition = tool.name is "Helmet" ? new Vector3(0f, 0.7f, 0f) : new Vector3(0f, -0.5f, -0.4f);
+                return;
+            } tool.GameObject().transform.localPosition = new Vector3(0f, 0f, -0.6f);
         }
     }
 
@@ -71,14 +86,19 @@ public class Toolbelt : MonoBehaviour {
     }
 
     /**
-     * <summary>Lets the tool kept in the hand go from the player's letting it fall down</summary>
+     * <summary>Swaps the tool's state from being in the player's hand
+     * <para>to on the ground with all the necessary flag changes</para></summary>
      */
-    private void throwToolFromHand() {
+    private void throwToolFromHand(Object tool) {
         if (toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>() == null) {
             Debug.Log("Whoopy, tried to throw an item from hand that doesn't have a rigidbody");
             return;
         } transferToolState(true);
-        StartCoroutine(pickupDelay());
+        if (StopWatch.stopWatchInUse) {
+            ((StopWatch)tool).useItem();
+        } else if (Umbrella.isOpen) {
+            ((Umbrella)tool).useItem();
+        } pickupDelay(); 
     }
 
     /**
@@ -129,8 +149,8 @@ public class Toolbelt : MonoBehaviour {
      * <summary>Stops the player from being able to pickup an another tool immediately</summary>
      * <remarks>The stop is 1 seconds long</remarks>
      */
-    private IEnumerator pickupDelay() {
-        yield return new WaitForSeconds(1);
+    private async void pickupDelay() {
+        await Task.Delay(1000);
         canPickup = true;
     }
 
