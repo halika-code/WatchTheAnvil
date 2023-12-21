@@ -34,7 +34,7 @@ public class Toolbelt : MonoBehaviour {
         if (checkForCorrectToolType(tool.name)) {
             if (canPickup || toolInHand == null) { //if the hand is empty of the hand just have been emptied
                 if (toolInHand != null && !tool.name.Equals(toolInHand.gameObject.name)) {
-                    throwToolFromHand();
+                    throwToolFromHand(); //todo there needs to be a cooldown (or make it function better)
                 } addTool(tool);
             }
         } else {      //todo create a state machine that keeps track of the player's toolset and changes equipments when necessary
@@ -105,6 +105,7 @@ public class Toolbelt : MonoBehaviour {
     public void checkForDurability(Equipment tool) {
         Equipment.useItem(tool, out var isBroken);
         if (isBroken) {
+            toolInHand.transform.parent = null;
             removeTool(tool.name);
         } 
     }
@@ -116,7 +117,6 @@ public class Toolbelt : MonoBehaviour {
      */
     private void removeTool(string toolName) {
         if (toolInHand != null && toolName.Equals(toolInHand.gameObject.name)) {
-            toolInHand.transform.parent = null;
             toolInHand = null;
         } else {
             checkIfToolIsObtained(toolName, out var tool);
