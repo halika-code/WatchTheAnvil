@@ -43,7 +43,7 @@ public class AnvilManager : MonoBehaviour {
      */
     public static IEnumerator helpRunTimer(Anvil anvil, int limit) {
         while (anvil.aTimer != limit) {
-            while (StopWatch.stopWatchInUse) { //will skip over this IF the stopWatch is not in use
+            while (StopWatch.checkWatch()) { //will skip over this IF the stopWatch is not in use
                 yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
             } anvil.aTimer--;
             Debug.Log("Anvil droppin in " + anvil.aTimer + " seconds");
@@ -73,7 +73,7 @@ public class AnvilManager : MonoBehaviour {
      */
     public IEnumerator runWait() {
         while (waitTimer > 0) {
-            while (StopWatch.stopWatchInUse) { //will skip over this IF the stopWatch is not in use
+            while (StopWatch.checkWatch()) { //will skip over this IF the stopWatch is not in use
                 yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
             } Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
             yield return new WaitForSeconds(0.5f);

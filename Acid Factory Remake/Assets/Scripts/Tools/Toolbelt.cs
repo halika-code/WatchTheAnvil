@@ -1,14 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Script.Tools.ToolType;
 using Unity.VisualScripting;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 public class Toolbelt : MonoBehaviour {
     public List<Equipment> belt;
+    public static Toolbelt toolBelt;
     /**
      * <summary>
      * <para>A variable that can only hold 1 item at a time (except flowers, those are kept in a bouquet)</para>
@@ -23,6 +27,7 @@ public class Toolbelt : MonoBehaviour {
     private void Start() {
         belt = new List<Equipment>();
         canPickup = true;
+        toolBelt = this;
     }
 
     /**
@@ -31,7 +36,9 @@ public class Toolbelt : MonoBehaviour {
      * <remarks>This function is equipped to handle flowers properly as well</remarks>
      */
     public void handleTool(Object tool) {
-        tool.GameObject().GetComponent<Collider>().enabled = false;
+        if (tool == null) {
+            Debug.Log("Whoopy");
+        }
         if (checkForCorrectToolType(tool.name)) {
             putToolInHand((Tools)tool);
         } else {
@@ -44,9 +51,11 @@ public class Toolbelt : MonoBehaviour {
      */
     private void putToolInHand(Tools tool) {
         if (canPickup || toolInHand == null) { //if the hand is empty of the hand just have been emptied
+            canPickup = false;
             if (toolInHand != null && !tool.name.Equals(toolInHand.gameObject.name)) {
                 throwToolFromHand(tool);
             } addTool(tool);
+            canPickup = true;
         }
     }
     
@@ -89,16 +98,17 @@ public class Toolbelt : MonoBehaviour {
      * <summary>Swaps the tool's state from being in the player's hand
      * <para>to on the ground with all the necessary flag changes</para></summary>
      */
-    private void throwToolFromHand(Object tool) {
-        if (toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>() == null) {
+    private void throwToolFromHand(Object tool) { 
+        Debug.Log("Throwing " + toolInHand.name); //todo then have an OnCollisionEnter that swaps the trigger back with the gravity turned off
+        if (toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>() == null) { //todo finally have the getTool have the tool be set in every if statement
             Debug.Log("Whoopy, tried to throw an item from hand that doesn't have a rigidbody");
             return;
         } transferToolState(true);
-        if (StopWatch.stopWatchInUse) {
+        if (tool.name.Contains("StopWatch") && ((StopWatch)tool).stopWatchInUse) {
             ((StopWatch)tool).useItem();
-        } else if (Umbrella.isOpen) {
+        } else if (tool.name.Contains("Umbrella") && ((Umbrella)tool).checkIfOpen()) { //if the umbrella is in the player's hand AND is open
             ((Umbrella)tool).useItem();
-        } pickupDelay(); 
+        } 
     }
 
     /**
@@ -112,12 +122,9 @@ public class Toolbelt : MonoBehaviour {
         var handBody = toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>();
         handBody.useGravity = whereTo;
         handBody.isKinematic = !whereTo;
-        handBody.GetComponent<Collider>().enabled = handBody.useGravity;
-        if (handBody.useGravity) {
-            toolInHand.transform.parent = GameObject.Find("Tools").transform;
-        } else {
-            toolInHand.transform.parent = Character_Controller.getPlayerHand();
-        } if (handBody.useGravity) {
+        handBody.GetComponent<CapsuleCollider>().enabled = whereTo;
+        toolInHand.transform.parent = handBody.useGravity ? GameObject.Find("Tools").transform : Character_Controller.getPlayerHand(); 
+        if (whereTo) {
             removeTool(toolInHand.gameObject.name);
         }
     }
@@ -139,41 +146,35 @@ public class Toolbelt : MonoBehaviour {
         if (toolInHand != null && toolName.Equals(toolInHand.gameObject.name)) {
             toolInHand = null;
         } else {
-            checkIfToolIsObtained(toolName, out var tool);
+            checkForTool(toolName, out var tool);
             belt.Remove((Equipment)tool);
             Destroy(tool.GameObject());
         } 
     }
 
     /**
-     * <summary>Stops the player from being able to pickup an another tool immediately</summary>
-     * <remarks>The stop is 1 seconds long</remarks>
-     */
-    private async void pickupDelay() {
-        await Task.Delay(1000);
-        canPickup = true;
-    }
-
-    /**
-     * <summary>Attempts to fetches an existing instance of a tool</summary>
+     * <summary>Attempts to fetches an existing instance of a tool after initialization</summary>
+     * <param name="gObj">The instance of the tool's component. Any type will work as long as a valid tool can be found using the <see cref="checkIfToolIsObtained"/></param>
+     * <param name="collided">A flag denoting if the player have purchased the tool or found it in the field</param>
      * <returns>The newly added tool, or null if the tool is found to exists already</returns>
-     * <remarks>If a flower is attempted to be created, the instance of the flower found will be returned</remarks>
+     * <remarks>When expanding with a new tool, keep in mind: the gObj is used to find the instance of the tool,
+     * for the switch-statement the found instance named tool must be used</remarks>
      */
-    public Object getTool(Object gObj, bool collided) {
-        if (getBelt().checkIfToolIsObtained(gObj.name, out var tool)) {
+    public Object findTool(Object gObj, bool collided) {
+        if (checkForTool(gObj.name, out var tool)) {
             return null;
         } switch (gObj.name) {
             case "Helmet" or "Vest" or "Slipper": { //if an instance of the equipment is found in the overworld, it is destroyed and the code acts like a new instance is purchased
                 ((Equipment)(tool = gObj.GetComponent<Equipment>())).initTool(gObj.name);
                 break;
             } case "StopWatch": {
-                if (!collided) {
-                    //todo potentially create spawner for any item for the rest of the places down except flower
-                }  ((StopWatch)(tool = gObj.GetComponent<StopWatch>())).prepStopWatch();
-                break;
+                if (((StopWatch)(tool = gObj.GetComponent<StopWatch>())).text == null) { //if the text is Unity null
+                    ((StopWatch)tool).prepStopWatch();
+                } break;
             } case "Dynamite": {
-                ((Dynamite)(tool = gObj.GetComponent<Dynamite>())).prepDynamite(tool.GameObject());
-                break;
+                if (((Dynamite)(tool = gObj.GetComponent<Dynamite>())).getText() == null) {
+                    ((Dynamite)tool).prepDynamite();
+                } break;
             } case "Umbrella": {
                 ((Umbrella)(tool = gObj.GetComponent<Umbrella>())).prepUmbrella();
                 break; 
@@ -191,9 +192,9 @@ public class Toolbelt : MonoBehaviour {
      * <para>Will be null, if nothing is found</para></param>
      * <returns>True, if an instance is found, false otherwise</returns>
      */
-    public bool checkIfToolIsObtained(string toolName, out Object foundTool) {
+    public bool checkForTool(string toolName, out Object foundTool) {
         foundTool = null;
-        if (toolInHand != null && toolName.Equals(toolInHand.gameObject.name)) {
+        if (toolInHand /*if it is not NULL*/ && toolName.Equals(toolInHand.gameObject.name)) {
             foundTool = toolInHand;
             return true;
         } foreach (var tool in belt) {
@@ -208,6 +209,6 @@ public class Toolbelt : MonoBehaviour {
      * <summary>Fetches the belt attached to the player</summary>
      */
     public static Toolbelt getBelt() {
-        return Character_Controller.getPlayerBody().GetComponent<Toolbelt>();
+        return toolBelt;
     }
 }

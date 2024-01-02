@@ -9,7 +9,7 @@ using static Move;
 public class Character_Controller : MonoBehaviour {
     public const double MoveVel = 20;
     private static Rigidbody pBody;
-    private static Toolbelt belt;
+    private static Transform pHand;
 
     //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one value
     
@@ -21,6 +21,7 @@ public class Character_Controller : MonoBehaviour {
         pBody.freezeRotation = true;
         Physics.gravity = new Vector3(0, -30f);
         Collide.init();
+        pHand = GameObject.Find("Hand").transform;
     }
 
     private void OnEnable() { //singleton pattern, just in case
@@ -31,7 +32,6 @@ public class Character_Controller : MonoBehaviour {
 
     private void Start() {
         init();
-        belt = GetComponent<Toolbelt>();
     }
 
     // Update is called once per frame
@@ -76,14 +76,12 @@ public class Character_Controller : MonoBehaviour {
         return Input.GetKey(KeyCode.E);
     }
 
-    private void checkForItemUse() {
+    private static void checkForItemUse() {
         var hand = Toolbelt.getBelt().toolInHand;
-        if (Input.GetKey(KeyCode.F) && hand != null && !itemCoolDown) {
-            switch (hand.name) {
+        if (Input.GetKey(KeyCode.F) && hand /*hand is not null*/ && !itemCoolDown) {
+            switch (hand.gameObject.name) {
                 case "Dynamite": {
                     ((Dynamite)hand).useItem();
-                    break;
-                } case "Flower": {
                     break;
                 } case "Umbrella": {
                     ((Umbrella)hand).useItem();
@@ -119,7 +117,6 @@ public class Character_Controller : MonoBehaviour {
      * <summary>A simple kill-switch that reloads the game</summary>
      */
     public static void killPlayer() {
-        GameObject.Find("Player").GetComponent<MonoBehaviour>().StopAllCoroutines(); 
         RootVeg.init(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
@@ -149,7 +146,7 @@ public class Character_Controller : MonoBehaviour {
         } do {
             parentList.Add(obj.name);
             obj = obj.transform.parent.gameObject;
-        } while (obj.transform.parent != null);
+        } while (obj.transform.parent); //check against null
         parentList.Add(obj.name);
         return parentList;
     }
@@ -162,12 +159,13 @@ public class Character_Controller : MonoBehaviour {
         ShadowController.moveShadow(pBody.transform.position);
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     /**
      * <summary>Finds the rigidbody attached to the player</summary>
      * <remarks>The component will always be found</remarks>
      */
     public static Rigidbody getPlayerBody() {
-        if (pBody != null) {
+        if (pBody) { //pbody is checked against it being null
             return pBody;
         } init();
         return getPlayerBody();
@@ -178,7 +176,7 @@ public class Character_Controller : MonoBehaviour {
      * <returns>The empty used to store the objects designated to be "in the player's hand", the player's body's transform otherwise</returns>
      */
     public static Transform getPlayerHand() {
-        return GameObject.Find("Hand").transform;
+        return pHand;
     }
 
     public static bool isAscending() {

@@ -1,8 +1,8 @@
 using UnityEngine;
 
 namespace Script.Tools.ToolType {
-    public class Umbrella : global::Tools {
-        public static bool isOpen;
+    public class Umbrella : global::Tools { 
+        public bool isOpen;
         public void prepUmbrella() {
             lifeSpanTimer = -1;
             isOpen = false;
@@ -20,7 +20,7 @@ namespace Script.Tools.ToolType {
          * the umbrella is not open
          * <para>False only if the umbrella is open</para></returns>
          */
-        public static bool checkIfOpen() {
+        public bool checkIfOpen() {
             var hand = Toolbelt.getBelt().toolInHand;
             return hand == null || !hand.name.Contains("Umbrella") ||
                    hand.name.Contains("Umbrella") && !isOpen;

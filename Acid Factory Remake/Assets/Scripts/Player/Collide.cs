@@ -31,7 +31,7 @@ public class Collide : MonoBehaviour {
     private void OnCollisionEnter(Collision collision) {
         var cObj = collision.gameObject;
         if (!VegetablePull.validateVegetable(cObj)) {
-            processCollision(getParentName(cObj.transform), cObj);
+            processCollision(getParentName(cObj.transform), cObj.gameObject);
         } StopCoroutine(nameof(ShadowController.findPlatform)); //turns off ray-casting while the y coordinate will not change
     }
     
@@ -119,7 +119,7 @@ public class Collide : MonoBehaviour {
                 } break;
             } default: {
                 Debug.Log("Doin some uncoded things for " + parentName + "s");
-                goto case "DeathPane";
+                goto case "Platforms";
             } 
         }
     }
@@ -134,9 +134,18 @@ public class Collide : MonoBehaviour {
         VegetablePull.pullVegetable(veggie);
     }
 
+    /**
+     * <summary>Processes collision with an anvil.
+     * <para>If the anvil is in the air a check is performed for a helmet.
+     * If one is found said helmet takes a durability-hit</para>
+     * Otherwise the player takes a single point of damage</summary>
+     * <remarks>If the anvil is stationary on the ground, it will be treated as a platform</remarks>
+     * <returns>True if the anvil have hit the player in a flying state
+     * <para>False otherwise</para></returns>
+     */
     private static bool processAnvil() {
         if (AnvilManager.isFlyin()) {
-            if (Toolbelt.getBelt().checkIfToolIsObtained("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
+            if (Toolbelt.getBelt().checkForTool("Helmet", out var foundTool)) { //the helmet stops the player from getting hurt
                 Toolbelt.getBelt().checkForDurability((Equipment)foundTool);
             } else {
                 hurtPlayer();
@@ -150,7 +159,12 @@ public class Collide : MonoBehaviour {
      * <remarks>It is assumed that an item exists in the field for this function to trigger</remarks>
      */
     private static void processTools(Object obj) {
-        Toolbelt.getBelt().handleTool(Toolbelt.getBelt().getTool(obj, true));
+        var tool = Toolbelt.getBelt().findTool(obj, true); //problem here, tool gets set as null
+        if (tool != null) {
+            Toolbelt.getBelt().handleTool(tool);
+        } else {
+            Debug.Log("Whoopy, tried to process " + obj.name + " as a tool");
+        }
     }
 
     #region ExtrasICouldn'tMoveToSeparateCollision
@@ -173,7 +187,7 @@ public class Collide : MonoBehaviour {
             hop.y -= (float)MoveVel;
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
-        } if (Umbrella.checkIfOpen()) { 
+        } if (Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella) && ((Umbrella)umbrella).checkIfOpen()) { 
             StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
         }
     }

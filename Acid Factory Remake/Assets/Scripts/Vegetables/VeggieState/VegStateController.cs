@@ -18,7 +18,6 @@ public class VegStateController : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        var asd2 = getVegStates();
         for (var i = 0; i < getBodyCollective().Count; i++) {
             checkForPlayerDistance(getBodyCollective()[i], getVegStates()[i]);
         }

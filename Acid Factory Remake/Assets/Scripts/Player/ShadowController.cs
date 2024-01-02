@@ -7,7 +7,8 @@ public class ShadowController : MonoBehaviour {
     private static Rigidbody sBody;
     
     private void Start() {
-        sBody = gameObject.GetComponent<Rigidbody>();
+        sBody = gameObject.GetComponent<Rigidbody>(); 
+                //todo check if Rider knows it is supposed to look for it's dependencies in the D:/ folder
     }
 
     /**
@@ -29,12 +30,23 @@ public class ShadowController : MonoBehaviour {
 
     /**
      * <summary>Fetches the collision point the Raycast finds underneath the player</summary>
-     * <param name="hit">an alternate return for the container of info of the object the raycast have hit</param>
-     * <returns>True if a hit was detected, false otherwise</returns>
+     * <param name="hit">A container for the object struck by the ray</param>
+     * <returns>True if a hit was detected within 30f distance, false otherwise</returns>
      */
     public static bool findColPoint(out RaycastHit hit) {
         var ray = new Ray(getPlayerBody().position, Vector3.down);
-        return Physics.Raycast(ray, out hit, 50f);
+        return Physics.Raycast(ray, out hit, 30f);
+    }
+
+    /**
+     * <summary>Fetches the collision point the Raycast finds underneath the desired GameObject for a shorter distance</summary>
+     * <param name="parentObj">The object the ray should shoot underneath from</param>
+     * <param name="hit">A container for the object struck by the ray, including exact collision position</param>
+     * <returns>True if a hit is detected within 20f distance, false otherwise</returns>
+     */
+    public static bool findColPoint(GameObject parentObj, out RaycastHit hit) {
+        var ray = new Ray(parentObj.transform.position, Vector3.down);
+        return Physics.Raycast(ray, out hit, 20f);
     }
 
     private static void setShadowPosition(Vector3 pos) {

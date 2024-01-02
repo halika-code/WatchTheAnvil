@@ -3,9 +3,10 @@ using Script.Tools.ToolType;
 using UnityEngine;
 
 public static class RootVeg {
-    private static List<Rigidbody> cBodyCollective;
+    private static List<Rigidbody> cBodyCollective; 
     private static List<VegetableVisibility.VegState> vegStateCollective;
 
+    // ReSharper disable Unity.PerformanceAnalysis cause: This function is only called on load/reload
     public static void init(bool forceReset) {
         if (cBodyCollective == null || forceReset) {
             cBodyCollective = new List<Rigidbody>();
