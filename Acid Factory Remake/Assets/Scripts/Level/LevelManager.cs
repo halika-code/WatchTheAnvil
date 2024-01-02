@@ -21,7 +21,7 @@ public class LevelManager : MonoBehaviour {
     private void countMaxPoints() {
         foreach (var veggie in RootVeg.getBodyCollective()) {
             if (veggie.name is not "Flower") {
-                maxPoints += VegetablePull.getProfileOfVeggie(Character_Controller.getParentName(veggie.gameObject));
+                maxPoints += VegetablePull.getProfileOfVeggie(Character_Controller.getParentName(veggie.transform));
             }
         }
     }

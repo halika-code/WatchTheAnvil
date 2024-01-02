@@ -46,9 +46,9 @@ namespace Script.Tools.ToolType {
          */
         private void explode() {
             foreach (var hit in Physics.SphereCastAll(gameObject.transform.position, 5f,Vector3.forward, 5f)) {
-                if (Character_Controller.getParentName(hit.transform.gameObject).Contains("ExplodableRocks")) {
+                if (Character_Controller.getParentName(hit.transform).Contains("ExplodableRocks")) {
                     Destroy(hit.transform.gameObject);
-                } if (Character_Controller.getParentName(hit.transform) is "Player") {
+                } if (Character_Controller.getParentName(hit.transform.gameObject) is "Player") {
                     if (!Toolbelt.getBelt().checkForTool("Vest", out _)) {
                         Character_Controller.hurtPlayer();
                     }

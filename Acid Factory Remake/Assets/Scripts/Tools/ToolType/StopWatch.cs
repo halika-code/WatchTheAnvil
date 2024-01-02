@@ -18,7 +18,7 @@ namespace Script.Tools.ToolType {
         }
 
         public void OnCollisionEnter(Collision other) {
-            if (Character_Controller.getParentName(other.transform) is "Platforms") {
+            if (Character_Controller.getParentName(other.gameObject) is "Platforms") {
                 gameObject.GetComponent<Collider>().isTrigger = true;
                 gameObject.GetComponent<Rigidbody>().useGravity = false;
             }

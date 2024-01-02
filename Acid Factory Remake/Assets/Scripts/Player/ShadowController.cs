@@ -4,11 +4,13 @@ using UnityEngine;
 using static Character_Controller;
 
 public class ShadowController : MonoBehaviour {
+    private new static MeshRenderer renderer;
     private static Rigidbody sBody;
     
     private void Start() {
-        sBody = gameObject.GetComponent<Rigidbody>(); 
-                //todo check if Rider knows it is supposed to look for it's dependencies in the D:/ folder
+        sBody = gameObject.GetComponent<Rigidbody>();
+        renderer = gameObject.GetComponent<MeshRenderer>();
+        StartCoroutine(findPlatform());
     }
 
     /**
@@ -17,15 +19,22 @@ public class ShadowController : MonoBehaviour {
      * <remarks>This is designed to run forever and is supposed to get killed as soon as the player lands</remarks>
      */
     public static IEnumerator findPlatform() { //var hit is the container of the collider of the object that was hit 
-        if (!getShadowBody().activeSelf) {
-            getShadowBody().SetActive(true);
-        } while (true) {
+        if (!renderer.enabled) {
+            renderer.enabled = true;
+        } do {
             if (!findColPoint(out var hit) || hit.collider.gameObject.name is "DeathPane") {
-                getShadowBody().SetActive(false);
-            } if (getParentName(hit.collider.transform) is "Platforms" or "Anvils") {
-                setShadowPosition(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
+                break;
+            } if (getParentName(hit.collider.gameObject) is "Platforms" or "Anvils") {
+                setShadowPosition(new Vector3(hit.point.x, hit.point.y + 0.1f, hit.point.z));
             } yield return null;
-        }
+        } while (!checkIfStandingOnPlayer());
+        renderer.enabled = false;
+    }
+
+    private static bool checkIfStandingOnPlayer() {
+        var asd = getPlayerBody().position.y;
+        var asd2 = Math.Round(asd - sBody.position.y) < 1.5f;
+        return Math.Round(getPlayerBody().position.y - sBody.position.y, 2) < 1.5f; //1.4 is the distance found using debug.log + 0.6 to account for Unity weirdness + padding 
     }
 
     /**
@@ -54,7 +63,7 @@ public class ShadowController : MonoBehaviour {
     }
 
     /**
-     * <summary>Adds the given velocity to the shadow pane</summary>
+     * <summary>Moves the shadow horizontally only</summary>
      * <remarks>Uses plain addition</remarks>
      */
     public static void moveShadow(Vector3 pos) {

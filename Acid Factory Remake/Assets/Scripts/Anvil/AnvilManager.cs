@@ -62,7 +62,7 @@ public class AnvilManager : MonoBehaviour {
                 anvil.getTarget().SetActive(true);
             } if (!ShadowController.findColPoint(out var hit) || hit.collider.gameObject.name is "DeathPane") {
                 anvil.getTarget().SetActive(false);
-            } if (Character_Controller.getParentName(hit.collider.transform) is not "Vegetables") {
+            } if (Character_Controller.getParentName(hit.collider.gameObject) is not "Vegetables") {
                 anvil.setTargetPos(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
             } yield return null;
         } anvil.isFlying = true;

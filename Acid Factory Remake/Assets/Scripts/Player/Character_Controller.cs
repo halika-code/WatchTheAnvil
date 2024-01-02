@@ -11,7 +11,7 @@ public class Character_Controller : MonoBehaviour {
     private static Rigidbody pBody;
     private static Transform pHand;
 
-    //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one value
+    //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one variable
     
     /**
      * <summary>Initialized the variables unique to the player</summary>
@@ -43,7 +43,7 @@ public class Character_Controller : MonoBehaviour {
 
     public static bool checkForDistance() {
         if (ShadowController.findColPoint(out var hit)) {
-            return hit.distance > (getPlayerBody().GetComponent<Transform>().localScale.y/2)+1f; //the idea here is with the localScale I can get the height of the player from this data
+            return hit.distance > (getPlayerBody().transform.localScale.y/2)+1f; //the idea here is with the localScale I can get the height of the player from this data
         } return false;
     }
 
@@ -127,8 +127,8 @@ public class Character_Controller : MonoBehaviour {
      * <returns>The name of the root parent</returns>
      * <remarks>Will find the name no matter how deep the object is in the hierarchy</remarks>
      */
-    public static string getParentName(Transform obj) {
-        return getParentName(obj.gameObject)[^1];
+    public static string getParentName(GameObject obj) {
+        return getParentName(obj.transform)[^1];
     }
     
     /**
@@ -137,17 +137,11 @@ public class Character_Controller : MonoBehaviour {
      * <returns>The list (of type string) of the "family tree"</returns>
      * <remarks>Works with objects that doesn't "normally" have a gameObject attached</remarks>
      */
-    public static List<string> getParentName(GameObject obj) {
+    public static List<string> getParentName(Transform obj) {
         var parentList = new List<string>();
-        if (obj.name.Contains("Veggie")) {
-            obj = obj.transform.parent.gameObject;
-        } if (obj.transform.parent is null) {
-            return new List<string> {obj.name};
-        } do {
+        do {
             parentList.Add(obj.name);
-            obj = obj.transform.parent.gameObject;
-        } while (obj.transform.parent); //check against null
-        parentList.Add(obj.name);
+        }  while ((obj = obj.transform.parent));
         return parentList;
     }
 
@@ -156,7 +150,7 @@ public class Character_Controller : MonoBehaviour {
      */
     public static void movePlayer(Vector3 movement) {
         pBody.velocity = movement;
-        ShadowController.moveShadow(pBody.transform.position);
+        ShadowController.moveShadow(pBody.transform.position); //todo find every instance of an object with a rigidbody being moved with position and replace with
     }
 
     // ReSharper disable Unity.PerformanceAnalysis

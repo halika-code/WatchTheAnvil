@@ -1,6 +1,5 @@
 using System.Collections;
 using Script.Tools.ToolType;
-using Unity.VisualScripting;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
@@ -31,7 +30,7 @@ public class Collide : MonoBehaviour {
     private void OnCollisionEnter(Collision collision) {
         var cObj = collision.gameObject;
         if (!VegetablePull.validateVegetable(cObj)) {
-            processCollision(getParentName(cObj.transform), cObj.gameObject);
+            processCollision(getParentName(cObj.gameObject), cObj.gameObject);
         } StopCoroutine(nameof(ShadowController.findPlatform)); //turns off ray-casting while the y coordinate will not change
     }
     
@@ -40,7 +39,7 @@ public class Collide : MonoBehaviour {
      */
     private void OnCollisionExit(Collision other) {
         if (checkForDistance()) {
-            if (getParentName(other.gameObject.transform) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
+            if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
                 Move.updateMovement(Move.CanMove.CantJump); 
                 StartCoroutine(falling(getPlayerBody().velocity));
             } StartCoroutine(ShadowController.findPlatform()); 
@@ -105,8 +104,8 @@ public class Collide : MonoBehaviour {
                     goto case "Platforms"; //this will make the anvil act like a platform
                 } break;
             } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
-                hurtPlayer();
                 failSafe();
+                hurtPlayer();
                 break;
             } case "Tools": {
                 processTools(obj); //tools without triggers include helmet, vest, slippers ...
@@ -130,7 +129,7 @@ public class Collide : MonoBehaviour {
      * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
      */
     private static void processVegetables(Collider veggie) {
-        UI.updatePoints(VegetablePull.getProfileOfVeggie(getParentName(veggie.gameObject)));
+        UI.updatePoints(VegetablePull.getProfileOfVeggie(getParentName(veggie.transform)));
         VegetablePull.pullVegetable(veggie);
     }
 
@@ -187,7 +186,7 @@ public class Collide : MonoBehaviour {
             hop.y -= (float)MoveVel;
             yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
             movePlayer(hop);
-        } if (Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella) && ((Umbrella)umbrella).checkIfOpen()) { 
+        } if (!(Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella) && ((Umbrella)umbrella).checkIfOpen())) { 
             StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
         }
     }
@@ -221,6 +220,6 @@ public class Collide : MonoBehaviour {
      * <summary>Warps the player back in bounds if the player ever manages to fall under the map</summary>
      */
     private static void failSafe() {
-        getPlayerBody().position = new Vector3(0f, 3f, 0f);
+        getPlayerBody().MovePosition(new Vector3(0f, 3f, 0f));
     }
 }

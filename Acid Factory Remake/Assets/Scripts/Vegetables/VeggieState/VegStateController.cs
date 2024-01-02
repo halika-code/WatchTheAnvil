@@ -51,7 +51,7 @@ public class VegStateController : MonoBehaviour {
     private static int getIndexOfVeg(Component cObj) {
         for (var i = 0; i < getBodyCollective().Count; i++) {
             if (cObj.name.Equals(getBodyCollective()[i].name)) { //preliminary check if the Veggie3 is a Veggie3
-                if (checkIfEqual(getParentName(cObj.gameObject), getParentName(getBodyCollective()[i].gameObject))) {
+                if (checkIfEqual(getParentName(cObj.transform), getParentName(getBodyCollective()[i].transform))) {
                     return i; //a more detailed check based on the hierarchy of the veggie, mainly to improve efficiency
                 }
             }
