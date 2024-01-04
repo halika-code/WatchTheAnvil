@@ -1,14 +1,9 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using Script.Tools.ToolType;
 using Unity.VisualScripting;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
-using Random = UnityEngine.Random;
 
 public class Toolbelt : MonoBehaviour {
     public List<Equipment> belt;

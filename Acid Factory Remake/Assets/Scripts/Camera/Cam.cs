@@ -5,7 +5,7 @@ using UnityEngine;
 using static Character_Controller;
 public class Cam : MonoBehaviour {
     private Camera cam;
-    private readonly Vector3 normalDistance = new (-1.23f, 50f, -120f); //this is the distance relative to the player where the camera has the player in the center
+    private readonly Vector3 normalDistance = new (5f, 50f, -80f); //this is the distance relative to the player where the camera has the player in the center
 
     private void Start() {
         if (cam != null) {
@@ -35,8 +35,7 @@ public class Cam : MonoBehaviour {
     private void moveFollowPlayer() {
         var pBody = getPlayerBody().position;
         var camPos = cam.transform.position;
-        var asd = haveLeftBorder(camPos, pBody);
-        foreach (var i in asd) {
+        foreach (var i in haveLeftBorder(camPos, pBody)) {
             camPos[i] = Mathf.Lerp(camPos[i], normalDistance[i] + pBody[i], 0.02f);
         } cam.transform.position = camPos;
     }
@@ -45,22 +44,32 @@ public class Cam : MonoBehaviour {
      * <summary>Checks if the player have left a border</summary>
      * <param name="camPos">The main camera's current position</param>
      * <param name="pBody">The player's current position</param>
-     * <returns>A list of booleans corresponding to each cardinal sides that the player have left the border at</returns>
+     * <returns>A list of integers corresponding to each cardinal sides that the player have left the border at</returns>
      */
     private List<int> haveLeftBorder(Vector3 camPos, Vector3 pBody) {
-        var asd = Math.Abs(camPos.x - pBody.x) > normalDistance.x + 2f; //todo check the z, since the cam doesn't want to follow the player upwards
-        var asd2 = Math.Abs(camPos.y - pBody.y) > normalDistance.y + 2f;
-        var asd3 = Math.Abs(camPos.z - pBody.z) > normalDistance.z + 2f;
-        var leftBorderAt = new[] {asd,asd2
-           , asd3 };
+        var leftBorderAt = calculateBorders(camPos, pBody);
+        var ret = new List<int>();
         if (!leftBorderAt.Contains(true)) {
-            return new List<int> {-1};
-        } var ret = new List<int>();
-        for (var i = 0; i < 3; i++) {
+            ret.Add(-1);
+            return ret;
+        } for (var i = 0; i < leftBorderAt.Length; i++) {
             if (leftBorderAt[i]) {
                 ret.Add(i);
             }
         } return ret;
+    }
+
+    /**
+     * <summary>Calculates if the player have left the border</summary>
+     * <para>Using a formula to decide if the player have left the border</para>
+     * <returns>A list of bool denoting if the given direction have been passed over</returns>
+     * <remarks>The formula works for all 3 axis</remarks>
+     */
+    private bool[] calculateBorders(Vector3 camPos, Vector3 pBody) {
+        var retVal = new bool[3];
+        for (var i = 0; i < 3; i++) {
+            retVal[i] = Math.Abs(camPos[i] * Math.Sign(camPos[i]) - (normalDistance[i] + Math.Sign(camPos[i]) * pBody[i])) > 5;
+        } return retVal;
     }
 
     /**
