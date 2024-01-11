@@ -3,6 +3,13 @@ using TMPro;
 using UnityEngine;
 
 namespace Script.Tools.ToolType {
+    
+    /**
+     * <date>29/10/2023</date>
+     * <author>Gyula Attila Kovacs(gak8)</author>
+     * <summary>A separate script meant to handle the interactions unique to the Dynamite.
+     * This includes explosion and a timer</summary>
+     */
     public class Dynamite : global::Tools {
         private bool inUse;
         private TextMeshPro text;
@@ -15,6 +22,7 @@ namespace Script.Tools.ToolType {
             text = gameObject.GetComponentInChildren<TextMeshPro>();
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         public override void useItem() {
             if (!inUse) {
                 inUse = true;

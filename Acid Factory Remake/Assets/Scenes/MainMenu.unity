@@ -4759,6 +4759,7 @@ GameObject:
   - component: {fileID: 1470679666}
   - component: {fileID: 1470679667}
   - component: {fileID: 1470679668}
+  - component: {fileID: 1470679669}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4912,6 +4913,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   belt: []
   toolInHand: {fileID: 0}
+--- !u!114 &1470679669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470679659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c50b65e25ff01cb48bd38383392140bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1496065355
 GameObject:
   m_ObjectHideFlags: 0

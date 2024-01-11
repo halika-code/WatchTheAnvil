@@ -3,6 +3,11 @@ using System.Collections;
 using UnityEngine;
 using static Character_Controller;
 
+/**
+ * <date>03/07/2023</date>
+ * <author>Gyula Attila Kovacs(gak8)</author>
+ * <summary>A simple class that keeps the shadow under the player's feet</summary>
+ */
 public class ShadowController : MonoBehaviour {
     private new static MeshRenderer renderer;
     private static Rigidbody sBody;

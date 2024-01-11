@@ -3,6 +3,13 @@ using System.Collections;
 using Script.Tools.ToolType;
 using UnityEngine;
 
+/**
+ * <date>18/09/2023</date>
+ * <author>Gyula Attila Kovacs (gak8)</author>
+ * <summary>A collection of function that falls under the animation for the anvil
+ * alongside miscellaneous logic needed for the anvil.</summary>
+ */
+
 public class AnvilManager : MonoBehaviour {
     public static Anvil currentAnvil;
     public static int waitTimer;

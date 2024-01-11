@@ -1,6 +1,12 @@
 using UnityEngine;
 
 namespace Script.Tools.ToolType {
+    
+    /**
+     * <date></date>
+     * <author></author>
+     * <summary></summary>
+     */
     public class Flower : global::Tools {
         public GameObject flowerBody;
         public bool havePulled;

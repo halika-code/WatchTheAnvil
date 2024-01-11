@@ -1,20 +1,26 @@
 using System;
 using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using static AnvilManager;
 
 namespace Script.Tools.ToolType {
     public class StopWatch : global::Tools {
-        
-        private Coroutine stopWatchFuncContainer; //used as a more reliable way to stop a coroutine
-        public bool stopWatchInUse;
+
+        public bool stopWatchInUse; // a flag if the async should suspend
+        private delegate IEnumerator RunWatch(); //used as a more reliable way to stop a coroutine
+
+        private RunWatch container;
         public TextMeshPro text;
+        
         public void prepStopWatch() {
-            lifeSpanTimer = 20;
             stopWatchInUse = false;
+            lifeSpanTimer = 20;
             this.name = "StopWatch";
             text = gameObject.GetComponentInChildren<TextMeshPro>();
+            container += runStopWatch;
         }
 
         public void OnCollisionEnter(Collision other) {
@@ -25,25 +31,25 @@ namespace Script.Tools.ToolType {
         }
 
         public override void useItem() {
-            if (stopWatchInUse) {
-                StopCoroutine(stopWatchFuncContainer);
-                stopWatchInUse = false;
+            if (stopWatchInUse) { //the stop-watch still have juice in it but the player wants to stop it
                 updateStopWatchDisplay();
             } else if (lifeSpanTimer > 0){
-                stopWatchFuncContainer = StartCoroutine(runStopWatch());
-            } else { //I expect a stop-watch is in the player's hand
+                stopWatchInUse = true;
+                StartCoroutine(container.Invoke());
+                return; //avoids setting the stopwatch back to false
+            } if (lifeSpanTimer == 0) { //I expect a stop-watch is in the player's hand
                 destroyWatch();
-            }
+            } stopWatchInUse = false; 
+            /*StopCoroutine(container); *///todo research the container.endInvoke as a possible way of stopping async manually
         }
             
         /**
          * <summary>Find which state the anvil is in, saves that state and attempts to continue execution where it was left off</summary>
          */
         private IEnumerator runStopWatch() { 
-            stopWatchInUse = true;
-            while (lifeSpanTimer is not 0) { //actual wait
+            while (lifeSpanTimer is not 0 || stopWatchInUse) { //actual wait
                 updateStopWatchDisplay();
-                yield return new WaitForSeconds(0.7f);
+                yield return new WaitForSeconds(7f);
                 lifeSpanTimer--;
             } destroyWatch();
         }

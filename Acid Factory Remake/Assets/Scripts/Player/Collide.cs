@@ -3,7 +3,14 @@ using Script.Tools.ToolType;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
+using Task = System.Threading.Tasks.Task;
 
+/**
+ * <date>27/10/2023</date>
+ * <author>Gyula Attila Kovacs(gak8)</author>
+ * <summary>A class that is responsible for the collision processing for the player.
+ * This includes platform logic, item trigger handling and more</summary>
+ */
 public class Collide : MonoBehaviour {
     
     private static float priorYVel;
@@ -16,7 +23,7 @@ public class Collide : MonoBehaviour {
         if (getMove() is not CanMove.CantJump) {
             if (Input.GetKey(KeyCode.Space) && !isAscending()) {
                 Move.updateMovement(CanMove.CantJump);
-                StartCoroutine(flying());
+                GravAmplifier.gravity.flying();
             } 
         } else {
             updatePriorVel();
@@ -41,7 +48,7 @@ public class Collide : MonoBehaviour {
         if (checkForDistance()) {
             if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
                 Move.updateMovement(Move.CanMove.CantJump); 
-                StartCoroutine(falling(getPlayerBody().velocity));
+                GravAmplifier.gravity.falling(getPlayerBody().velocity);
             } StartCoroutine(ShadowController.findPlatform()); 
         }
     }
@@ -49,7 +56,7 @@ public class Collide : MonoBehaviour {
     private void processPlatforms() {
         /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
         if (getMove() is CanMove.CantJump) { //if the player is flying
-            slapPlayerDown();
+            GravAmplifier.gravity.slapPlayerDown();
         } if (priorYVel < 0f) {
             Move.updateMovement(CanMove.Freely);
         }
@@ -77,7 +84,7 @@ public class Collide : MonoBehaviour {
      * <remarks>It is assumed that an object with a trigger flag set is a kind of tool</remarks>
      */
     private void OnTriggerStay(Collider other) {
-        if (checkForActionButton()) {
+        if (InputController.checkForActionButton()) {
             if (VegetablePull.validateVegetable(other.gameObject)) {
                 processVegetables(other);
             } else if (Toolbelt.checkForCorrectToolType(other.name)) {
@@ -165,56 +172,13 @@ public class Collide : MonoBehaviour {
             Debug.Log("Whoopy, tried to process " + obj.name + " as a tool");
         }
     }
-
-    #region ExtrasICouldn'tMoveToSeparateCollision
-
-    /**
-    * <summary>Handles the player's y velocity for the whole duration of the player's flight</summary>
-    * <remarks>it has a decent arch</remarks>
-    */
-    private IEnumerator flying() {
-        var hop = new Vector3(getPlayerBody().velocity.x, (float)(MoveVel / 2*6f), getPlayerBody().velocity.z);
-        movePlayer(hop);
-        return falling(hop);
-    }
-
-    /**
-     * <summary>Calculates the falling velocity during the downward arch before reaching terminal (desired) velocity</summary>
-     */
-    private IEnumerator falling(Vector3 hop) {
-        while (hop.y > -50f) { //here the arch goes from ~50 to -30
-            hop.y -= (float)MoveVel;
-            yield return new WaitForSeconds(0.1f); //this is needed with the time being optimal
-            movePlayer(hop);
-        } if (!(Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella) && ((Umbrella)umbrella).checkIfOpen())) { 
-            StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
-        }
-    }
-    
-    /**
-     * <summary>Amplifies the gravity applied onto the player in a logarithmic arch (capped)</summary>
-     * <remarks>I have no idea how this works while falling...</remarks>
-     */
-    private static IEnumerator gravAmplifier(Vector3 hop) {
-        while (Move.getMove() is not CanMove.Freely) { //here the arch is kept at a downwards angle
-            movePlayer(hop);
-            yield return new WaitForFixedUpdate();
-        }
-    }
-    
-    private void slapPlayerDown() {
-        StopAllCoroutines();
-        var pBody = getPlayerBody();
-        getPlayerBody().velocity = new Vector3(pBody.velocity.x, -5f, pBody.velocity.z);
-    }
     
     /**
      * <summary>Saves the previously calculated velocity calculated in the last physics update</summary>
      */
-    private static void updatePriorVel() {
+    private static void updatePriorVel() { 
         priorYVel = getPlayerBody().velocity.y;
     }
-    #endregion
     
     /**
      * <summary>Warps the player back in bounds if the player ever manages to fall under the map</summary>

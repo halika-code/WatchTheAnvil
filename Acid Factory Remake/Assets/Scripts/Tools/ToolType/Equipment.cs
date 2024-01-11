@@ -1,6 +1,12 @@
 using UnityEngine;
 
 namespace Script.Tools.ToolType {
+    
+    /**
+     * <date>28/10/2023</date>
+     * <author>Gyula Attila Kovacs</author>
+     * <summary>This is a simple class that regulates any tool that is meant to be worn</summary>
+     */
     public class Equipment : global::Tools{
         private int durability;
 

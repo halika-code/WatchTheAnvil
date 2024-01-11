@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/**
+ * <date>17/06/2023</date>
+ * <author>Gyula Attila Kovacs (gak8)</author>
+ * <summary>A simple class that is used to regulate the movement of the player</summary>
+ */
 public class Move : MonoBehaviour {
     
     private static CanMove controller; 

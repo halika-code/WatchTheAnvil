@@ -5,18 +5,25 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
 
+/**
+ * <date>17/06/2023</date>
+ * <author>Gyula Attila Kovacs (gak8)</author>
+ * <summary>A traditional character controller script, this class is supposed to
+ * move the player in all cardinal directions alongside extra logic</summary>
+ */
 public class Character_Controller : MonoBehaviour {
     public const double MoveVel = 20;
-    private static Rigidbody pBody;
+    protected static Rigidbody pBody;
     private static Transform pHand;
 
     //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one variable
+    
     
     /**
      * <summary>Initialized the variables unique to the player</summary>
      */
     private static void init() {
-        pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
+        pBody = GameObject.Find("Player").GetComponent<Rigidbody>(); //todo check why the player's movement stutters while rapidly moving in random directions
         pBody.freezeRotation = true;
         Physics.gravity = new Vector3(0, -30f);
         Collide.init();
@@ -36,8 +43,10 @@ public class Character_Controller : MonoBehaviour {
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
-            move();
-        } checkForItemUse();
+            movePlayer(InputController.move());
+        } if (InputController.checkForItemUse()) {
+            Toolbelt.getBelt().fetchItem();
+        }
     }
 
     public static bool checkForDistance() {
@@ -45,61 +54,6 @@ public class Character_Controller : MonoBehaviour {
             return hit.distance > (getPlayerBody().transform.localScale.y/2)+1f; //the idea here is with the localScale I can get the height of the player from this data
         } return false;
     }
-
-    #region InputProcessing
-
-    private static bool itemCoolDown = false; //true if the cooldown is activated
-    
-    /**
-     * <summary><para>Evaluates the movement vector of the player</para>
-     * Based on the keys supplied by the currently active gimmick.</summary>
-     * <remarks>I wish I could implement this into a switch statement</remarks>
-    */
-    private static void move() {
-        var vel = new Vector3(0f, pBody.velocity.y, 0f);
-        if (Input.GetKey(KeyCode.A)) { //left
-            vel.x = -(float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.D)) { //right
-            vel.x = (float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.W)) { //up
-            vel.z = (float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.S)) { //down
-            vel.z = -(float)(MoveVel*1.5);
-        } movePlayer(vel);
-    }
-    
-    /**
-     * <summary>Checks if the player have pressed the E key</summary>
-     */
-    public static bool checkForActionButton() {
-        return Input.GetKey(KeyCode.E);
-    }
-
-    private static void checkForItemUse() {
-        var hand = Toolbelt.getBelt().toolInHand;
-        if (Input.GetKey(KeyCode.F) && hand /*hand is not null*/ && !itemCoolDown) {
-            switch (hand.gameObject.name) {
-                case "Dynamite": {
-                    ((Dynamite)hand).useItem();
-                    break;
-                } case "Umbrella": {
-                    ((Umbrella)hand).useItem();
-                    break;
-                } case "StopWatch": {
-                    ((StopWatch)hand).useItem();
-                    break;
-                } 
-            } itemCoolDown = true;
-            runItemCoolDown();
-        }
-    }
-
-    private static async void runItemCoolDown() {
-        await Task.Delay(1000);
-        itemCoolDown = false;
-    }
-    
-    #endregion
     
     /**
      * <summary>Attempts to remove one health-point. If that fails, the player is killed</summary>

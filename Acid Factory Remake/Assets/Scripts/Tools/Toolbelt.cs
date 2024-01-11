@@ -1,10 +1,18 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Script.Tools.ToolType;
 using Unity.VisualScripting;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
+/**
+ * <name>ToolBelt</name>
+ * <summary>A collection of functions responsive to any general purpose mechanisms for the tools.
+ * This include tools processing, storage and management</summary>
+ * <author>Gyula Attila Kovacs (gak8)</author>
+ * <date>21/10/2023</date>
+ */
 public class Toolbelt : MonoBehaviour {
     public List<Equipment> belt;
     public static Toolbelt toolBelt;
@@ -65,6 +73,27 @@ public class Toolbelt : MonoBehaviour {
                 return;
             } tool.GameObject().transform.localPosition = new Vector3(0f, 0f, -0.6f);
         }
+    }
+
+    public void fetchItem() {
+        switch (toolInHand.gameObject.name) {
+            case "Dynamite": {
+                ((Dynamite)toolInHand).useItem();
+                break;
+            } case "Umbrella": {
+                ((Umbrella)toolInHand).useItem();
+                break;
+            } case "StopWatch": {
+                ((StopWatch)toolInHand).useItem();
+                break;
+            }
+        } InputController.itemCoolDown = true;
+        runItemCoolDown();
+    }
+    
+    private async void runItemCoolDown() {
+        await Task.Delay(1000);
+        InputController.itemCoolDown = false;
     }
 
     /**
