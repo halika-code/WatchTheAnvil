@@ -12,23 +12,7 @@ using Task = System.Threading.Tasks.Task;
  * This includes platform logic, item trigger handling and more</summary>
  */
 public class Collide : MonoBehaviour {
-    
-    private static float priorYVel;
 
-    public static void init() {
-        priorYVel = 0f;
-    }
-    
-    private void FixedUpdate() {
-        if (getMove() is not CanMove.CantJump) {
-            if (Input.GetKey(KeyCode.Space) && !isAscending()) {
-                Move.updateMovement(CanMove.CantJump);
-                GravAmplifier.gravity.flying();
-            } 
-        } else {
-            updatePriorVel();
-        }
-    }
 
     #region PlatformCollision
     /**
@@ -173,12 +157,7 @@ public class Collide : MonoBehaviour {
         }
     }
     
-    /**
-     * <summary>Saves the previously calculated velocity calculated in the last physics update</summary>
-     */
-    private static void updatePriorVel() { 
-        priorYVel = getPlayerBody().velocity.y;
-    }
+
     
     /**
      * <summary>Warps the player back in bounds if the player ever manages to fall under the map</summary>

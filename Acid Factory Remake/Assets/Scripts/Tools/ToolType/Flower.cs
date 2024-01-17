@@ -3,9 +3,9 @@ using UnityEngine;
 namespace Script.Tools.ToolType {
     
     /**
-     * <date></date>
-     * <author></author>
-     * <summary></summary>
+     * <date>28/10/2023</date>
+     * <author>Gyula Attila Kovacs</author>
+     * <summary>A script that handles individual interactions for flowers</summary>
      */
     public class Flower : global::Tools {
         public GameObject flowerBody;

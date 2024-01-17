@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Script.Tools.ToolType;
@@ -12,9 +13,12 @@ using static Move;
  * move the player in all cardinal directions alongside extra logic</summary>
  */
 public class Character_Controller : MonoBehaviour {
+    
     public const double MoveVel = 20;
     protected static Rigidbody pBody;
     private static Transform pHand;
+    public static bool isAscending;
+    public static float priorYVel;
 
     //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one variable
     
@@ -23,11 +27,12 @@ public class Character_Controller : MonoBehaviour {
      * <summary>Initialized the variables unique to the player</summary>
      */
     private static void init() {
-        pBody = GameObject.Find("Player").GetComponent<Rigidbody>(); //todo check why the player's movement stutters while rapidly moving in random directions
+        pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
         Physics.gravity = new Vector3(0, -30f);
-        Collide.init();
+        priorYVel = 0f;
         pHand = GameObject.Find("Hand").transform;
+        isAscending = false;
     }
 
     private void OnEnable() { //singleton pattern, just in case
@@ -46,6 +51,15 @@ public class Character_Controller : MonoBehaviour {
             movePlayer(InputController.move());
         } if (InputController.checkForItemUse()) {
             Toolbelt.getBelt().fetchItem();
+        }
+    }
+
+    private void FixedUpdate() {
+        if (getMove() is not CanMove.CantJump && InputController.checkForJump()) {
+            var pVel = pBody.velocity;
+            GravAmplifier.gravity.falling(new Vector3(pVel.x, (float)MoveVel, pVel.z));
+        } else {
+            updatePriorVel();
         }
     }
 
@@ -125,8 +139,11 @@ public class Character_Controller : MonoBehaviour {
     public static Transform getPlayerHand() {
         return pHand;
     }
-
-    public static bool isAscending() {
-        return pBody.velocity.y > 0.05f;
+    
+    /**
+     * <summary>Saves the previously calculated velocity calculated in the last physics update</summary>
+     */
+    private static void updatePriorVel() { 
+        priorYVel = getPlayerBody().velocity.y;
     }
 }

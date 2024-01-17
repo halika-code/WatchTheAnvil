@@ -2,6 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * <date>17/09/2023</date>
+ * <author>Gyula Attila Kovacs</author>
+ * <summary>A container script with logic for individual anvils</summary>
+ */
+
 public class Anvil {
     public int aTimer;
     private Rigidbody aBody;

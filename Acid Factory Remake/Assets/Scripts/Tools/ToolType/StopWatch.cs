@@ -7,6 +7,12 @@ using UnityEngine;
 using static AnvilManager;
 
 namespace Script.Tools.ToolType {
+    
+    /**
+     * <date>28/10/2023</date>
+     * <author>Gyula Attila Kovacs</author>
+     * <summary>A somewhat complex script that stops the anvils from dropping</summary>
+     */
     public class StopWatch : global::Tools {
 
         public bool stopWatchInUse; // a flag if the async should suspend

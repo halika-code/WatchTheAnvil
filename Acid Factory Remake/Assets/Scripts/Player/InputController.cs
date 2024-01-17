@@ -29,6 +29,14 @@ public class InputController : Character_Controller {
             vel.z = -(float)(MoveVel*1.5);
         } return vel;
     }
+
+    public static bool checkForJump() {
+        if (Input.GetKey(KeyCode.Space) && !isAscending) {
+            Move.updateMovement(Move.CanMove.CantJump);
+            isAscending = true;
+            return true;
+        } return false;
+    }
     
     /**
      * <summary>Checks if the player have pressed the E key</summary>

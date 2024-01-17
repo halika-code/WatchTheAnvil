@@ -3,6 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Character_Controller;
+
+/**
+ * <date>20/08/2023</date>
+ * <author>Gyula Attila Kovacs</author>
+ * <summary>A script that handles the movement of the camera using a pre-set border and an activation formula</summary>
+ * <remarks>The camera only moves, will not rotate and
+ * needs to be snapped back to the player in case the player is warped further than the border in a frame (will jitter until the player reappears into frame)</remarks>
+ */
+
 public class Cam : MonoBehaviour {
     private Camera cam;
     private readonly Vector3 normalDistance = new (5f, 50f, -80f); //this is the distance relative to the player where the camera has the player in the center
