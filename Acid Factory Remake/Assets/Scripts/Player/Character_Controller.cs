@@ -57,7 +57,7 @@ public class Character_Controller : MonoBehaviour {
     private void FixedUpdate() {
         if (getMove() is not CanMove.CantJump && InputController.checkForJump()) {
             var pVel = pBody.velocity;
-            GravAmplifier.gravity.falling(new Vector3(pVel.x, (float)MoveVel, pVel.z));
+            GravAmplifier.gravity.falling(new Vector3(pVel.x, (float)MoveVel*2, pVel.z));
         } else {
             updatePriorVel();
         }

@@ -19,13 +19,13 @@ public class InputController : Character_Controller {
     */
     public static Vector3 move() {
         var vel = new Vector3(0f, pBody.velocity.y, 0f);
-        if (Input.GetKey(KeyCode.A)) { //left
+        if (Input.GetKey(KeyCode.A) && Move.getMove() is not Move.CanMove.CantLeft) { //left
             vel.x = -(float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.D)) { //right
+        } if (Input.GetKey(KeyCode.D) && Move.getMove() is not Move.CanMove.CantRight) { //right
             vel.x = (float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.W)) { //up
+        } if (Input.GetKey(KeyCode.W) && Move.getMove() is not Move.CanMove.CantUp) { //up
             vel.z = (float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.S)) { //down
+        } if (Input.GetKey(KeyCode.S) && Move.getMove() is not Move.CanMove.CantDown) { //down
             vel.z = -(float)(MoveVel*1.5);
         } return vel;
     }

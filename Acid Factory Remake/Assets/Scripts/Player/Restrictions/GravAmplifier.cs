@@ -34,13 +34,11 @@ public class GravAmplifier : MonoBehaviour {
     private IEnumerator speedDown(Vector3 hop) {
         while (hop.y > -50f) { //here the arch goes from ~50 to -30
             movePlayer(hop);
-            yield return new WaitForSeconds(0.2f); //todo for some reason this moves it down ...
-                      //perhaps I should have a function that waits for the normal gravity to reduce the y vel to 0
-                      
+            yield return new WaitForSeconds(0.2f);
             hop.y -= (float)MoveVel;  //todo also, what it looks like at the end of the loop if the player moves then falls off a ledge
                      //after the player lands, the player receives some residual speed (even though no input is pressed)
                      //todo note: while I was trying to do the async, the grav-amplifier have been pushing the player to the right continuously 
-        }
+        } Move.updateMovement(Move.CanMove.Freely);
     }
     
     /**
@@ -50,11 +48,7 @@ public class GravAmplifier : MonoBehaviour {
     private IEnumerator gravAmplifier(Vector3 hop) {
         while (Move.getMove() is not Move.CanMove.Freely) { //here the arch is kept at a downwards angle
             yield return speedDown(hop);
-            Debug.Log("speedin down after speedDown");
-            movePlayer(hop);
-            yield return new WaitForSeconds(0.1f);
-            Debug.Log("Move is " + Move.getMove());
-        }
+        } isAscending = false;
     }
     
     public void slapPlayerDown() {

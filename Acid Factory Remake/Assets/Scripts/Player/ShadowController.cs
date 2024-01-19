@@ -11,6 +11,7 @@ using static Character_Controller;
 public class ShadowController : MonoBehaviour {
     private new static MeshRenderer renderer;
     private static Rigidbody sBody;
+    public static RaycastHit lastHitObj;
     
     private void Start() {
         sBody = gameObject.GetComponent<Rigidbody>();
@@ -27,10 +28,10 @@ public class ShadowController : MonoBehaviour {
         if (!renderer.enabled) {
             renderer.enabled = true;
         } do {
-            if (!findColPoint(out var hit) || hit.collider.gameObject.name is "DeathPane") {
+            if (!findColPoint(out lastHitObj) || lastHitObj.collider.gameObject.name is "DeathPane") {
                 break;
-            } if (getParentName(hit.collider.gameObject) is "Platforms" or "Anvils") {
-                setShadowPosition(new Vector3(hit.point.x, hit.point.y + 0.1f, hit.point.z));
+            } if (getParentName(lastHitObj.collider.gameObject) is "Platforms" or "Anvils") {
+                setShadowPosition(new Vector3(lastHitObj.point.x, lastHitObj.point.y + 0.1f, lastHitObj.point.z));
             } yield return null;
         } while (!checkIfStandingOnPlayer());
         renderer.enabled = false;

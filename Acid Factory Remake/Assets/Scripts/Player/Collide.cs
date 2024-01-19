@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using Script.Tools.ToolType;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
+using Object = UnityEngine.Object;
 using Task = System.Threading.Tasks.Task;
 
 /**
@@ -13,6 +15,41 @@ using Task = System.Threading.Tasks.Task;
  */
 public class Collide : MonoBehaviour {
 
+    /**
+     * <summary>Processes platforms, Death-Planes and Equipment type tools</summary>
+     * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
+     */
+    private void processCollision(string parentName, GameObject obj) {
+        switch (parentName) {
+            case "Platforms": {
+                processPlatforms(); 
+                break;
+            } case "Walls": { //in case I need to add stuff in here
+                //processWalls(obj);
+                break;
+            } case "Anvils": { //updates the flag
+                if (!processAnvil()) {
+                    goto case "Platforms"; //this will make the anvil act like a platform
+                } break;
+            } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
+                failSafe();
+                hurtPlayer();
+                break;
+            } case "Tools": {
+                processTools(obj); //tools without triggers include helmet, vest, slippers ...
+                break;
+            } case "Burrow": {
+                if (obj.name is "Exit") {
+                    LevelManager.advanceLevel();
+                } else {
+                    goto case "Platforms";
+                } break;
+            } default: {
+                Debug.Log("Doin some uncoded things for " + parentName + "s");
+                goto case "Platforms";
+            } 
+        }
+    }
 
     #region PlatformCollision
     /**
@@ -45,6 +82,21 @@ public class Collide : MonoBehaviour {
             Move.updateMovement(CanMove.Freely);
         }
     }
+
+    /**
+     * <summary>Decides which direction the player gets locked from moving</summary>
+     * <remarks>If the player is found to be grounded, the wall will be treated as a platform</remarks>
+     */
+    private void processWalls(GameObject obj) {
+        for (var i = 1; i <= 4; i++) {  //todo the idea here is: the enum is a glorified integer array, so if I know what integer I want to update with, I should be able to use a for loop
+            if (gameObject.transform.position[i] > obj.transform.position[i]) { //todo player pos bigger than object: coming from the left towards the right
+                Enum.TryParse<CanMove>(i.ToString(), out var restriction); //todo note: this might not work
+                Move.updateMovement(restriction); //todo update this to reflect on up-down AND to test what position the up-down is supposed to be (not the jump)
+            }
+        }
+        
+    }
+    
     #endregion
 
     #region ToolCollision
@@ -79,41 +131,6 @@ public class Collide : MonoBehaviour {
     
     #endregion
     
-    /**
-     * <summary>Processes platforms, Death-Planes and Equipment type tools</summary>
-     * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
-     */
-    private void processCollision(string parentName, GameObject obj) {
-        switch (parentName) {
-            case "Platforms": {
-                processPlatforms(); 
-                break;
-            } case "Walls" or "Player": { //in case I need to add stuff in here
-                break;
-            } case "Anvils": { //updates the flag
-                if (!processAnvil()) {
-                    goto case "Platforms"; //this will make the anvil act like a platform
-                } break;
-            } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
-                failSafe();
-                hurtPlayer();
-                break;
-            } case "Tools": {
-                processTools(obj); //tools without triggers include helmet, vest, slippers ...
-                break;
-            } case "Burrow": {
-                if (obj.name is "Exit") {
-                    LevelManager.advanceLevel();
-                } else {
-                    goto case "Platforms";
-                } break;
-            } default: {
-                Debug.Log("Doin some uncoded things for " + parentName + "s");
-                goto case "Platforms";
-            } 
-        }
-    }
-        
     /**
      * <summary>Initiates the logic behind the vegetable pulls
      * <para>A beetroot is twice as valuable</para></summary>
