@@ -47,6 +47,7 @@ public class Character_Controller : MonoBehaviour {
 
     // Update is called once per frame
     private void Update() {
+        Debug.Log("The move state is " + getMove());
         if (getMove() is not CanMove.Cant) {
             movePlayer(InputController.move());
         } if (InputController.checkForItemUse()) {
@@ -57,7 +58,7 @@ public class Character_Controller : MonoBehaviour {
     private void FixedUpdate() {
         if (getMove() is not CanMove.CantJump && InputController.checkForJump()) {
             var pVel = pBody.velocity;
-            GravAmplifier.gravity.falling(new Vector3(pVel.x, (float)MoveVel*2, pVel.z));
+            GravAmplifier.gravity.falling(new Vector3(pVel.x, (float)MoveVel*3, pVel.z));
         } else {
             updatePriorVel();
         }

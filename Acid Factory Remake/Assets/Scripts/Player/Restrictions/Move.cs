@@ -12,8 +12,8 @@ public class Move : MonoBehaviour {
         Freely,
         CantLeft,
         CantRight,
-        CantUp,
         CantDown,
+        CantUp,
         CantJump,
         Cant
     }

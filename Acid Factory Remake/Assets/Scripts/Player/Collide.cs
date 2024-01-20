@@ -19,11 +19,10 @@ public class Collide : MonoBehaviour {
      * <summary>Processes platforms, Death-Planes and Equipment type tools</summary>
      * <remarks>If the object is something uncounted for, the player is hurt and respawned at center coordinates</remarks>
      */
-    private void processCollision(string parentName, GameObject obj) {
+    private void processCollision(string parentName, Collision obj) {
         switch (parentName) {
             case "Platforms": {
-                Debug.Log(getPlayerBody().velocity.y);
-                if (Math.Abs(getPlayerBody().velocity.y) > 1) { //normally 0 if grounded
+                if (Math.Abs(Math.Round(getPlayerBody().velocity.y, 2)) > 0.05f) { //normally 0 if grounded
                     goto case "Walls";
                 } processPlatforms(); 
                 break;
@@ -39,10 +38,10 @@ public class Collide : MonoBehaviour {
                 hurtPlayer();
                 break;
             } case "Tools": {
-                processTools(obj); //tools without triggers include helmet, vest, slippers ...
+                processTools(obj.gameObject); //tools without triggers include helmet, vest, slippers ...
                 break;
             } case "Burrow": {
-                if (obj.name is "Exit") {
+                if (obj.gameObject.name is "Exit") {
                     LevelManager.advanceLevel();
                 } else {
                     goto case "Platforms";
@@ -59,9 +58,8 @@ public class Collide : MonoBehaviour {
          * <summary>handles the logic behind solid object collision</summary>
          */
         private void OnCollisionEnter(Collision collision) {
-            var cObj = collision.gameObject;
-            if (!VegetablePull.validateVegetable(cObj)) {
-                processCollision(getParentName(cObj.gameObject), cObj.gameObject);
+            if (!VegetablePull.validateVegetable(collision.gameObject)) {
+                processCollision(getParentName(collision.gameObject), collision);
             } StopCoroutine(nameof(ShadowController.findPlatform)); //turns off ray-casting while the y coordinate will not change
         }
         
@@ -91,20 +89,16 @@ public class Collide : MonoBehaviour {
          * <summary>Decides which direction the player gets locked from moving</summary>
          * <remarks>If the player is found to be grounded, the wall will be treated as a platform</remarks>
          */
-        private void processWalls(GameObject obj) {
-            for (var i = 0; i < 7; i+=2) { //todo test if this properly runs through each side. 
-                
-                if (Math.Abs(gameObject.transform.position[i] - obj.transform.position[i]) < 0.2f) { 
-                    processPlatforms(); //diverting execution just in case
-                } else {
-                    if (i == 1) { //don't want to restrict the jumping axis
-                        continue;
-                    } Enum.TryParse<CanMove>(gameObject.transform.position[i] < obj.transform.position[i] 
-                            ? /*todo the idea here is if the player is to the left on the given axis, apply restriction state number i
-                                todo else, apply restriction state number i+1 ( 1=left, 1+1=right or 3=up, 3+1=down)*/
-                            i.ToString() : (1 + i).ToString(), 
-                        out var restriction); 
+        private void processWalls(Collision obj) {
+            //Collision.impulse is used here since it is a nice big number that is reliable
+            if (Math.Abs(obj.impulse[1]) is not 0) { 
+                processPlatforms(); //diverting execution just in case
+                return;
+            } for (var i = 0; i < 3; i+=2) { //designed to run twice
+                if (Math.Abs(obj.contacts[0].normal[i]) is not 0) { //normal is used here since it is reliably ranging from -1 to 1
+                    Enum.TryParse<CanMove>(obj.contacts[0].normal[i] > 0 ? (1 + i).ToString() : (2 + i).ToString(), out var restriction);
                     Move.updateMovement(restriction);
+                    break;
                 }
             }
             

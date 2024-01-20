@@ -26,7 +26,6 @@ public class GravAmplifier : MonoBehaviour {
      */
     public void falling(Vector3 hop) {
         if (!(Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella) && ((Umbrella)umbrella).checkIfOpen())) { 
-            Debug.Log("Fallin");
             StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
         }
     }
@@ -34,7 +33,7 @@ public class GravAmplifier : MonoBehaviour {
     private IEnumerator speedDown(Vector3 hop) {
         while (hop.y > -50f) { //here the arch goes from ~50 to -30
             movePlayer(hop);
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f); //tune this to strengthen the gravity,
             hop.y -= (float)MoveVel; 
         } Move.updateMovement(Move.CanMove.Freely);
     }
