@@ -47,7 +47,6 @@ public class Character_Controller : MonoBehaviour {
 
     // Update is called once per frame
     private void Update() {
-        Debug.Log("The move state is " + getMove());
         if (getMove() is not CanMove.Cant) {
             movePlayer(InputController.move());
         } if (InputController.checkForItemUse()) {

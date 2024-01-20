@@ -67,7 +67,10 @@ public class Toolbelt : MonoBehaviour {
      */
     private void putToolOnBelt(Equipment tool) {
         if (!belt.Contains(tool)) { //brainstorming: this could be done by having a sprite / 3D version of the object kept as an apallel like the player's shadow 
-            belt.Add(tool); tool.GameObject().transform.parent = Character_Controller.getPlayerBody().transform;
+            if (tool.name.Contains("lipper")) {
+                tool.GetComponent<Collider>().enabled = false; //needs to be disabled otherwise the player's hitbox gets massively elongated
+            } belt.Add(tool); 
+            tool.gameObject.transform.parent = Character_Controller.getPlayerBody().transform;
             if (tool.name is not "Vest") {  //then playing an animation of the player getting it on then toggling the mesh renderer of the object (or pane housing the sprite)
                 tool.GameObject().transform.localPosition = tool.name is "Helmet" ? new Vector3(0f, 0.7f, 0f) : new Vector3(0f, -0.5f, -0.4f);
                 return;
