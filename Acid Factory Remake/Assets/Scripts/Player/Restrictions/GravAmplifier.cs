@@ -35,9 +35,7 @@ public class GravAmplifier : MonoBehaviour {
         while (hop.y > -50f) { //here the arch goes from ~50 to -30
             movePlayer(hop);
             yield return new WaitForSeconds(0.2f);
-            hop.y -= (float)MoveVel;  //todo also, what it looks like at the end of the loop if the player moves then falls off a ledge
-                     //after the player lands, the player receives some residual speed (even though no input is pressed)
-                     //todo note: while I was trying to do the async, the grav-amplifier have been pushing the player to the right continuously 
+            hop.y -= (float)MoveVel; 
         } Move.updateMovement(Move.CanMove.Freely);
     }
     
@@ -48,7 +46,7 @@ public class GravAmplifier : MonoBehaviour {
     private IEnumerator gravAmplifier(Vector3 hop) {
         while (Move.getMove() is not Move.CanMove.Freely) { //here the arch is kept at a downwards angle
             yield return speedDown(hop);
-        } isAscending = false;
+        } 
     }
     
     public void slapPlayerDown() {

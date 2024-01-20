@@ -22,10 +22,13 @@ public class Collide : MonoBehaviour {
     private void processCollision(string parentName, GameObject obj) {
         switch (parentName) {
             case "Platforms": {
-                processPlatforms(); 
+                Debug.Log(getPlayerBody().velocity.y);
+                if (Math.Abs(getPlayerBody().velocity.y) > 1) { //normally 0 if grounded
+                    goto case "Walls";
+                } processPlatforms(); 
                 break;
             } case "Walls": { //in case I need to add stuff in here
-                //processWalls(obj);
+                processWalls(obj);
                 break;
             } case "Anvils": { //updates the flag
                 if (!processAnvil()) {
@@ -52,82 +55,92 @@ public class Collide : MonoBehaviour {
     }
 
     #region PlatformCollision
-    /**
-     * <summary>handles the logic behind solid object collision</summary>
-     */
-    private void OnCollisionEnter(Collision collision) {
-        var cObj = collision.gameObject;
-        if (!VegetablePull.validateVegetable(cObj)) {
-            processCollision(getParentName(cObj.gameObject), cObj.gameObject);
-        } StopCoroutine(nameof(ShadowController.findPlatform)); //turns off ray-casting while the y coordinate will not change
-    }
-    
-    /**
-     * <summary>Attempts to reset the player's state into "should fall"</summary>
-     */
-    private void OnCollisionExit(Collision other) {
-        if (checkForDistance()) {
-            if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
-                Move.updateMovement(Move.CanMove.CantJump); 
-                GravAmplifier.gravity.falling(getPlayerBody().velocity);
-            } StartCoroutine(ShadowController.findPlatform()); 
+        /**
+         * <summary>handles the logic behind solid object collision</summary>
+         */
+        private void OnCollisionEnter(Collision collision) {
+            var cObj = collision.gameObject;
+            if (!VegetablePull.validateVegetable(cObj)) {
+                processCollision(getParentName(cObj.gameObject), cObj.gameObject);
+            } StopCoroutine(nameof(ShadowController.findPlatform)); //turns off ray-casting while the y coordinate will not change
         }
-    }
-    
-    private void processPlatforms() {
-        /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
-        if (getMove() is CanMove.CantJump) { //if the player is flying
-            GravAmplifier.gravity.slapPlayerDown();
-        } if (priorYVel < 0f) {
-            Move.updateMovement(CanMove.Freely);
-        }
-    }
-
-    /**
-     * <summary>Decides which direction the player gets locked from moving</summary>
-     * <remarks>If the player is found to be grounded, the wall will be treated as a platform</remarks>
-     */
-    private void processWalls(GameObject obj) {
-        for (var i = 1; i <= 4; i++) {  //todo the idea here is: the enum is a glorified integer array, so if I know what integer I want to update with, I should be able to use a for loop
-            if (gameObject.transform.position[i] > obj.transform.position[i]) { //todo player pos bigger than object: coming from the left towards the right
-                Enum.TryParse<CanMove>(i.ToString(), out var restriction); //todo note: this might not work
-                Move.updateMovement(restriction); //todo update this to reflect on up-down AND to test what position the up-down is supposed to be (not the jump)
+        
+        /**
+         * <summary>Attempts to reset the player's state into "should fall"</summary>
+         */
+        private void OnCollisionExit(Collision other) {
+            if (checkForDistance()) {
+                if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
+                    Move.updateMovement(Move.CanMove.CantJump); 
+                    GravAmplifier.gravity.falling(getPlayerBody().velocity);
+                } StartCoroutine(ShadowController.findPlatform()); 
             }
         }
         
-    }
-    
+        private void processPlatforms() {
+            /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
+            if (getMove() is CanMove.CantJump) { //if the player is flying
+                GravAmplifier.gravity.slapPlayerDown();
+            } if (priorYVel < 0f) {
+                Move.updateMovement(CanMove.Freely);
+                isAscending = false;
+            }
+        }
+
+        /**
+         * <summary>Decides which direction the player gets locked from moving</summary>
+         * <remarks>If the player is found to be grounded, the wall will be treated as a platform</remarks>
+         */
+        private void processWalls(GameObject obj) {
+            for (var i = 0; i < 7; i+=2) { //todo test if this properly runs through each side. 
+                
+                if (Math.Abs(gameObject.transform.position[i] - obj.transform.position[i]) < 0.2f) { 
+                    processPlatforms(); //diverting execution just in case
+                } else {
+                    if (i == 1) { //don't want to restrict the jumping axis
+                        continue;
+                    } Enum.TryParse<CanMove>(gameObject.transform.position[i] < obj.transform.position[i] 
+                            ? /*todo the idea here is if the player is to the left on the given axis, apply restriction state number i
+                                todo else, apply restriction state number i+1 ( 1=left, 1+1=right or 3=up, 3+1=down)*/
+                            i.ToString() : (1 + i).ToString(), 
+                        out var restriction); 
+                    Move.updateMovement(restriction);
+                }
+            }
+            
+        }
+        
     #endregion
 
     #region ToolCollision
-    /** 
-     * <summary>Attempts to pick-up item from the floor that are pickup-able</summary>
-     * <remarks>Added an override that jumps straight to OnTriggerStay instead of processing logic</remarks>
-     */
-    private void OnTriggerEnter(Collider other) {
-        /*
-        if (Toolbelt.checkForCorrectToolType(other.name) || getParentName(other.transform) is "Tools") {
-            var flow = FlowerController.findFlower(other.name);
-            if (flow == null || !flow.gameObject.GetComponent<Collider>().enabled && flow.havePulled) { //if the item have not been acquired OR is a flower and have been pulled (need to check against the collider being turned)
-                Toolbelt.getBelt().putToolInHand(Toolbelt.getBelt().getTool(other, true));
-            } 
-        }*/ //removed function: ensures the player will not have annoying moments of unintentionally juggling items
-        OnTriggerStay(other);
-    } 
+        /** 
+         * <summary>Attempts to pick-up item from the floor that are pickup-able</summary>
+         * <remarks>Added an override that jumps straight to OnTriggerStay instead of processing logic</remarks>
+         */
+        private void OnTriggerEnter(Collider other) {
+            /*
+            if (Toolbelt.checkForCorrectToolType(other.name) || getParentName(other.transform) is "Tools") {
+                var flow = FlowerController.findFlower(other.name);
+                if (flow == null || !flow.gameObject.GetComponent<Collider>().enabled && flow.havePulled) { //if the item have not been acquired OR is a flower and have been pulled (need to check against the collider being turned)
+                    Toolbelt.getBelt().putToolInHand(Toolbelt.getBelt().getTool(other, true));
+                } 
+            }*/ //removed function: ensures the player will not have annoying moments of unintentionally juggling items
+            OnTriggerStay(other);
+        } 
 
-    /**
-     * <summary>Handles items that aren't supposed to be vacuumed up immediately</summary>
-     * <remarks>It is assumed that an object with a trigger flag set is a kind of tool</remarks>
-     */
-    private void OnTriggerStay(Collider other) {
-        if (InputController.checkForActionButton()) {
-            if (VegetablePull.validateVegetable(other.gameObject)) {
-                processVegetables(other);
-            } else if (Toolbelt.checkForCorrectToolType(other.name)) {
-                processTools(other.gameObject);
-            } 
+        /**
+         * <summary>Handles items that aren't supposed to be vacuumed up immediately</summary>
+         * <remarks>It is assumed that an object with a trigger flag set is a kind of tool</remarks>
+         */
+        private void OnTriggerStay(Collider other) {
+            if (InputController.checkForActionButton()) {
+                if (VegetablePull.validateVegetable(other.gameObject)) {
+                    processVegetables(other);
+                } else if (Toolbelt.checkForCorrectToolType(other.name)) {
+                    processTools(other.gameObject);
+                } 
+            }
         }
-    }
     
     #endregion
     
