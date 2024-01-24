@@ -135,8 +135,14 @@ public class Collide : MonoBehaviour {
                 } 
             }
         }
-    
-    #endregion
+
+        private void OnTriggerExit(Collider other) {
+            if (InputController.itemCoolDown) { //this re-enables the player to pick-up the tool dropped to the floor
+                InputController.itemCoolDown = false;
+            }
+        }
+
+        #endregion
     
     /**
      * <summary>Initiates the logic behind the vegetable pulls
@@ -174,8 +180,10 @@ public class Collide : MonoBehaviour {
      */
     private static void processTools(Object obj) {
         var tool = Toolbelt.getBelt().findTool(obj, true); //problem here, tool gets set as null
-        if (tool != null) {
-            Toolbelt.getBelt().handleTool(tool);
+        if (tool != null) { //if the tool found is not null AND the player isn't attempting to spam-pickup the same tool
+            if (!InputController.itemCoolDown) {
+                Toolbelt.getBelt().handleTool(tool);
+            }
         } else {
             Debug.Log("Whoopy, tried to process " + obj.name + " as a tool");
         }

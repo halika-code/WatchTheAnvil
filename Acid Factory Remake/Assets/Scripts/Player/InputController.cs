@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Script.Tools.ToolType;
 using UnityEngine;
@@ -11,23 +13,36 @@ using UnityEngine;
  */
 public class InputController : Character_Controller {
     public static bool itemCoolDown; //true if the cooldown is activated
+    private static KeyCode lastButtonPressed;
+    private static KeyCode[] buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
     
     /**
      * <summary><para>Evaluates the movement vector of the player</para>
-     * Based on the keys supplied by the currently active gimmick.</summary>
+     *  Based on the keys supplied by the currently active gimmick.</summary>
      * <remarks>I wish I could implement this into a switch statement</remarks>
     */
-    public static Vector3 move() {
-        var vel = new Vector3(0f, pBody.velocity.y, 0f);
-        if (Input.GetKey(KeyCode.A) && Move.getMove() is not Move.CanMove.CantLeft) { //left
-            vel.x = -(float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.D) && Move.getMove() is not Move.CanMove.CantRight) { //right
-            vel.x = (float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.W) && Move.getMove() is not Move.CanMove.CantUp) { //up
-            vel.z = (float)(MoveVel*1.5);
-        } if (Input.GetKey(KeyCode.S) && Move.getMove() is not Move.CanMove.CantDown) { //down
-            vel.z = -(float)(MoveVel*1.5);
+    public static Vector3 move(Vector3 vel) {
+        for (var i = 0; i <= 3; i++) {
+            if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
+                float velocity = calculateParity(i);
+                if (buttons[i].Equals(lastButtonPressed) || !isAscending) {
+                    velocity *= (float)(MoveVel * 1.3);
+                } else {  //todo have an additional check breaking from the function IF the player is ascending (this formula jiggles the player left-right)
+                    velocity *= (float)(MoveVel * 0.8f);
+                } vel[i < 2 ? 0 : 2] = velocity;
+                lastButtonPressed = buttons[i];
+            } 
         } return vel;
+    }
+
+    /**
+     * <summary>Toggles between -1 and 1 based on the value given.
+     * <para>Starts at 1 when given a 1</para></summary>
+     * <param name="i">The index from the pattern that will be returned</param>
+     * <remarks>Could be done in a more simple-minded way</remarks>
+     */
+    private static int calculateParity(double i) {
+        return Math.Sign(-Math.Pow(-2, (int)i)); //note, the integer casting is used to divide by zero and get 0 as result. The brackets are important there, as in we wanna divide then cast
     }
 
     public static bool checkForJump() {

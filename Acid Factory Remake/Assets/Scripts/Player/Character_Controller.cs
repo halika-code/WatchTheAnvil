@@ -8,13 +8,17 @@ using static Move;
 
 /**
  * <date>17/06/2023</date>
- * <author>Gyula Attila Kovacs (gak8)</author>
+ * <author>ciglos mikCiglos aka cigi migi</author>
  * <summary>A traditional character controller script, this class is supposed to
  * move the player in all cardinal directions alongside extra logic</summary>
  */
 public class Character_Controller : MonoBehaviour {
     
-    public const double MoveVel = 20;
+    public const double MoveVel = 20; 
+      //todo jitter happens when spamming left-right in the air. Also all the equipment's hitboxes need to be turned off.
+      //todo Picking up the stopWatch and then the dynamite just drops the dynamite through the floor (picking up dynamite then the stopWatch drops the dynamite the same way)
+      //todo change the force applying function in movePlayer() to not have the player get smashed into the ground randomly
+      //todo change the burrows to be in the platforms (and change the OnCollisionEnter accordingly)
     protected static Rigidbody pBody;
     private static Transform pHand;
     public static bool isAscending;
@@ -48,10 +52,25 @@ public class Character_Controller : MonoBehaviour {
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
-            movePlayer(InputController.move());
+            movePlayer(InputController.move(calculateVel()));
         } if (InputController.checkForItemUse()) {
             Toolbelt.getBelt().fetchItem();
         }
+    }
+
+    /**
+     * <summary>Dampens the button press</summary>
+     */
+    private static Vector3 calculateVel() {
+        var ret = new Vector3(0f, pBody.velocity.y, 0f);
+        if (isAscending) {
+            var pVel = pBody.velocity;
+            for(var i = 0; i < 3; i+=2) {
+                if (Math.Abs(Math.Round(pVel[i] / 1.5, 2)) > 0.1f) {
+                    ret[i] = pVel[i];
+                }
+            } return new Vector3(pVel.x * .9f, pVel.y, pVel.z * .9f);
+        } return ret;
     }
 
     private void FixedUpdate() {

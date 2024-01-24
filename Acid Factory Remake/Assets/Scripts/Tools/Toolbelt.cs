@@ -39,9 +39,6 @@ public class Toolbelt : MonoBehaviour {
      * <remarks>This function is equipped to handle flowers properly as well</remarks>
      */
     public void handleTool(Object tool) {
-        if (tool == null) {
-            Debug.Log("Whoopy");
-        }
         if (checkForCorrectToolType(tool.name)) {
             putToolInHand((Tools)tool);
         } else {
@@ -52,11 +49,12 @@ public class Toolbelt : MonoBehaviour {
     /**
      * <summary>Puts tool into an object that is child of the player to be used as a tool</summary>
      */
-    private void putToolInHand(Tools tool) {
+    private void putToolInHand(Object tool) {
         if (canPickup || toolInHand == null) { //if the hand is empty of the hand just have been emptied
             canPickup = false;
-            if (toolInHand != null && !tool.name.Equals(toolInHand.gameObject.name)) {
-                throwToolFromHand(tool);
+            if (toolInHand != null) {
+                throwToolFromHand(); 
+                runItemCoolDown();
             } addTool(tool);
             canPickup = true;
         }
@@ -67,9 +65,8 @@ public class Toolbelt : MonoBehaviour {
      */
     private void putToolOnBelt(Equipment tool) {
         if (!belt.Contains(tool)) { //brainstorming: this could be done by having a sprite / 3D version of the object kept as an apallel like the player's shadow 
-            if (tool.name.Contains("lipper")) {
-                tool.GetComponent<Collider>().enabled = false; //needs to be disabled otherwise the player's hitbox gets massively elongated
-            } belt.Add(tool); 
+            tool.GetComponent<Collider>().enabled = false; //needs to be disabled otherwise the player's hitbox gets massively elongated
+            belt.Add(tool); 
             tool.gameObject.transform.parent = Character_Controller.getPlayerBody().transform;
             if (tool.name is not "Vest") {  //then playing an animation of the player getting it on then toggling the mesh renderer of the object (or pane housing the sprite)
                 tool.GameObject().transform.localPosition = tool.name is "Helmet" ? new Vector3(0f, 0.7f, 0f) : new Vector3(0f, -0.5f, -0.4f);
@@ -90,12 +87,12 @@ public class Toolbelt : MonoBehaviour {
                 ((StopWatch)toolInHand).useItem();
                 break;
             }
-        } InputController.itemCoolDown = true;
-        runItemCoolDown();
+        } runItemCoolDown();
     }
     
-    private async void runItemCoolDown() {
-        await Task.Delay(1000);
+    private static async void runItemCoolDown() {
+        InputController.itemCoolDown = true;
+        await Task.Delay(500);
         InputController.itemCoolDown = false;
     }
 
@@ -125,17 +122,13 @@ public class Toolbelt : MonoBehaviour {
      * <summary>Swaps the tool's state from being in the player's hand
      * <para>to on the ground with all the necessary flag changes</para></summary>
      */
-    private void throwToolFromHand(Object tool) { 
+    private void throwToolFromHand() { 
         Debug.Log("Throwing " + toolInHand.name); //todo then have an OnCollisionEnter that swaps the trigger back with the gravity turned off
-        if (toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>() == null) { //todo finally have the getTool have the tool be set in every if statement
-            Debug.Log("Whoopy, tried to throw an item from hand that doesn't have a rigidbody");
-            return;
+        if (toolInHand.name.Contains("StopWatch") && ((StopWatch)toolInHand).stopWatchInUse) {
+            ((StopWatch)toolInHand).useItem();
+        } else if (toolInHand.name.Contains("Umbrella") && ((Umbrella)toolInHand).checkIfOpen()) { //if the umbrella is in the player's hand AND is open
+            ((Umbrella)toolInHand).useItem();
         } transferToolState(true);
-        if (tool.name.Contains("StopWatch") && ((StopWatch)tool).stopWatchInUse) {
-            ((StopWatch)tool).useItem();
-        } else if (tool.name.Contains("Umbrella") && ((Umbrella)tool).checkIfOpen()) { //if the umbrella is in the player's hand AND is open
-            ((Umbrella)tool).useItem();
-        } 
     }
 
     /**
@@ -171,6 +164,7 @@ public class Toolbelt : MonoBehaviour {
      */
     private void removeTool(string toolName) {
         if (toolInHand != null && toolName.Equals(toolInHand.gameObject.name)) {
+            toolInHand.transform.position = Character_Controller.getPlayerBody().position; //putting the given item to the feet of the player
             toolInHand = null;
         } else {
             checkForTool(toolName, out var tool);
