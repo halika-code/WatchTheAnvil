@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class VegetablePull : MonoBehaviour {
@@ -42,7 +43,9 @@ public class VegetablePull : MonoBehaviour {
                     score *= 5;
                     break;
                 } default: {
-                    Debug.Log("Whoopy while trying to decide the score of the object of name " + parentList[0]);
+                    if (parents.Contains("Veggie")) {
+                        continue; //making sure the loop will not break out thanks to a rouge Veggie
+                    } Debug.Log("Whoopy while trying to decide the score of the object of name " + parentList[0]);
                     break;
                 }
             }

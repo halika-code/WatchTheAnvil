@@ -52,7 +52,7 @@ public class Character_Controller : MonoBehaviour {
     private void Update() {
         if (getMove() is not CanMove.Cant) {
             movePlayer(InputController.move(calculateVel()));
-        } if (InputController.checkForItemUse()) {
+        } if (InputController.checkForItemUse()) { //if the player wants to use the item and the cooldown flag is clear
             Toolbelt.getBelt().fetchItem();
         }
     }

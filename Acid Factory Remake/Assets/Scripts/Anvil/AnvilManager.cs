@@ -31,7 +31,7 @@ public class AnvilManager : MonoBehaviour {
         currentAnvil = new Anvil(Instantiate(preFab, transform, true), 3);
         yield return runTimer(currentAnvil);
         waitTimer = 20 - (int)Math.Ceiling((double)anvilCounter*3/2); //resets the wait timer
-        StartCoroutine(runWait()); 
+        yield return runWait(); 
     }
 
     /**
@@ -84,7 +84,7 @@ public class AnvilManager : MonoBehaviour {
             } Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
             yield return new WaitForSeconds(0.5f);
             waitTimer--;
-        } StartCoroutine(runAnvils()); //keep in mind, execution returns here as soon as the 1st timer starts ticking
+        } yield return runAnvils(); //keep in mind, execution returns here as soon as the 1st timer starts ticking
     }
 
     public static bool isFlyin() {

@@ -27,7 +27,7 @@ public class Toolbelt : MonoBehaviour {
 
     private bool canPickup;
     
-    private void Start() {
+    private void OnEnable() {
         belt = new List<Equipment>();
         canPickup = true;
         toolBelt = this;

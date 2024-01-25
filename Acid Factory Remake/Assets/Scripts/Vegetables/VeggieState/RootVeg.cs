@@ -19,8 +19,8 @@ public class RootVeg : MonoBehaviour {
      * <summary>Wipes the list from the previous level</summary>
      */
     public void OnDisable() {
-        cBodyCollective = null;
-        vegStateCollective = null;
+        cBodyCollective.Clear();
+        vegStateCollective.Clear();
         root = null;
     }
 

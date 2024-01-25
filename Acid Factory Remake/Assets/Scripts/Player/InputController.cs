@@ -28,7 +28,7 @@ public class InputController : Character_Controller {
                 if (buttons[i].Equals(lastButtonPressed) || !isAscending) {
                     velocity *= (float)(MoveVel * 1.3);
                     lastButtonPressed = buttons[i];
-                } else {  //todo have an additional check breaking from the function IF the player is ascending (this formula jiggles the player left-right)
+                } else {
                     velocity *= (float)(MoveVel * 0.8f);
                 } vel[i < 2 ? 0 : 2] = velocity;
             } 

@@ -39,25 +39,30 @@ namespace Script.Tools.ToolType {
         public override void useItem() {
             if (stopWatchInUse) { //the stop-watch still have juice in it but the player wants to stop it
                 updateStopWatchDisplay();
+                stopWatchInUse = false; 
             } else if (lifeSpanTimer > 0){
                 stopWatchInUse = true;
-                StartCoroutine(container.Invoke());
-                return; //avoids setting the stopwatch back to false
+                if (waitTimer < 2) {
+                    text.text = "Too late, watch out!";
+                } else {
+                    StartCoroutine(container.Invoke());
+                } return; //avoids setting the stopwatch back to false
             } if (lifeSpanTimer == 0) { //I expect a stop-watch is in the player's hand
                 destroyWatch();
-            } stopWatchInUse = false; 
-            /*StopCoroutine(container); *///todo research the container.endInvoke as a possible way of stopping async manually
+            }
         }
             
         /**
          * <summary>Find which state the anvil is in, saves that state and attempts to continue execution where it was left off</summary>
          */
         private IEnumerator runStopWatch() { 
-            while (lifeSpanTimer is not 0 || stopWatchInUse) { //actual wait
+            while (lifeSpanTimer is not 0 && stopWatchInUse) { //actual wait
                 updateStopWatchDisplay();
-                yield return new WaitForSeconds(7f);
+                yield return new WaitForSeconds(0.8f);
                 lifeSpanTimer--;
-            } destroyWatch();
+            } if (stopWatchInUse) {
+                destroyWatch();
+            }
         }
 
         /**

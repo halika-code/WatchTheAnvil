@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Character_Controller;
@@ -10,7 +11,7 @@ public class LevelManager : MonoBehaviour {
     private static LevelManager lvlLoader;
     
     // Start is called before the first frame update
-    private void Start() {
+    private void OnEnable() {
         lvlLoader = this;
         levelType = SceneManager.GetActiveScene().name.Contains("Level") ? "Level" : "Menu";
     }
@@ -35,7 +36,9 @@ public class LevelManager : MonoBehaviour {
             Debug.Log("Running into the next level ... kinda");
             killPlayer(); //todo add functionality that loads the next level
         } else {
-            Debug.Log("Player wanted to leave level with " + UI.getCurrentPoints() + " points against " + maxPoints);
+            gameObject.GetComponentInChildren<TextMeshPro>().text =
+                "Whoops, looks like you tried leaving the level with " + UI.getCurrentPoints() + " points against " +
+                maxPoints + ", try again when you have at least 80% of the vegetables collected";
         }
     }
 
