@@ -13,7 +13,7 @@ using UnityEngine;
  */
 public class InputController : Character_Controller {
     public static bool itemCoolDown; //true if the cooldown is activated
-    private static KeyCode lastButtonPressed;
+    private static KeyCode lastButtonPressed = KeyCode.D;
     private static KeyCode[] buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
     
     /**
@@ -27,10 +27,10 @@ public class InputController : Character_Controller {
                 float velocity = calculateParity(i);
                 if (buttons[i].Equals(lastButtonPressed) || !isAscending) {
                     velocity *= (float)(MoveVel * 1.3);
+                    lastButtonPressed = buttons[i];
                 } else {  //todo have an additional check breaking from the function IF the player is ascending (this formula jiggles the player left-right)
                     velocity *= (float)(MoveVel * 0.8f);
                 } vel[i < 2 ? 0 : 2] = velocity;
-                lastButtonPressed = buttons[i];
             } 
         } return vel;
     }

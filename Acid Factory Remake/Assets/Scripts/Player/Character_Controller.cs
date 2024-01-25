@@ -15,17 +15,16 @@ using static Move;
 public class Character_Controller : MonoBehaviour {
     
     public const double MoveVel = 20; 
-      //todo jitter happens when spamming left-right in the air. Also all the equipment's hitboxes need to be turned off.
-      //todo Picking up the stopWatch and then the dynamite just drops the dynamite through the floor (picking up dynamite then the stopWatch drops the dynamite the same way)
-      //todo change the force applying function in movePlayer() to not have the player get smashed into the ground randomly
-      //todo change the burrows to be in the platforms (and change the OnCollisionEnter accordingly)
     protected static Rigidbody pBody;
     private static Transform pHand;
-    public static bool isAscending;
+    /**
+     * A boolean that keeps track if the player is air-borne
+     * <para>Set to true the 1st frame execution starts for the jump routine, set to false when colliding with the ground</para>
+     */
+    public static bool isAscending; 
     public static float priorYVel;
 
     //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one variable
-    
     
     /**
      * <summary>Initialized the variables unique to the player</summary>
@@ -103,7 +102,6 @@ public class Character_Controller : MonoBehaviour {
      * <summary>A simple kill-switch that reloads the game</summary>
      */
     public static void killPlayer() {
-        RootVeg.init(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

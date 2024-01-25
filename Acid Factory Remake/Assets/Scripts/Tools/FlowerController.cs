@@ -11,7 +11,7 @@ namespace Script.Tools.ToolType {
             foreach (var flower in gameObject.GetComponentsInChildren<Rigidbody>()) {
                 FlowerArray.Add(flower.AddComponent<Flower>());
                 FlowerArray[^1].prepFlower(flower.gameObject);
-                RootVeg.addVeg(flower.gameObject.GetComponent<Rigidbody>());
+                RootVeg.getRoot().addVeg(flower.gameObject.GetComponent<Rigidbody>());
             }
         }
 
@@ -24,7 +24,7 @@ namespace Script.Tools.ToolType {
                 Debug.Log("Couldn't find the flower in the array");
             } else if (!tulip.havePulled) {
                 tulip.havePulled = true;
-                RootVeg.removeVeg(tulip.GetComponent<Rigidbody>(), out _);
+                RootVeg.getRoot().removeVeg(tulip.GetComponent<Rigidbody>(), out _);
                 addFlower(tulip);
             } 
         }

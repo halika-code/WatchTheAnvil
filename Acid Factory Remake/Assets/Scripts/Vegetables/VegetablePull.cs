@@ -7,7 +7,7 @@ public class VegetablePull : MonoBehaviour {
      * <summary>Disables the vegetable</summary>
      */
     public static void pullVegetable(Collider veggie) {
-        RootVeg.removeVeg(veggie.attachedRigidbody, out _);
+        RootVeg.getRoot().removeVeg(veggie.attachedRigidbody, out _);
         veggie.gameObject.SetActive(false); //todo create placement for the carrots to fly to
     }
 
@@ -47,5 +47,12 @@ public class VegetablePull : MonoBehaviour {
                 }
             }
         } return score;
+    }
+
+    /**
+     * <summary>A replica of the <see cref="getProfileOfVeggie(System.Collections.Generic.List{string})"/> but for single vegetables</summary>
+     */
+    public static int getProfileOfVeggie(string parent) {
+        return getProfileOfVeggie(new List<string>{ parent });
     }
 }

@@ -3400,6 +3400,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1050051415}
+  - component: {fileID: 1050051416}
   m_Layer: 0
   m_Name: Vegetables
   m_TagString: Untagged
@@ -3424,6 +3425,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: -45, z: 0}
+--- !u!114 &1050051416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1050051414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1beeae73ead83274b8ccbe8a1bc562d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1067214534
 GameObject:
   m_ObjectHideFlags: 0
@@ -4320,6 +4333,7 @@ GameObject:
   - component: {fileID: 1378582274}
   - component: {fileID: 1378582273}
   - component: {fileID: 1378582272}
+  - component: {fileID: 1378582275}
   m_Layer: 0
   m_Name: Exit
   m_TagString: Untagged
@@ -4335,7 +4349,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378582270}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.2000046, y: 0.33, z: -22.7}
+  m_LocalPosition: {x: -1.2000046, y: -0.1, z: -22.7}
   m_LocalScale: {x: 10, y: 1, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4407,6 +4421,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378582270}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1378582275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378582270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d2e586163027a42ab1e942d29c6eb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  levelType: 
 --- !u!1 &1390903957
 GameObject:
   m_ObjectHideFlags: 0
@@ -4851,7 +4878,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1470679659}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.1, y: 23.6, z: -46.3}
+  m_LocalPosition: {x: 83.9, y: 23.6, z: -3}
   m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -42,7 +42,7 @@ public class Collide : MonoBehaviour {
                 break;
             } case "Burrow": {
                 if (obj.gameObject.name is "Exit") {
-                    LevelManager.advanceLevel();
+                    LevelManager.getLevelLoader().advanceLevel();
                 } else {
                     goto case "Platforms";
                 } break;

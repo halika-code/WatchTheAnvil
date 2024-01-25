@@ -3,36 +3,43 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static Character_Controller;
 
 public class LevelManager : MonoBehaviour {
-    private static int maxPoints;
+    public string levelType;
+    private static LevelManager lvlLoader;
     
     // Start is called before the first frame update
     private void Start() {
-        maxPoints = 0;
-        countMaxPoints();
+        lvlLoader = this;
+        levelType = SceneManager.GetActiveScene().name.Contains("Level") ? "Level" : "Menu";
     }
 
     /**
      * <summary>Calculates the max amount of points the player can possibly earn in a level</summary>
-     * <remarks>Relies on <see cref="VegetablePull.getProfileOfVeggie"/> and
+     * <remarks>Relies on <see cref="VegetablePull.getProfileOfVeggie(string)"/> and
      * <see cref="Character_Controller.getParentName(GameObject)"/> to get the calculations</remarks>
      */
-    private void countMaxPoints() {
-        foreach (var veggie in RootVeg.getBodyCollective()) {
+    private static int countMaxPoints() {
+        var maxPoints = 0;
+        foreach (var veggie in RootVeg.getRoot().getBodyCollective()) {
             if (veggie.name is not "Flower") {
-                maxPoints += VegetablePull.getProfileOfVeggie(Character_Controller.getParentName(veggie.transform));
+                maxPoints += VegetablePull.getProfileOfVeggie(getParentName(veggie.transform)[1]);
             }
+        } return maxPoints;
+    }
+
+    public void advanceLevel() {
+        var maxPoints = countMaxPoints();
+        if (UI.getCurrentPoints() >= Math.Round(maxPoints * 0.8)) {
+            Debug.Log("Running into the next level ... kinda");
+            killPlayer(); //todo add functionality that loads the next level
+        } else {
+            Debug.Log("Player wanted to leave level with " + UI.getCurrentPoints() + " points against " + maxPoints);
         }
     }
 
-    public static void advanceLevel() {
-        if (UI.getCurrentPoints() >= Math.Round(maxPoints * 0.8)) {
-            Debug.Log("Running into the next level ... kinda");
-            Character_Controller.killPlayer(); //todo add functionality that loads the next leve
-        }
-        else {
-            Debug.Log("Player wanted to leave level with " + UI.getCurrentPoints() + " points against " + maxPoints);
-        }
+    public static LevelManager getLevelLoader() {
+        return lvlLoader;
     }
 }

@@ -1,18 +1,27 @@
+using System;
 using System.Collections.Generic;
 using Script.Tools.ToolType;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public static class RootVeg {
-    private static List<Rigidbody> cBodyCollective; 
-    private static List<VegetableVisibility.VegState> vegStateCollective;
+public class RootVeg : MonoBehaviour {
+    private List<Rigidbody> cBodyCollective; 
+    private List<VegetableVisibility.VegState> vegStateCollective;
+    private static RootVeg root;
 
-    // ReSharper disable Unity.PerformanceAnalysis cause: This function is only called on load/reload
-    public static void init(bool forceReset) {
-        if (cBodyCollective == null || forceReset) {
-            cBodyCollective = new List<Rigidbody>();
-            vegStateCollective = new List<VegetableVisibility.VegState>();
-            GameObject.Find("Flowers").GetComponent<FlowerController>().prepFlowers();
-        } 
+    public void OnEnable() {
+        root = this; //if null, assign as this
+        cBodyCollective = new List<Rigidbody>();
+        vegStateCollective = new List<VegetableVisibility.VegState>();
+    }
+
+    /**
+     * <summary>Wipes the list from the previous level</summary>
+     */
+    public void OnDisable() {
+        cBodyCollective = null;
+        vegStateCollective = null;
+        root = null;
     }
 
     /**
@@ -22,39 +31,39 @@ public static class RootVeg {
      * <remarks>If the bCol is fed as null, the function terminates immediately
      * <para>The bCol is assumed to be new and not existing already in the cBodyCollective</para></remarks>
      */
-    public static void init(Rigidbody[] bCol, out bool terminate) {
+    public void init(Rigidbody[] bCol, out bool terminate) {
         terminate = bCol.Length is 0; //idea here is if there is no vegetables under this parent script, the script should disable
         foreach (var bodyCollective in bCol) {
             cBodyCollective.Add(bodyCollective);
         } for (var i = 0; i < bCol.Length; i++) {
             vegStateCollective.Add(VegetableVisibility.VegState.Hidden);
+        } if (LevelManager.getLevelLoader().levelType is "Level") {
+            GameObject.Find("Flowers").GetComponent<FlowerController>().prepFlowers(); 
         }
     }
 
     /**
-     * <summary>Gets the collection of veggie bodies</summary>
-     * <remarks>Loops once if the body collective isn't initialized properly</remarks>
+     * <summary>Returns the collection the RigidBodies are kept that are vegetables</summary>
      */
-    public static List<Rigidbody> getBodyCollective() {
+    public List<Rigidbody> getBodyCollective() {
         return cBodyCollective;
     }
 
     /**
-     * <summary>Gets the collection of veggie bodies</summary>
-     * <remarks>Loops once if the body collective isn't initialized properly</remarks>
+     * <summary>Returns the collection of the states registered for each RigidBodies kept in <see cref="cBodyCollective"/></summary>
      */
-    public static List<VegetableVisibility.VegState> getVegStates() { 
+    public List<VegetableVisibility.VegState> getVegStates() { 
         return vegStateCollective;
     }
 
-    public static void updateCollective(int index, VegetableVisibility.VegState state) {
+    public void updateCollective(int index, VegetableVisibility.VegState state) {
         vegStateCollective[index] = state;
     }
 
     /**
      * <summary>Adds a single vegetable into the list to be animated upon the player's proximity </summary>
      */
-    public static void addVeg(Rigidbody veg) {
+    public void addVeg(Rigidbody veg) {
         cBodyCollective.Add(veg);
         vegStateCollective.Add(VegetableVisibility.VegState.Hidden);
     }
@@ -62,7 +71,7 @@ public static class RootVeg {
     /**
      * <summary>Removes a given vegetable from an entry</summary>
      */
-    public static void removeVeg(Rigidbody veg, out bool didItSucceed) {
+    public void removeVeg(Rigidbody veg, out bool didItSucceed) {
         didItSucceed = false;
         for (var i = 0; i < cBodyCollective.Count; i++) {
             if (cBodyCollective[i] == veg) {
@@ -71,5 +80,9 @@ public static class RootVeg {
                 break;
             }
         }
+    }
+
+    public static RootVeg getRoot() {
+        return root;
     }
 }

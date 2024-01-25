@@ -10,16 +10,15 @@ public class VegStateController : MonoBehaviour {
 
     private void Start() {
         pBody = getPlayerBody();
-        init(false); //as in initialise the lists
-        init(gameObject.GetComponentsInChildren<Rigidbody>(), out var terminate); //as in, feed in the data to the lists
+        getRoot().init(gameObject.GetComponentsInChildren<Rigidbody>(), out var terminate); //as in, feed in the data to the lists
         if (terminate) {
             Destroy(this);
         }
     }
 
     private void FixedUpdate() {
-        for (var i = 0; i < getBodyCollective().Count; i++) {
-            checkForPlayerDistance(getBodyCollective()[i], getVegStates()[i]);
+        for (var i = 0; i < getRoot().getBodyCollective().Count; i++) {
+            checkForPlayerDistance(getRoot().getBodyCollective()[i], getRoot().getVegStates()[i]);
         }
     }
     
@@ -34,11 +33,11 @@ public class VegStateController : MonoBehaviour {
                 new []{pBody.transform.position.x, pBody.transform.position.z}, 20)) { 
             if (state is VegState.Hidden) { //the idea here is if the player is close, the player will be inside a border
                StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
-               updateCollective(getIndexOfVeg(cBody), VegState.Visible);
+               getRoot().updateCollective(getIndexOfVeg(cBody), VegState.Visible);
             } 
         } else if (state is VegState.Visible) { 
             StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
-            updateCollective(getIndexOfVeg(cBody), VegState.Hidden);
+            getRoot().updateCollective(getIndexOfVeg(cBody), VegState.Hidden);
         }
     }
 
@@ -49,9 +48,9 @@ public class VegStateController : MonoBehaviour {
      * <remarks>If an exact match in the hierarchy wasn't found, the 1st index is returned</remarks>
      */
     private static int getIndexOfVeg(Component cObj) {
-        for (var i = 0; i < getBodyCollective().Count; i++) {
-            if (cObj.name.Equals(getBodyCollective()[i].name)) { //preliminary check if the Veggie3 is a Veggie3
-                if (checkIfEqual(getParentName(cObj.transform), getParentName(getBodyCollective()[i].transform))) {
+        for (var i = 0; i < getRoot().getBodyCollective().Count; i++) {
+            if (cObj.name.Equals(getRoot().getBodyCollective()[i].name)) { //preliminary check if the Veggie3 is a Veggie3
+                if (checkIfEqual(getParentName(cObj.transform), getParentName(getRoot().getBodyCollective()[i].transform))) {
                     return i; //a more detailed check based on the hierarchy of the veggie, mainly to improve efficiency
                 }
             }
