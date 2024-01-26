@@ -32,6 +32,8 @@ public class Character_Controller : MonoBehaviour {
     private static void init() {
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
+        var burrowPos = GameObject.Find("Enter").gameObject.transform.position;
+        pBody.position = new Vector3(burrowPos.x, burrowPos.y + 2f, burrowPos.z);
         Physics.gravity = new Vector3(0, -30f);
         priorYVel = 0f;
         pHand = GameObject.Find("Hand").transform;

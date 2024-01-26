@@ -37,8 +37,8 @@ public class LevelManager : MonoBehaviour {
             killPlayer(); //todo add functionality that loads the next level
         } else {
             gameObject.GetComponentInChildren<TextMeshPro>().text =
-                "Whoops, looks like you tried leaving the level with " + UI.getCurrentPoints() + " points against " +
-                maxPoints + ", try again when you have at least 80% of the vegetables collected";
+                "Whoops, looks like you tried leaving with " + UI.getCurrentPoints() + " points against " +
+                maxPoints + ", need more than that";
         }
     }
 
