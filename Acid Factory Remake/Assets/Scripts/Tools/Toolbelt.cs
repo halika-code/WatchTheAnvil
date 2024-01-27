@@ -142,7 +142,7 @@ public class Toolbelt : MonoBehaviour {
         var handBody = toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>();
         handBody.useGravity = whereTo;
         handBody.isKinematic = !whereTo;
-        handBody.GetComponent<CapsuleCollider>().enabled = whereTo;
+        handBody.GetComponent<Collider>().enabled = whereTo;
         toolInHand.transform.parent = handBody.useGravity ? GameObject.Find("Tools").transform : Character_Controller.getPlayerHand(); 
         if (whereTo) {
             removeTool(toolInHand.gameObject.name);

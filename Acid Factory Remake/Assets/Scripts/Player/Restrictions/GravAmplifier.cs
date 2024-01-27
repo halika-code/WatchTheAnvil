@@ -25,9 +25,7 @@ public class GravAmplifier : MonoBehaviour {
      * <summary>Calculates the falling velocity during the downward arch before reaching terminal (desired) velocity</summary>
      */
     public void falling(Vector3 hop) {
-        if (!(Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella) && ((Umbrella)umbrella).checkIfOpen())) { 
-            StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
-        }
+        StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
     }
 
     private IEnumerator speedDown(Vector3 hop) {

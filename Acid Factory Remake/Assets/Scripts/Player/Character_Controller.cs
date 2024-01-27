@@ -30,14 +30,24 @@ public class Character_Controller : MonoBehaviour {
      * <summary>Initialized the variables unique to the player</summary>
      */
     private static void init() {
-        pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
-        pBody.freezeRotation = true;
-        var burrowPos = GameObject.Find("Enter").gameObject.transform.position;
-        pBody.position = new Vector3(burrowPos.x, burrowPos.y + 2f, burrowPos.z);
+        setPlayerBody();
         Physics.gravity = new Vector3(0, -30f);
         priorYVel = 0f;
         pHand = GameObject.Find("Hand").transform;
         isAscending = false;
+    }
+
+    /**
+     * <summary>Prepares the player's RigidBody, moving it to the burrow if one can be found</summary>
+     */
+    private static void setPlayerBody() {
+        pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
+        pBody.freezeRotation = true;
+        var burrow = GameObject.Find("Enter");
+        if (burrow != null) {
+            var burrowPos = GameObject.Find("Enter").gameObject.transform.position;
+            pBody.position = new Vector3(burrowPos.x, burrowPos.y + 2f, burrowPos.z);
+        }
     }
 
     private void OnEnable() { //singleton pattern, just in case
@@ -75,9 +85,14 @@ public class Character_Controller : MonoBehaviour {
     }
 
     private void FixedUpdate() {
+        var pVel = pBody.velocity;
         if (getMove() is not CanMove.CantJump && InputController.checkForJump()) {
-            var pVel = pBody.velocity;
-            GravAmplifier.gravity.falling(new Vector3(pVel.x, (float)MoveVel*3, pVel.z));
+            if ((Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella))) {
+                if (((Umbrella)umbrella).checkIfOpen()) {
+                    movePlayer(new Vector3(pVel.x, (float)MoveVel * 1.4f, pVel.z));
+                    return;
+                } 
+            } GravAmplifier.gravity.falling(new Vector3(pVel.x, (float)MoveVel*3, pVel.z));
         } else {
             updatePriorVel();
         }

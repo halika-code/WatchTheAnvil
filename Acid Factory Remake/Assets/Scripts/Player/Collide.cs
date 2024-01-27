@@ -185,7 +185,7 @@ public class Collide : MonoBehaviour {
                 Toolbelt.getBelt().handleTool(tool);
             }
         } else {
-            Debug.Log("Whoopy, tried to process " + obj.name + " as a tool");
+            Debug.Log("Whoopy while trying to process " + obj.name + " as a tool");
         }
     }
     
