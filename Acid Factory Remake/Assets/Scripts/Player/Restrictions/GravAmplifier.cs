@@ -22,32 +22,26 @@ public class GravAmplifier : MonoBehaviour {
     }
 
     /**
-     * <summary>Calculates the falling velocity during the downward arch before reaching terminal (desired) velocity</summary>
+     * <summary>Starts <see cref="gravAmplifier"/> as a coroutine</summary>
      */
-    public void falling(Vector3 hop) {
-        StartCoroutine(gravAmplifier(hop)); //idea here is to have the gravity work specifically when the player is not jumping
-    }
-
-    private IEnumerator speedDown(Vector3 hop) {
-        while (hop.y > -50f) { //here the arch goes from ~50 to -30
-            movePlayer(hop);
-            yield return new WaitForSeconds(0.1f); //tune this to strengthen the gravity,
-            hop.y -= (float)MoveVel; 
-        } Move.updateMovement(Move.CanMove.Freely);
+    public void falling(Vector3 hop, float desiredSpeed) {
+        StartCoroutine(gravAmplifier(hop, desiredSpeed)); //idea here is to have the gravity work specifically when the player is not jumping
     }
     
     /**
-     * <summary>Amplifies the gravity applied onto the player in a logarithmic arch (capped)</summary>
-     * <remarks>I have no idea how this works while falling...</remarks>
+     * <summary>Amplifies the gravity applied onto the player in a logarithmic arch (capped) by slowly increasing the velocity applied on the player</summary>
+     * <param name="hop">The starting speed that will be given to the player</param>
+     * <param name="desiredSpeed">The cap the player should not exceed while falling</param>
+     * <remarks>Coroutine falls out when the <see cref="Character_Controller.isAscending"/> flag is cleared (false)</remarks>
      */
-    private IEnumerator gravAmplifier(Vector3 hop) {
-        while (Move.getMove() is not Move.CanMove.Freely) { //here the arch is kept at a downwards angle
-            yield return speedDown(hop);
-        } 
-    }
-    
-    public void slapPlayerDown() {
-        var pBody = getPlayerBody();
-        getPlayerBody().velocity = new Vector3(pBody.velocity.x, -5f, pBody.velocity.z);
+    private IEnumerator gravAmplifier(Vector3 hop, float desiredSpeed) {
+        while (Move.getMove() is Move.CanMove.CantJump || isAscending) { //here the arch is kept at a downwards angle
+            movePlayer(hop);
+            yield return null;
+            if (hop.y > desiredSpeed) { 
+                hop.y -= (float)MoveVel;
+                yield return new WaitForSeconds(0.1f); //waits a bit to apply the speed reduction, producing an arch
+            }
+        } Move.updateMovement(Move.CanMove.Freely);
     }
 }

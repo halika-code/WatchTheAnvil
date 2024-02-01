@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Script.Tools.ToolType;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
@@ -29,6 +30,8 @@ public class Collide : MonoBehaviour {
             } case "Walls": { //in case I need to add stuff in here
                 processWalls(obj);
                 break;
+            } case "Foliage": {
+                goto case "Walls";
             } case "Anvils": { //updates the flag
                 if (!processAnvil()) {
                     goto case "Platforms"; //this will make the anvil act like a platform
@@ -69,20 +72,14 @@ public class Collide : MonoBehaviour {
         private void OnCollisionExit(Collision other) {
             if (checkForDistance()) {
                 if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
-                    Move.updateMovement(Move.CanMove.CantJump); 
-                    GravAmplifier.gravity.falling(getPlayerBody().velocity);
+                    jump();
                 } StartCoroutine(ShadowController.findPlatform()); 
             }
         }
         
         private void processPlatforms() {
-            /*Debug.Log("Current y vel: "+ pBody.velocity.y + ", prior y vel: " + priorYVel);*/
-            if (getMove() is CanMove.CantJump) { //if the player is flying
-                GravAmplifier.gravity.slapPlayerDown();
-            } if (priorYVel < 0f) {
-                Move.updateMovement(CanMove.Freely);
-                isAscending = false;
-            }
+            isAscending = false;
+            updateMovement(CanMove.Freely);
         }
 
         /**
@@ -97,8 +94,10 @@ public class Collide : MonoBehaviour {
             } for (var i = 0; i < 3; i+=2) { //designed to run twice
                 if (Math.Abs(obj.contacts[0].normal[i]) is not 0) { //normal is used here since it is reliably ranging from -1 to 1
                     Enum.TryParse<CanMove>(obj.contacts[0].normal[i] > 0 ? (1 + i).ToString() : (2 + i).ToString(), out var restriction);
-                    Move.updateMovement(restriction);
-                    break;
+                    if (restriction is CanMove.Freely) {
+                        Debug.Log("ohno");
+                    }
+                    Move.updateMovement(restriction); //note: by design, the restriction will always be between 1-4
                 }
             }
             

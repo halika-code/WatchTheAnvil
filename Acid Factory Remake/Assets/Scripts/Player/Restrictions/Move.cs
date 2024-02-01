@@ -2,13 +2,18 @@ using UnityEngine;
 
 /**
  * <date>17/06/2023</date>
- * <author>Gyula Attila Kovacs (gak8)</author>
+ * <author>Gyula Attila Kovacs kuki(gak8)</author>
  * <summary>A simple class that is used to regulate the movement of the player</summary>
  */
 public class Move : MonoBehaviour {
     
     private static CanMove controller; 
-    public enum CanMove {
+    
+    /**
+     * <summary>The main restriction list</summary>
+     * <remarks>The corresponding to a given state can be received IF a variable with a given state is cast into an integer</remarks>
+     */
+    public enum CanMove : int{ 
         Freely,
         CantLeft,
         CantRight,

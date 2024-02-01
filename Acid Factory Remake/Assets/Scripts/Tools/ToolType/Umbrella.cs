@@ -15,15 +15,12 @@ namespace Script.Tools.ToolType {
 
         /**
          * <summary>Checks the status of the umbrella in the hands of the player</summary>
-         * <returns>True if: the hand is empty,
-         * <para>the name of the object is not the umbrella,</para>
-         * the umbrella is not open
-         * <para>False only if the umbrella is open</para></returns>
+         * <returns>Only true when the umbrella is in use, false otherwise</returns>
+         * <remarks>Multiple integrity checks are performed to ensure the player doesn't try floating with a stopwatch for example</remarks>
          */
         public bool checkIfOpen() {
             var hand = Toolbelt.getBelt().toolInHand;
-            return hand == null || !hand.name.Contains("Umbrella") ||
-                   hand.name.Contains("Umbrella") && !isOpen;
+            return hand == null || !hand.name.Contains("Umbrella") || isOpen;
         }
     }
 }

@@ -11,6 +11,7 @@ using static Move;
  * <author>ciglos mikCiglos aka cigi migi</author>
  * <summary>A traditional character controller script, this class is supposed to
  * move the player in all cardinal directions alongside extra logic</summary>
+ * <remarks>This is also one of the center-most scripts in the project</remarks>
  */
 public class Character_Controller : MonoBehaviour {
     
@@ -66,7 +67,7 @@ public class Character_Controller : MonoBehaviour {
             movePlayer(InputController.move(calculateVel()));
         } if (InputController.checkForItemUse()) { //if the player wants to use the item and the cooldown flag is clear
             Toolbelt.getBelt().fetchItem();
-        }
+        } //Debug.Log("canMove is " + Move.getMove() + ", Player's prior y vel is: " + priorYVel); //note, just comment this debug out when not in use
     }
 
     /**
@@ -78,24 +79,35 @@ public class Character_Controller : MonoBehaviour {
             var pVel = pBody.velocity;
             for(var i = 0; i < 3; i+=2) {
                 if (Math.Abs(Math.Round(pVel[i] / 1.5, 2)) > 0.1f) {
-                    ret[i] = pVel[i];
-                }
-            } return new Vector3(pVel.x * .9f, pVel.y, pVel.z * .9f);
+                    ret[i] = pVel[i] * 0.9f; //todo some weird shit is happenin here, ret[i] is not used after this calculations
+                }   
+            }
         } return ret;
     }
 
     private void FixedUpdate() {
-        var pVel = pBody.velocity;
+        
         if (getMove() is not CanMove.CantJump && InputController.checkForJump()) {
             if ((Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella))) {
-                if (((Umbrella)umbrella).checkIfOpen()) {
-                    movePlayer(new Vector3(pVel.x, (float)MoveVel * 1.4f, pVel.z));
+                if (!((Umbrella)umbrella).checkIfOpen()) {
+                    jump((float)MoveVel * 1.4f, 0f); //should be a normal jump-arch until 0 then fall slowly
                     return;
                 } 
-            } GravAmplifier.gravity.falling(new Vector3(pVel.x, (float)MoveVel*3, pVel.z));
+            } jump();
         } else {
             updatePriorVel();
         }
+    }
+
+    /**
+     * <summary>Gives the player a starting velocity then based on the desired speed cap, will apply increased gravity until the cap is reached / passed</summary>
+     * <param name="speedUp">The starting Y velocity, by default is <see cref="MoveVel"/> * 3 cast into a float</param>
+     * <param name="desiredSpeedCap">The desired terminal velocity, by default is set to -70f</param>
+     */
+    public static void jump(float speedUp = (float)MoveVel*3, float desiredSpeedCap = -70f) {
+        var pVel = pBody.velocity;
+        GravAmplifier.gravity.falling(new Vector3(pVel.x, speedUp, pVel.z), desiredSpeedCap);
+        updateMovement(CanMove.CantJump);
     }
 
     public static bool checkForDistance() {
@@ -151,7 +163,7 @@ public class Character_Controller : MonoBehaviour {
      */
     public static void movePlayer(Vector3 movement) {
         pBody.velocity = movement;
-        ShadowController.moveShadow(pBody.transform.position); //todo find every instance of an object with a rigidbody being moved with position and replace with
+        ShadowController.moveShadow(pBody.transform.position);
     }
 
     // ReSharper disable Unity.PerformanceAnalysis
