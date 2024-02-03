@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
-using Script.Tools.ToolType;
 using UnityEngine;
+using static GravAmplifier;
 
 /**
  * <date>05/01/2024</date>
@@ -21,7 +17,7 @@ public class InputController : Character_Controller {
      *  Based on the keys supplied.</summary>
      * <remarks>I wish I could implement this into a switch statement</remarks>
     */
-    public static Vector3 move(Vector3 vel) {
+    public static Vector3 checkForButtonPress(Vector3 vel) {
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
                 vel[i < 2 ? 0 : 2] = applyRestriction(i);
@@ -35,20 +31,23 @@ public class InputController : Character_Controller {
      * If a match is found, the player is deemed to be colliding into a wall, the input will be dropped</summary>
      * <param name="i">the index pointing to the key pressed from the <see cref="buttons"/> array</param>
      * <remarks>The index supplied is expected to correspond to the placement of the key pressed</remarks>
+     * note: this function delves into intricate button manipulations, earning it's place in this script
      */
     private static float applyRestriction(int i) {
         float velocity = calculateParity(i);
-        Enum.TryParse((i + getRestrictionAxis((int)velocity)).ToString(), out Move.CanMove restriction); //this finds the restriction todo check if it is in the correct value or runs out
-        //var asd = Move.getMove(); 
+        Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
+        var whyDoesntYouWork = Move.getMove(); 
         if (restriction != Move.getMove()) {
-            if (!buttons[i].Equals(lastButtonPressed) || !isAscending) {
-                velocity *= (float)(MoveVel * 1.3);
-                lastButtonPressed = buttons[i];
+            if (isAscending && buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button as the last one AND the player is soaring
+                velocity *= (float)MoveVel; //the player must be flyin
             } else {
-                velocity *= (float)(MoveVel * 0.8f);
+                velocity *= (float)(MoveVel * 1.3); 
+                lastButtonPressed = buttons[i];
             } 
-        } else {
-            return 0f;
+        } else { //if the player tries to move towards a direction that is restricted
+            if (gravity.getDownwardSpeed() > 0f) {
+                gravity.updateDownwardSpeed(-1f);
+            } return 0f;
         } return velocity;
     }
 
@@ -59,24 +58,19 @@ public class InputController : Character_Controller {
      * <remarks>Could be done in a simplified way</remarks>
      */
     private static int calculateParity(double i) {
-        var ret = Math.Sign(-Math.Pow(-2, (int)i));
+        var ret = i % 2 is not 0 ? 1 : -1;
         return ret; //note, the integer casting is used to divide by zero and get 0 as result. The brackets are important there, as in we wanna divide then cast
-    }
-
-    /**
-     * <param name="i">The number in question</param>
-     * <returns>Based on the parity of the <see cref="i"/> supplied, 1 if positive, 2 if negative</returns>
-     * <remarks>Can deal with 0, will return a 2</remarks>
-     */
-    private static int getRestrictionAxis(int i) {
-        return Math.Sign(i) is 1 ? 1 : 2;
     }
 
     public static bool checkForJump() {
         if (Input.GetKey(KeyCode.Space) && !isAscending) {
-            Move.updateMovement(Move.CanMove.CantJump);
-            isAscending = true;
+            toggleToJumpingState();
         } return isAscending && Input.GetKey(KeyCode.Space);
+    }
+
+    public static void toggleToJumpingState() {
+        Move.updateMovement(Move.CanMove.CantJump);
+        isAscending = true;
     }
     
     /**

@@ -23,7 +23,7 @@ public class Collide : MonoBehaviour {
     private void processCollision(string parentName, Collision obj) {
         switch (parentName) {
             case "Platforms": {
-                if (Math.Abs(Math.Round(getPlayerBody().velocity.y, 2)) > 0.05f) { //normally 0 if grounded
+                if (Math.Floor(Math.Abs(obj.impulse[1])) is 0) { //normally 0 if grounded
                     goto case "Walls";
                 } processPlatforms(); 
                 break;
@@ -31,7 +31,7 @@ public class Collide : MonoBehaviour {
                 processWalls(obj);
                 break;
             } case "Foliage": {
-                goto case "Walls";
+                goto case "Platforms";
             } case "Anvils": { //updates the flag
                 if (!processAnvil()) {
                     goto case "Platforms"; //this will make the anvil act like a platform
@@ -70,16 +70,22 @@ public class Collide : MonoBehaviour {
          * <summary>Attempts to reset the player's state into "should fall"</summary>
          */
         private void OnCollisionExit(Collision other) {
-            if (checkForDistance()) {
+            if (checkForDistance()) { //if the player have left the ground
                 if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
                     jump();
-                } StartCoroutine(ShadowController.findPlatform()); 
+                } StartCoroutine(ShadowController.findPlatform());
+                if (!GravAmplifier.isAscending) { //if the player haven't pressed jump yet
+                    GravAmplifier.gravity.falling(getPlayerBody().velocity);
+                    InputController.toggleToJumpingState();
+                }
+            } else {
+                processPlatforms();
             }
         }
         
         private void processPlatforms() {
-            isAscending = false;
             updateMovement(CanMove.Freely);
+            GravAmplifier.isAscending = false;
         }
 
         /**
@@ -88,15 +94,9 @@ public class Collide : MonoBehaviour {
          */
         private void processWalls(Collision obj) {
             //Collision.impulse is used here since it is a nice big number that is reliable
-            if (Math.Abs(obj.impulse[1]) is not 0) { 
-                processPlatforms(); //diverting execution just in case
-                return;
-            } for (var i = 0; i < 3; i+=2) { //designed to run twice
+            for (var i = 0; i < 3; i+=2) { //designed to run twice
                 if (Math.Abs(obj.contacts[0].normal[i]) is not 0) { //normal is used here since it is reliably ranging from -1 to 1
                     Enum.TryParse<CanMove>(obj.contacts[0].normal[i] > 0 ? (1 + i).ToString() : (2 + i).ToString(), out var restriction);
-                    if (restriction is CanMove.Freely) {
-                        Debug.Log("ohno");
-                    }
                     Move.updateMovement(restriction); //note: by design, the restriction will always be between 1-4
                 }
             }

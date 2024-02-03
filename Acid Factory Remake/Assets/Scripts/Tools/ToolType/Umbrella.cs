@@ -10,7 +10,8 @@ namespace Script.Tools.ToolType {
         }
 
         public override void useItem() {
-            isOpen = !isOpen;
+            GravAmplifier.gravity.updateSpeedCap(!isOpen);
+            isOpen = !isOpen; 
         }
 
         /**

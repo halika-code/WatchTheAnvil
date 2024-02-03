@@ -10,24 +10,52 @@ public class Move : MonoBehaviour {
     private static CanMove controller; 
     
     /**
-     * <summary>The main restriction list</summary>
-     * <remarks>The corresponding to a given state can be received IF a variable with a given state is cast into an integer</remarks>
+     * <summary>A movement restriction list of states that will stop the player from being able to register movement</summary>
+     * <remarks>Mainly used for collision detection and movement logic</remarks>
+     * Note: each state is used in different scenarios,
+     * Rider just can't find the gray states being named specifically (those are used indirectly in InputController)
      */
     public enum CanMove : int{ 
+        /**
+         * <summary>Flag denoting the player has free movement</summary>
+         */
         Freely,
+        /**
+         * <summary>Flag denoting the player hit a wall from the right</summary>
+         */
         CantLeft,
+        /**
+         * <summary>Flag denoting the player looks at a wall from the left</summary>
+         */
         CantRight,
+        /**
+         * <summary>Flag denoting the player collides with a wall from behind</summary>
+         */
         CantDown,
+        /**
+         * <summary>Flag denoting the player hugs a wall from the front</summary>
+         */
         CantUp,
+        /**
+         * <summary>Flag denoting the player is soaring through the sky through the press of the space bar</summary>
+         */
         CantJump,
+        /**
+         * <summary>Flag denoting the player is in a cutscene / transition state</summary>
+         */
         Cant
     }
     
     private void OnEnable() { 
         controller = CanMove.Freely;
     }
+    
+    
 
     public static void updateMovement(CanMove restriction) {
+        if (restriction is not CanMove.CantJump) {
+            Debug.Log("hmm");
+        }
         controller = restriction;
     }
 

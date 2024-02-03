@@ -232,4 +232,12 @@ public class Toolbelt : MonoBehaviour {
     public static Toolbelt getBelt() {
         return toolBelt;
     }
+
+    /**
+     * <summary>Checks the toolInHand against null</summary>
+     * <returns>True if is NOT null, False if it is</returns>
+     */
+    public static bool checkHand() {
+        return getBelt().toolInHand != null;
+    }
 }

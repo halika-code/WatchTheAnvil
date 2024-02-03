@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Script.Tools.ToolType;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,17 +14,14 @@ using static Move;
  */
 public class Character_Controller : MonoBehaviour {
     
-    public const double MoveVel = 20; 
+    public const double MoveVel = 22D;
+    public const double DampeningCoefficient = 1.7D;
+    public static Vector3 flyingVector;
     protected static Rigidbody pBody;
     private static Transform pHand;
-    /**
-     * A boolean that keeps track if the player is air-borne
-     * <para>Set to true the 1st frame execution starts for the jump routine, set to false when colliding with the ground</para>
-     */
-    public static bool isAscending; 
-    public static float priorYVel;
 
-    //todo note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one variable
+
+    //note: within functions if I write a function that has an out <variable> keyword, I can RETURN more than one variable
     
     /**
      * <summary>Initialized the variables unique to the player</summary>
@@ -33,9 +29,8 @@ public class Character_Controller : MonoBehaviour {
     private static void init() {
         setPlayerBody();
         Physics.gravity = new Vector3(0, -30f);
-        priorYVel = 0f;
         pHand = GameObject.Find("Hand").transform;
-        isAscending = false;
+        flyingVector = Vector3.zero;
     }
 
     /**
@@ -64,47 +59,80 @@ public class Character_Controller : MonoBehaviour {
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
-            movePlayer(InputController.move(calculateVel()));
+            movePlayer(InputController.checkForButtonPress(calculateVelocity()));
         } if (InputController.checkForItemUse()) { //if the player wants to use the item and the cooldown flag is clear
             Toolbelt.getBelt().fetchItem();
         } //Debug.Log("canMove is " + Move.getMove() + ", Player's prior y vel is: " + priorYVel); //note, just comment this debug out when not in use
     }
 
     /**
-     * <summary>Dampens the button press</summary>
+     * <summary>Decides what speed the player should be going at the start of the frame</summary>
      */
-    private static Vector3 calculateVel() {
-        var ret = new Vector3(0f, pBody.velocity.y, 0f);
-        if (isAscending) {
+    private static Vector3 calculateVelocity() { //new Vector3(0f, pBody.velocity.y, 0f)
+        if (GravAmplifier.isAscending) {
             var pVel = pBody.velocity;
-            for(var i = 0; i < 3; i+=2) {
-                if (Math.Abs(Math.Round(pVel[i] / 1.5, 2)) > 0.1f) {
-                    ret[i] = pVel[i] * 0.9f; //todo some weird shit is happenin here, ret[i] is not used after this calculations
-                }   
-            }
-        } return ret;
+            if (flyingVector == new Vector3(0f, pVel.y, 0f)) { //if the player just jumped
+                return pVel;
+            } calculateFlyingVelocity(pVel);  //if the player is flying in the air
+        } else {
+            flyingVector = new Vector3(0f, pBody.velocity.y, 0f);
+        } return flyingVector;
+    }
+
+    /**
+     * <summary>Modifies the calculated velocity for the player to be in it's airborne state</summary>
+     */
+    private static void calculateFlyingVelocity(Vector3 pVel) {
+        var diff = flyingVector - pVel; //getting the change in direction
+        flyingVector = pVel; //gets the default values in case no change is detected
+        for (var i = 0; i < 3; i+=2) {
+            if (Math.Abs(Math.Round(diff[i], 1)) > 1.5f) { //filtering for small changes //1.6f for single and 4.38f for multipress
+                flyingVector[i] = Math.Sign(flyingVector[i]) * (Math.Abs(flyingVector[i]) / 
+                    (float)DampeningCoefficient * (checkAgainstUmbrella() ? 3.5f : 1f)); //this multiplier crops the gliding distance of the umbrella 
+            } //dividing makes sure the value gets smaller than the original velocity
+        }
+    }
+
+    private static bool checkAgainstUmbrella() {
+        return Toolbelt.checkHand() && ((Umbrella)Toolbelt.getBelt().toolInHand).isOpen;
     }
 
     private void FixedUpdate() {
-        
-        if (getMove() is not CanMove.CantJump && InputController.checkForJump()) {
+        //Debug.Log(GravAmplifier.isAscending? "flyin" : "On the ground");
+        //Debug.Log(getMove() is CanMove.CantJump? "StateFly" : "StateGround");
+        if (getMove() is not CanMove.CantJump && InputController.checkForJump()) { //wall-jump: the Move state machine can only have 1 state, can be locked out IF I check for isAscending as well
             if ((Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella))) {
                 if (!((Umbrella)umbrella).checkIfOpen()) {
-                    jump((float)MoveVel * 1.4f, 0f); //should be a normal jump-arch until 0 then fall slowly
+                    jump(desiredSpeedCap: 0f); //should be a normal jump-arch until 0 then fall slowly
                     return;
                 } 
             } jump();
-        } else {
-            updatePriorVel();
+        } velocityDecay(); //needs to be here to have a fixed rate of slowdown
+    }
+    
+    /**
+     * <summary>Slowly decreases the player's velocity</summary>
+     * <remarks>Breaks early if the player is on the ground</remarks>
+     */
+    private static void velocityDecay() {
+        if (GravAmplifier.isAscending) { //if false, breaks early
+            var pVel = pBody.velocity;
+            for (var i = 0; i < 2; i+=2) {
+                if (Math.Abs(Math.Round(pVel[i])) > 0.05f) {
+                    pVel[i] -= Math.Sign(pVel[i]) * 0.1f;
+                } else {
+                    pVel[i] = 0;
+                }
+            } pBody.velocity = pVel;
         }
     }
 
     /**
      * <summary>Gives the player a starting velocity then based on the desired speed cap, will apply increased gravity until the cap is reached / passed</summary>
-     * <param name="speedUp">The starting Y velocity, by default is <see cref="MoveVel"/> * 3 cast into a float</param>
+     * <param name="speedUp">The starting Y velocity, by default is <see cref="MoveVel"/> * 3.2 cast into a float</param>
      * <param name="desiredSpeedCap">The desired terminal velocity, by default is set to -70f</param>
      */
-    public static void jump(float speedUp = (float)MoveVel*3, float desiredSpeedCap = -70f) {
+    public static void jump(float speedUp = (float)MoveVel * 3.2f, float desiredSpeedCap = -70f) {
         var pVel = pBody.velocity;
         GravAmplifier.gravity.falling(new Vector3(pVel.x, speedUp, pVel.z), desiredSpeedCap);
         updateMovement(CanMove.CantJump);
@@ -161,9 +189,29 @@ public class Character_Controller : MonoBehaviour {
     /**
      * <summary>Applies the desired vector of movement onto the player</summary>
      */
-    public static void movePlayer(Vector3 movement) {
+    private static void movePlayer(Vector3 movement) {
+        //Debug.Log(movement.x is 26 ? "gravAmplified movement" : "normal movement");
         pBody.velocity = movement;
         ShadowController.moveShadow(pBody.transform.position);
+    }
+
+    /**
+     * <summary>Alternative player movement function where only one angle is modified in the player's current velocity</summary>
+     * <param name="velocity">Desired vector given to the player</param>
+     * <param name="index">The desired index where the velocity will be changed.
+     * <para>By default this parameter is 1 (denoting the y axis)</para></param>
+     * <remarks>If the index falls outside the bounds of a traditional Vector3, this function will exit early</remarks>
+     */
+    public static void movePlayer(float velocity, int index = 1) {
+        if (index <= 2) { //if the 
+            Vector3 pVel;
+            var desiredVel = pVel = pBody.velocity;
+            for (var i = 0; i < 2; i++) {
+                desiredVel[i] = index.Equals(i) ? velocity : pVel[i];
+            } movePlayer(desiredVel);
+        } else {
+            Debug.Log("Whoopy, tried giving " + velocity + " to the " + index + "th element in the player's movement vector");
+        }
     }
 
     // ReSharper disable Unity.PerformanceAnalysis
@@ -184,12 +232,5 @@ public class Character_Controller : MonoBehaviour {
      */
     public static Transform getPlayerHand() {
         return pHand;
-    }
-    
-    /**
-     * <summary>Saves the previously calculated velocity calculated in the last physics update</summary>
-     */
-    private static void updatePriorVel() { 
-        priorYVel = getPlayerBody().velocity.y;
     }
 }

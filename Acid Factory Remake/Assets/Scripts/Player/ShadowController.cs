@@ -30,7 +30,7 @@ public class ShadowController : MonoBehaviour {
         } do {
             if (!findColPoint(out lastHitObj) || lastHitObj.collider.gameObject.name is "DeathPane") {
                 break;
-            } if (getParentName(lastHitObj.collider.gameObject) is "Platforms" or "Anvils") {
+            } if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
                 setShadowPosition(new Vector3(lastHitObj.point.x, lastHitObj.point.y + 0.1f, lastHitObj.point.z));
             } yield return null;
         } while (!checkIfStandingOnPlayer());
