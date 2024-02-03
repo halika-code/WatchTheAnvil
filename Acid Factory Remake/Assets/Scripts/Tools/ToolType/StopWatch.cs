@@ -42,8 +42,9 @@ namespace Script.Tools.ToolType {
                 stopWatchInUse = false; 
             } else if (lifeSpanTimer > 0){
                 stopWatchInUse = true;
-                if (waitTimer < 2) {
+                if (waitTimer < 2 && waitTimer is not 0 || waitTimer is 0 && currentAnvil.aTimer < 2) { //if the anvil is in waiting time OR the anvil is just dropping
                     text.text = "Too late, watch out!";
+                    stopWatchInUse = false;
                 } else {
                     StartCoroutine(container.Invoke());
                 } return; //avoids setting the stopwatch back to false
@@ -78,7 +79,7 @@ namespace Script.Tools.ToolType {
          * <remarks>The textmeshpro component will have an empty string when the stop-watch is not in use</remarks>
          */
         private void updateStopWatchDisplay() {
-            text.text = stopWatchInUse ? "Anvils frozen for " + lifeSpanTimer + " seconds" : ""; 
+            text.text = stopWatchInUse ? "Anvils frozen for " + lifeSpanTimer + " seconds" : " "; 
         }
 
         private static void destroyWatch() {

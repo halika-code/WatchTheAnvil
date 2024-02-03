@@ -238,6 +238,6 @@ public class Toolbelt : MonoBehaviour {
      * <returns>True if is NOT null, False if it is</returns>
      */
     public static bool checkHand() {
-        return getBelt().toolInHand != null;
+        return getBelt().toolInHand;
     }
 }

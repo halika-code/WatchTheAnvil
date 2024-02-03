@@ -53,9 +53,6 @@ public class Move : MonoBehaviour {
     
 
     public static void updateMovement(CanMove restriction) {
-        if (restriction is not CanMove.CantJump) {
-            Debug.Log("hmm");
-        }
         controller = restriction;
     }
 

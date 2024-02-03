@@ -88,13 +88,19 @@ public class Character_Controller : MonoBehaviour {
         for (var i = 0; i < 3; i+=2) {
             if (Math.Abs(Math.Round(diff[i], 1)) > 1.5f) { //filtering for small changes //1.6f for single and 4.38f for multipress
                 flyingVector[i] = Math.Sign(flyingVector[i]) * (Math.Abs(flyingVector[i]) / 
-                    (float)DampeningCoefficient * (checkAgainstUmbrella() ? 3.5f : 1f)); //this multiplier crops the gliding distance of the umbrella 
+                    (float)DampeningCoefficient * (checkAgainstUmbrella() ? 0.8f : 1.5f)); //this multiplier crops the gliding distance of the umbrella 
             } //dividing makes sure the value gets smaller than the original velocity
         }
     }
 
+    /**
+     * <summary>Checks if the umbrella is open</summary>
+     * <returns>False if the hand is empty, if the tool in the hand is not an umbrella or if the umbrella is not open.
+     * <para>True if all the above are true</para></returns>
+     */
     private static bool checkAgainstUmbrella() {
-        return Toolbelt.checkHand() && ((Umbrella)Toolbelt.getBelt().toolInHand).isOpen;
+        var tool = Toolbelt.getBelt().toolInHand;
+        return Toolbelt.checkHand() && tool.name.Contains("Umbrella") && ((Umbrella)tool).isOpen;
     }
 
     private void FixedUpdate() {
@@ -102,7 +108,7 @@ public class Character_Controller : MonoBehaviour {
         //Debug.Log(getMove() is CanMove.CantJump? "StateFly" : "StateGround");
         if (getMove() is not CanMove.CantJump && InputController.checkForJump()) { //wall-jump: the Move state machine can only have 1 state, can be locked out IF I check for isAscending as well
             if ((Toolbelt.getBelt().checkForTool("Umbrella", out var umbrella))) {
-                if (!((Umbrella)umbrella).checkIfOpen()) {
+                if (checkAgainstUmbrella()) {
                     jump(desiredSpeedCap: 0f); //should be a normal jump-arch until 0 then fall slowly
                     return;
                 } 
@@ -119,7 +125,7 @@ public class Character_Controller : MonoBehaviour {
             var pVel = pBody.velocity;
             for (var i = 0; i < 2; i+=2) {
                 if (Math.Abs(Math.Round(pVel[i])) > 0.05f) {
-                    pVel[i] -= Math.Sign(pVel[i]) * 0.1f;
+                    pVel[i] -= !checkAgainstUmbrella() ? Math.Sign(pVel[i]) * 0.08f: Math.Sign(pVel[i]) * 0.1f;
                 } else {
                     pVel[i] = 0;
                 }

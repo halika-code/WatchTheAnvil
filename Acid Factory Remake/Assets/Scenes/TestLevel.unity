@@ -1226,7 +1226,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 577364958}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1fa552fbdbc8f2942888fb040277d1a1, type: 3}
   m_Name: 
@@ -1462,8 +1462,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Items you can use. From left to right: Stop-watch (toggle with "F"), Dynamite
-    (explodes light), Helmet (used automatically), Vest and Slippers (unused)'
+  m_text: 'Items you can use ("F"). From left to right: Stop-watch (toggle, stops
+    time), Dynamite (explodes), Umbrella (dampens fall), Helmet (defends against
+    2 hit), Vest (explosion-proof) and Slippers (unused)'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4629,7 +4630,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1964723825470176790, guid: 3800b56ff3c753a4b877d82121cea6f2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -45.5
+      value: -47.8
       objectReference: {fileID: 0}
     - target: {fileID: 1964723825470176790, guid: 3800b56ff3c753a4b877d82121cea6f2, type: 3}
       propertyPath: m_LocalRotation.w
