@@ -123,7 +123,6 @@ public class Toolbelt : MonoBehaviour {
      * <para>to on the ground with all the necessary flag changes</para></summary>
      */
     private void throwToolFromHand() { 
-        Debug.Log("Throwing " + toolInHand.name); //todo then have an OnCollisionEnter that swaps the trigger back with the gravity turned off
         if (toolInHand.name.Contains("StopWatch") && ((StopWatch)toolInHand).stopWatchInUse) {
             ((StopWatch)toolInHand).useItem();
         } else if (toolInHand.name.Contains("Umbrella") && ((Umbrella)toolInHand).checkIfOpen()) { //if the umbrella is in the player's hand AND is open

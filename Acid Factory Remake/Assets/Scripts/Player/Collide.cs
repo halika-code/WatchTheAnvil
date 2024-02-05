@@ -73,7 +73,7 @@ public class Collide : MonoBehaviour {
             if (checkForDistance()) { //if the player have left the ground
                 if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
                     jump();
-                } StartCoroutine(ShadowController.findPlatform());
+                } StartCoroutine(checkForDistance() ? ShadowController.followPlayer() : ShadowController.findPlatform());
                 if (!GravAmplifier.isAscending) { //if the player haven't pressed jump yet
                     GravAmplifier.gravity.falling(getPlayerBody().velocity);
                     InputController.toggleToJumpingState();
@@ -187,8 +187,6 @@ public class Collide : MonoBehaviour {
             Debug.Log("Whoopy while trying to process " + obj.name + " as a tool");
         }
     }
-    
-
     
     /**
      * <summary>Warps the player back in bounds if the player ever manages to fall under the map</summary>

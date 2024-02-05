@@ -33,14 +33,24 @@ public class ShadowController : MonoBehaviour {
             } if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
                 setShadowPosition(new Vector3(lastHitObj.point.x, lastHitObj.point.y + 0.1f, lastHitObj.point.z));
             } yield return null;
-        } while (!checkIfStandingOnPlayer());
+        } while (checkForDistance());
         renderer.enabled = false;
     }
 
-    private static bool checkIfStandingOnPlayer() {
-        var asd = getPlayerBody().position.y;
-        var asd2 = Math.Round(asd - sBody.position.y) < 1.5f;
-        return Math.Round(getPlayerBody().position.y - sBody.position.y, 2) < 1.5f; //1.4 is the distance found using debug.log + 0.6 to account for Unity weirdness + padding 
+    /**
+     * <summary>Attempts to follow the player by applying the  flipped velocity of the player</summary>
+     */
+    public static IEnumerator followPlayer() {
+        if (!renderer.enabled) {
+            renderer.enabled = true;
+        } do {
+            var asd = getPlayerBody().transform.localPosition;
+            var asd2 = sBody.transform.localPosition;
+            var asd3 = sBody.transform.position;
+            sBody.velocity = -getPlayerBody().velocity; //todo idea: I could have the player' position and subtract it from the shadow's relative's position
+            yield return null;                              //note: OR have the raycast run faster above (to not jitter that often) 
+        } while (checkForDistance());
+        renderer.enabled = false;
     }
 
     /**

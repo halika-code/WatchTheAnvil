@@ -4,6 +4,7 @@ using Script.Tools.ToolType;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
+using static VelocityManipulation;
 
 /**
  * <date>17/06/2023</date>
@@ -14,7 +15,7 @@ using static Move;
  */
 public class Character_Controller : MonoBehaviour {
     
-    public const double MoveVel = 22D;
+    public const double MoveVel = 22D;                  //todo break the velocity manipulation logic from here into a new script called SpeedHandling
     public const double DampeningCoefficient = 1.7D;
     public static Vector3 flyingVector;
     protected static Rigidbody pBody;
@@ -39,8 +40,7 @@ public class Character_Controller : MonoBehaviour {
     private static void setPlayerBody() {
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
-        var burrow = GameObject.Find("Enter");
-        if (burrow != null) {
+        if (GameObject.Find("Enter") != null) {
             var burrowPos = GameObject.Find("Enter").gameObject.transform.position;
             pBody.position = new Vector3(burrowPos.x, burrowPos.y + 2f, burrowPos.z);
         }
@@ -65,44 +65,7 @@ public class Character_Controller : MonoBehaviour {
         } //Debug.Log("canMove is " + Move.getMove() + ", Player's prior y vel is: " + priorYVel); //note, just comment this debug out when not in use
     }
 
-    /**
-     * <summary>Decides what speed the player should be going at the start of the frame</summary>
-     */
-    private static Vector3 calculateVelocity() { //new Vector3(0f, pBody.velocity.y, 0f)
-        if (GravAmplifier.isAscending) {
-            var pVel = pBody.velocity;
-            if (flyingVector == new Vector3(0f, pVel.y, 0f)) { //if the player just jumped
-                return pVel;
-            } calculateFlyingVelocity(pVel);  //if the player is flying in the air
-        } else {
-            flyingVector = new Vector3(0f, pBody.velocity.y, 0f);
-        } return flyingVector;
-    }
-
-    /**
-     * <summary>Modifies the calculated velocity for the player to be in it's airborne state</summary>
-     */
-    private static void calculateFlyingVelocity(Vector3 pVel) {
-        var diff = flyingVector - pVel; //getting the change in direction
-        flyingVector = pVel; //gets the default values in case no change is detected
-        for (var i = 0; i < 3; i+=2) {
-            if (Math.Abs(Math.Round(diff[i], 1)) > 1.5f) { //filtering for small changes //1.6f for single and 4.38f for multipress
-                flyingVector[i] = Math.Sign(flyingVector[i]) * (Math.Abs(flyingVector[i]) / 
-                    (float)DampeningCoefficient * (checkAgainstUmbrella() ? 0.8f : 1.5f)); //this multiplier crops the gliding distance of the umbrella 
-            } //dividing makes sure the value gets smaller than the original velocity
-        }
-    }
-
-    /**
-     * <summary>Checks if the umbrella is open</summary>
-     * <returns>False if the hand is empty, if the tool in the hand is not an umbrella or if the umbrella is not open.
-     * <para>True if all the above are true</para></returns>
-     */
-    private static bool checkAgainstUmbrella() {
-        var tool = Toolbelt.getBelt().toolInHand;
-        return Toolbelt.checkHand() && tool.name.Contains("Umbrella") && ((Umbrella)tool).isOpen;
-    }
-
+    
     private void FixedUpdate() {
         //Debug.Log(GravAmplifier.isAscending? "flyin" : "On the ground");
         //Debug.Log(getMove() is CanMove.CantJump? "StateFly" : "StateGround");
@@ -116,23 +79,7 @@ public class Character_Controller : MonoBehaviour {
         } velocityDecay(); //needs to be here to have a fixed rate of slowdown
     }
     
-    /**
-     * <summary>Slowly decreases the player's velocity</summary>
-     * <remarks>Breaks early if the player is on the ground</remarks>
-     */
-    private static void velocityDecay() {
-        if (GravAmplifier.isAscending) { //if false, breaks early
-            var pVel = pBody.velocity;
-            for (var i = 0; i < 2; i+=2) {
-                if (Math.Abs(Math.Round(pVel[i])) > 0.05f) {
-                    pVel[i] -= !checkAgainstUmbrella() ? Math.Sign(pVel[i]) * 0.08f: Math.Sign(pVel[i]) * 0.1f;
-                } else {
-                    pVel[i] = 0;
-                }
-            } pBody.velocity = pVel;
-        }
-    }
-
+   
     /**
      * <summary>Gives the player a starting velocity then based on the desired speed cap, will apply increased gravity until the cap is reached / passed</summary>
      * <param name="speedUp">The starting Y velocity, by default is <see cref="MoveVel"/> * 3.2 cast into a float</param>
@@ -144,9 +91,13 @@ public class Character_Controller : MonoBehaviour {
         updateMovement(CanMove.CantJump);
     }
 
+    /**
+     * <summary>Calculates if the player is standing on the closest solid object</summary>
+     * <returns>True if the player's distance is too far from the raycast's length</returns>
+     */
     public static bool checkForDistance() {
         if (ShadowController.findColPoint(out var hit)) {
-            return hit.distance > (getPlayerBody().transform.localScale.y/2)+1f; //the idea here is with the localScale I can get the height of the player from this data
+            return hit.distance > (pBody.transform.localScale.y/2)+1f; //the idea here is with the localScale I can get the height of the player from this data
         } return false;
     }
     
