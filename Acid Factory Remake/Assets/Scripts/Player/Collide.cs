@@ -63,7 +63,7 @@ public class Collide : MonoBehaviour {
         private void OnCollisionEnter(Collision collision) {
             if (!VegetablePull.validateVegetable(collision.gameObject)) {
                 processCollision(getParentName(collision.gameObject), collision);
-            } StopCoroutine(nameof(ShadowController.findPlatform)); //turns off ray-casting while the y coordinate will not change
+            } 
         }
         
         /**
@@ -73,7 +73,7 @@ public class Collide : MonoBehaviour {
             if (checkForDistance()) { //if the player have left the ground
                 if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
                     jump();
-                } StartCoroutine(checkForDistance() ? ShadowController.followPlayer() : ShadowController.findPlatform());
+                } StartCoroutine(ShadowController.findPlatform());
                 if (!GravAmplifier.isAscending) { //if the player haven't pressed jump yet
                     GravAmplifier.gravity.falling(getPlayerBody().velocity);
                     InputController.toggleToJumpingState();

@@ -16,39 +16,32 @@ public class ShadowController : MonoBehaviour {
     private void Start() {
         sBody = gameObject.GetComponent<Rigidbody>();
         renderer = gameObject.GetComponent<MeshRenderer>();
-        StartCoroutine(findPlatform());
     }
 
     /**
      * <summary>Attempts to find the closest solid object that exists underneath the player
      * <para>If one is found, the pane will be placed on the surface of it</para></summary>
-     * <remarks>This is designed to run forever and is supposed to get killed as soon as the player lands</remarks>
+     * <remarks>This is designed to run forever and is supposed to get stopped as soon as the player lands</remarks>
      */
     public static IEnumerator findPlatform() { //var hit is the container of the collider of the object that was hit 
         if (!renderer.enabled) {
             renderer.enabled = true;
         } do {
-            if (!findColPoint(out lastHitObj) || lastHitObj.collider.gameObject.name is "DeathPane") {
-                break;
-            } if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
-                setShadowPosition(new Vector3(lastHitObj.point.x, lastHitObj.point.y + 0.1f, lastHitObj.point.z));
-            } yield return null;
-        } while (checkForDistance());
-        renderer.enabled = false;
-    }
+            
+            if (!findColPoint(out lastHitObj) || lastHitObj.collider.gameObject.name is "DeathPane") { //todo use lastHitObj's distance to decide if a raycast is needed. If not, divide between the player's body and the lasthitObj's distance
+               yield break;
+            }
 
-    /**
-     * <summary>Attempts to follow the player by applying the  flipped velocity of the player</summary>
-     */
-    public static IEnumerator followPlayer() {
-        if (!renderer.enabled) {
-            renderer.enabled = true;
-        } do {
-            var asd = getPlayerBody().transform.localPosition;
-            var asd2 = sBody.transform.localPosition;
-            var asd3 = sBody.transform.position;
-            sBody.velocity = -getPlayerBody().velocity; //todo idea: I could have the player' position and subtract it from the shadow's relative's position
-            yield return null;                              //note: OR have the raycast run faster above (to not jitter that often) 
+            var asd = getPlayerBody().position;
+            //the idea here is the player's position is the greatest, if I subtract the lastHitObj's position
+            //then the shadow-body's local position (compared to the player)
+            //I will get the distance between the ground and the shadow
+            var distanceDifference = getPlayerBody().position.y - lastHitObj.point.y - 
+                                      sBody.transform.localPosition.y > 0.1f; //todo chuck this into an if statement, Mathf.Lerp to smooth it out
+                              //todo test how this will run without calling getPlayerBody (using the shadow's original position)
+            if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
+                setShadowPosition(new Vector3(lastHitObj.point.x, lastHitObj.point.y + 0.15f, lastHitObj.point.z));
+            } yield return null;
         } while (checkForDistance());
         renderer.enabled = false;
     }
