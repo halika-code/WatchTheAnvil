@@ -36,9 +36,8 @@ public class ShadowController : MonoBehaviour {
             //the idea here is the player's position is the greatest, if I subtract the lastHitObj's position
             //then the shadow-body's local position (compared to the player)
             //I will get the distance between the ground and the shadow
-            var distanceDifference = getPlayerBody().position.y - lastHitObj.point.y - 
-                                      sBody.transform.localPosition.y > 0.1f; //todo chuck this into an if statement, Mathf.Lerp to smooth it out
-                              //todo test how this will run without calling getPlayerBody (using the shadow's original position)
+            var difference = lastHitObj.point.y - asd.y; //todo have the Mathf.Lerp smoothly interpolate between sbody's and lastHitObj's position, 
+                        //todo don't do anything with the difference since that would have the shadow lag behind the player instead of jittering, making it even worse
             if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
                 setShadowPosition(new Vector3(lastHitObj.point.x, lastHitObj.point.y + 0.15f, lastHitObj.point.z));
             } yield return null;
