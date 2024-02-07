@@ -73,7 +73,7 @@ public class Collide : MonoBehaviour {
             if (checkForDistance()) { //if the player have left the ground
                 if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
                     jump();
-                } StartCoroutine(ShadowController.findPlatform());
+                } StartCoroutine(ShadowController.followPlayer());
                 if (!GravAmplifier.isAscending) { //if the player haven't pressed jump yet
                     GravAmplifier.gravity.falling(getPlayerBody().velocity);
                     InputController.toggleToJumpingState();

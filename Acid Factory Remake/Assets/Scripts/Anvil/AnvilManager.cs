@@ -61,7 +61,7 @@ public class AnvilManager : MonoBehaviour {
 
     /**
      * <summary>Attempts to keep the player locked on target</summary>
-     * <remarks>This is a carbon copy of <see cref="ShadowController.findPlatform()"/>, could have made it generic if iterators could accept out keyword</remarks>
+     * <remarks>This is a carbon copy of <see cref="ShadowController.followPlayer"/>, could have made it generic if iterators could accept out keyword</remarks>
      */
     private static IEnumerator trackPlayer(Anvil anvil) {
         while (anvil.aTimer is not 0) {

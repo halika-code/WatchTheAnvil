@@ -11,11 +11,12 @@ using static Character_Controller;
 public class ShadowController : MonoBehaviour {
     private new static MeshRenderer renderer;
     private static Rigidbody sBody;
-    public static RaycastHit lastHitObj;
+    private static RaycastHit lastHitObj;
     
     private void Start() {
         sBody = gameObject.GetComponent<Rigidbody>();
         renderer = gameObject.GetComponent<MeshRenderer>();
+        StartCoroutine(followPlayer());
     }
 
     /**
@@ -23,26 +24,31 @@ public class ShadowController : MonoBehaviour {
      * <para>If one is found, the pane will be placed on the surface of it</para></summary>
      * <remarks>This is designed to run forever and is supposed to get stopped as soon as the player lands</remarks>
      */
-    public static IEnumerator findPlatform() { //var hit is the container of the collider of the object that was hit 
+    public static IEnumerator followPlayer() { //var hit is the container of the collider of the object that was hit 
+        var counter = 0;
         if (!renderer.enabled) {
             renderer.enabled = true;
-        } do {
-            
-            if (!findColPoint(out lastHitObj) || lastHitObj.collider.gameObject.name is "DeathPane") { //todo use lastHitObj's distance to decide if a raycast is needed. If not, divide between the player's body and the lasthitObj's distance
-               yield break;
-            }
-
-            var asd = getPlayerBody().position;
-            //the idea here is the player's position is the greatest, if I subtract the lastHitObj's position
-            //then the shadow-body's local position (compared to the player)
-            //I will get the distance between the ground and the shadow
-            var difference = lastHitObj.point.y - asd.y; //todo have the Mathf.Lerp smoothly interpolate between sbody's and lastHitObj's position, 
-                        //todo don't do anything with the difference since that would have the shadow lag behind the player instead of jittering, making it even worse
-            if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
-                setShadowPosition(new Vector3(lastHitObj.point.x, lastHitObj.point.y + 0.15f, lastHitObj.point.z));
+        } findPlatform(); //updates the last platform's point in case it gets nulled
+        do {
+            if (counter > 9) { //every 10th loop, update y position
+                findPlatform();
+                counter = 0;
+            } if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
+                var pBodyPos = getPlayerBody().position;
+                setShadowPosition(Vector3.Lerp(sBody.position, new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z), 1f));
             } yield return null;
-        } while (checkForDistance());
+            counter++;
+        } while (checkForDistance() || renderer.enabled);
         renderer.enabled = false;
+    }
+
+    /**
+     * <summary>Updates the point the player is directly under</summary>
+     */
+    private static void findPlatform() {
+        if (!findColPoint(out lastHitObj)) {
+            renderer.enabled = false;
+        }
     }
 
     /**
