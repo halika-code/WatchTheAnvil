@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Character_Controller;
 
@@ -16,6 +17,7 @@ public class ShadowController : MonoBehaviour {
     private void Start() {
         sBody = gameObject.GetComponent<Rigidbody>();
         renderer = gameObject.GetComponent<MeshRenderer>();
+        findPlatform(); //equal to "lastHitObj = new RayCastHit();"
         StartCoroutine(followPlayer());
     }
 
@@ -28,14 +30,15 @@ public class ShadowController : MonoBehaviour {
         var counter = 0;
         if (!renderer.enabled) {
             renderer.enabled = true;
-        } findPlatform(); //updates the last platform's point in case it gets nulled
-        do {
-            if (counter > 9) { //every 10th loop, update y position
+        } do {
+            if (!lastHitObj.collider.gameObject || counter > 9) { //every 10th loop OR if the lastHitObj have been dumped mid-loop, update y position
                 findPlatform();
                 counter = 0;
-            } if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
+            }
+                    //todo this sometimes returns a null-reference-exception, check out why (when jumping over the tools sometimes) 
+            if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
                 var pBodyPos = getPlayerBody().position;
-                setShadowPosition(Vector3.Lerp(sBody.position, new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z), 1f));
+                setShadowPosition(new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z));
             } yield return null;
             counter++;
         } while (checkForDistance() || renderer.enabled);
@@ -58,7 +61,7 @@ public class ShadowController : MonoBehaviour {
      */
     public static bool findColPoint(out RaycastHit hit) {
         var ray = new Ray(getPlayerBody().position, Vector3.down);
-        return Physics.Raycast(ray, out hit, 30f);
+        return Physics.Raycast(ray, out hit, 100f);
     }
 
     /**
