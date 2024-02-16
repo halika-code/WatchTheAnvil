@@ -31,18 +31,27 @@ public class ShadowController : MonoBehaviour {
         if (!renderer.enabled) {
             renderer.enabled = true;
         } do {
-            if (!lastHitObj.collider.gameObject || counter > 9) { //every 10th loop OR if the lastHitObj have been dumped mid-loop, update y position
-                findPlatform();
-                counter = 0;
-            }
-                    //todo this sometimes returns a null-reference-exception, check out why (when jumping over the tools sometimes) 
-            if (getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text")) {
+            if (checkForPlatform(counter, out counter)) {
                 var pBodyPos = getPlayerBody().position;
                 setShadowPosition(new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z));
             } yield return null;
-            counter++;
-        } while (checkForDistance() || renderer.enabled);
+        } while (checkForDistance(lastHitObj));
         renderer.enabled = false;
+    }
+
+    /**
+     * <summary>A helper function for <see cref="followPlayer()"/>
+     * Decides if the platform in memory have been purged or not.
+     * <para>If so, the said distance is refreshed</para></summary>
+     * <remarks>Also checks if the the last object hit is an expected one or not</remarks>
+     */
+    private static bool checkForPlatform(int counter, out int count) {
+        counter++;
+        if (lastHitObj.collider || counter > 9) { //every 10th loop OR if the lastHitObj have been dumped mid-loop, update y position
+            findPlatform();
+            counter = 0;
+        } count = counter;
+        return getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text");
     }
 
     /**

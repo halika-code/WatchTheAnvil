@@ -103,6 +103,14 @@ public class Character_Controller : MonoBehaviour {
     }
     
     /**
+     * <summary>An overloaded version from <see cref="checkForDistance()"/> where the rayCastHit is given</summary>
+     * <returns>True if the player's distance is too far from the raycast's length</returns>
+     */
+    public static bool checkForDistance(RaycastHit hit) {
+        return hit.distance > (pBody.transform.localScale.y/2)+1f;
+    }
+    
+    /**
      * <summary>Attempts to remove one health-point. If that fails, the player is killed</summary>
      */
     public static void hurtPlayer() {

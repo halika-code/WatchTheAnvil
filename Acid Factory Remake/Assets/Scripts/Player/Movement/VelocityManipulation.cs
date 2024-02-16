@@ -70,9 +70,7 @@ public static class VelocityManipulation {
      * <remarks>Update is every second, the time-frame decreased by 0.8f</remarks>
      */
     public static async void incrementXSpeedDown(float wait) {
-        while (wait > 0f || !GravAmplifier.isAscending) { //todo for some reason, the while loop refuses to terminate EVEN when it's condition turns to false
-            Debug.Log("xSlowDown is " + xSlowDown + ", wait is " + wait);
-            Debug.Log(wait > 0f ?"While should run" :"STOP WHILE");
+        while (wait > 0f || GravAmplifier.isAscending) {
             xSlowDown -= 0.005f;
             await Task.Delay(300);
             wait -= 0.8f;
