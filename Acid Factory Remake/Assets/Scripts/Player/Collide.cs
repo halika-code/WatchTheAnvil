@@ -75,8 +75,9 @@ public class Collide : MonoBehaviour {
                     jump();
                 } StartCoroutine(ShadowController.followPlayer());
                 if (!GravAmplifier.isAscending) { //if the player haven't pressed jump yet
-                    GravAmplifier.gravity.falling(getPlayerBody().velocity);
-                    InputController.toggleToJumpingState();
+                    var pBody = getPlayerBody().velocity;
+                    GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); //todo this isn't kicking in, 
+                    InputController.toggleToJumpingState(); //todo perhaps modify this to have the isAscending in the InputController, remove the jump state and rely on the isAscending instead
                 }
             } else {
                 processPlatforms();
@@ -98,9 +99,9 @@ public class Collide : MonoBehaviour {
                 if (Math.Abs(obj.contacts[0].normal[i]) is not 0) { //normal is used here since it is reliably ranging from -1 to 1
                     Enum.TryParse<CanMove>(obj.contacts[0].normal[i] > 0 ? (1 + i).ToString() : (2 + i).ToString(), out var restriction);
                     Move.updateMovement(restriction); //note: by design, the restriction will always be between 1-4
-                }
+                    GravAmplifier.isAscending = false;
+                } 
             }
-            
         }
         
     #endregion

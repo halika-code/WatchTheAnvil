@@ -45,7 +45,7 @@ public class GravAmplifier : MonoBehaviour {
      */
     private IEnumerator gravAmplifier(float desiredSpeed = -70f) {
         desiredSpeedCap = desiredSpeed;
-        while (Move.getMove() is Move.CanMove.CantJump || isAscending) { //here the arch is kept at a downwards angle
+        while (isAscending) { //here the arch is kept at a downwards angle
             movePlayer(hop.y);
             if (hop.y > desiredSpeedCap) { //normal execution
                 hop.y -= (float)MoveVel;

@@ -17,7 +17,11 @@ public class Character_Controller : MonoBehaviour {
     
     public const double MoveVel = 22D;                  //todo break the velocity manipulation logic from here into a new script called SpeedHandling
     public const double DampeningCoefficient = 1.7D;
-    public static Vector3 flyingVector;
+    /**
+     * <summary>Used for calculating the velocity of the player.
+     * Important while the player is airborne</summary>
+     */
+    public static Vector3 flyingVector; 
     protected static Rigidbody pBody;
     private static Transform pHand;
 
@@ -161,6 +165,7 @@ public class Character_Controller : MonoBehaviour {
         ShadowController.moveShadow(pBody.transform.position);
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     /**
      * <summary>Alternative player movement function where only one angle is modified in the player's current velocity</summary>
      * <param name="velocity">Desired vector given to the player</param>

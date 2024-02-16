@@ -6,7 +6,7 @@ using Task = System.Threading.Tasks.Task;
 
 public static class VelocityManipulation {
 
-    private static float xSlowDown = 0.03f;
+    private static float xSlowDown = 0.04f;
     
     /**
      * <summary>Decides what speed the player should be going at the start of the frame</summary>
@@ -67,11 +67,12 @@ public static class VelocityManipulation {
     /**
      * <summary>Increments the speed-down slowly in a given time-frame</summary>
      * <param name="wait">Any float second</param>
-     * <remarks>Update is every second, the time-frame decreased by 0.8f</remarks>
+     * <remarks>Update is every second, the time-frame decreased by 0.8f
+     * <para>Decrease the minus statement to increase the strength of the speed down</para></remarks>
      */
     public static async void incrementXSpeedDown(float wait) {
         while (wait > 0f || GravAmplifier.isAscending) {
-            xSlowDown -= 0.005f;
+            xSlowDown -= 0.0005f;
             await Task.Delay(300);
             wait -= 0.8f;
         } xSlowDown = 0.03f;
