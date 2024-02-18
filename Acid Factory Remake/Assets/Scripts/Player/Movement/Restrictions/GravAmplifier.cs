@@ -12,6 +12,11 @@ public class GravAmplifier : MonoBehaviour {
     public static GravAmplifier gravity;
     private float desiredSpeedCap = -70f;
     /**
+     * <summary>Waits for 0.1 second</summary>
+     * <remarks>Used to not have to create a new WaitForSeconds during gravity amplification</remarks>
+     */
+    private static readonly WaitForSeconds Wait = new(0.1f);
+    /**
      * <summary>A variable that keeps the calculated speed the player will inherit from the amplified gravity.
      * Only the y component can be modified outside the script</summary>
      * <remarks>Use <see cref="updateDownwardSpeed"/> to modify it's speed while the coroutine is running</remarks>
@@ -49,9 +54,9 @@ public class GravAmplifier : MonoBehaviour {
             movePlayer(hop.y);
             if (hop.y > desiredSpeedCap) { //normal execution
                 hop.y -= (float)MoveVel;
-                yield return new WaitForSeconds(0.1f); //waits a bit to apply the speed reduction, producing an arch
-            }  else {
-                yield return null;
+                yield return Wait; //waits a bit to apply the speed reduction, producing an arch
+            } else {
+                yield return null; 
             }
         } Move.updateMovement(Move.CanMove.Freely);
     }

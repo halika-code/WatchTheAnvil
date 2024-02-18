@@ -37,10 +37,6 @@ public class Move : MonoBehaviour {
          */
         CantUp,
         /**
-         * <summary>Flag denoting the player is soaring through the sky through the press of the space bar</summary>
-         */
-        CantJump,
-        /**
          * <summary>Flag denoting the player is in a cutscene / transition state</summary>
          */
         Cant

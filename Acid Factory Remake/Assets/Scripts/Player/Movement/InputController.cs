@@ -62,14 +62,20 @@ public class InputController : Character_Controller {
         return ret; //note, the integer casting is used to divide by zero and get 0 as result. The brackets are important there, as in we wanna divide then cast
     }
 
+    /**
+     * <summary>Checks if the player can jump</summary>
+     * <returns>false if the player shouldn't jump, true if the player is not in the air and has pressed jump</returns>
+     * <remarks>the <see cref="GravAmplifier.isAscending"/> has to be false in order to return a true</remarks>
+     */
     public static bool checkForJump() {
         if (Input.GetKey(KeyCode.Space) && !isAscending) {
             toggleToJumpingState();
-        } return isAscending && Input.GetKey(KeyCode.Space);
+            return true;
+        } //Debug.Log("canFly: " + isAscending + ", Pressed lump: " + Input.GetKey(KeyCode.Space));
+        return false;
     }
 
     public static void toggleToJumpingState() {
-        Move.updateMovement(Move.CanMove.CantJump);
         isAscending = true;
     }
     

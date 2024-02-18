@@ -71,13 +71,13 @@ public class Collide : MonoBehaviour {
          */
         private void OnCollisionExit(Collision other) {
             if (checkForDistance()) { //if the player have left the ground
-                if (getParentName(other.gameObject) is "Platforms" or "Walls" && Move.getMove() is not Move.CanMove.CantJump) {
+                if (getParentName(other.gameObject) is "Platforms" or "Walls" && !GravAmplifier.isAscending) {
                     jump();
                 } StartCoroutine(ShadowController.followPlayer());
                 if (!GravAmplifier.isAscending) { //if the player haven't pressed jump yet
                     var pBody = getPlayerBody().velocity;
                     GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); //todo this isn't kicking in, 
-                    InputController.toggleToJumpingState(); //todo perhaps modify this to have the isAscending in the InputController, remove the jump state and rely on the isAscending instead
+                    InputController.toggleToJumpingState(); 
                 }
             } else {
                 processPlatforms();
@@ -96,10 +96,15 @@ public class Collide : MonoBehaviour {
         private void processWalls(Collision obj) {
             //Collision.impulse is used here since it is a nice big number that is reliable
             for (var i = 0; i < 3; i+=2) { //designed to run twice
-                if (Math.Abs(obj.contacts[0].normal[i]) is not 0) { //normal is used here since it is reliably ranging from -1 to 1
+                if (Math.Abs(obj.contacts[0].normal[i]) is not 0) { //IF this is true, we have the side the player collides with
                     Enum.TryParse<CanMove>(obj.contacts[0].normal[i] > 0 ? (1 + i).ToString() : (2 + i).ToString(), out var restriction);
                     Move.updateMovement(restriction); //note: by design, the restriction will always be between 1-4
-                    GravAmplifier.isAscending = false;
+                    GravAmplifier.isAscending = false;  
+                    Debug.Log("Player's velocity: "); //todo remove the player's velocity: check what speed is kept in the player's x/z velocity when the player is clinging to a wall
+                    var asd = getPlayerBody().velocity;
+                    var asd2 = obj.contacts[0].normal[i];
+                            //todo example: player wants to move into north facing wall, z velocity is positive so the z needs to be stopped
+                            //note: obj.contacts.normal index could be interesting here
                 } 
             }
         }

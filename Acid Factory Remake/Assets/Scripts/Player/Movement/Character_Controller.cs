@@ -73,7 +73,8 @@ public class Character_Controller : MonoBehaviour {
     private void FixedUpdate() {
         //Debug.Log(GravAmplifier.isAscending? "flyin" : "On the ground");
         //Debug.Log(getMove() is CanMove.CantJump? "StateFly" : "StateGround");
-        if (getMove() is not CanMove.CantJump && InputController.checkForJump()) { //wall-jump: the Move state machine can only have 1 state, can be locked out IF I check for isAscending as well
+        if (InputController.checkForJump()) { //wall-jump: the Move state machine can only have 1 state, can be locked out IF I check for isAscending as well
+            //Debug.Log("Jumpin");
             if (Toolbelt.getBelt().checkForTool("Umbrella", out _)) {
                 if (checkAgainstUmbrella()) { //should be a normal jump-arch until 0 then fall slowly 
                     jump(desiredSpeedCap: 0f); //note this assigns a value in here
@@ -92,7 +93,6 @@ public class Character_Controller : MonoBehaviour {
     public static void jump(float speedUp = (float)MoveVel * 3.2f, float desiredSpeedCap = -70f) {
         var pVel = pBody.velocity;
         GravAmplifier.gravity.falling(new Vector3(pVel.x, speedUp, pVel.z), desiredSpeedCap);
-        updateMovement(CanMove.CantJump);
         incrementXSpeedDown(wait: 3f); //called from here to start the async function
     }
 
