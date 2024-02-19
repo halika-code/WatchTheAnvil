@@ -77,4 +77,18 @@ public static class VelocityManipulation {
             wait -= 0.8f;
         } xSlowDown = 0.03f;
     }
+    
+    /**
+     * <summary>Removes the residual velocity the player may have in select circumstances</summary>
+     * <param name="placement">The index of the given axis.
+     * <para>Can only range from 0 to 2</para>
+     * Will do no operation when given an index of 1</param>
+     * <remarks>See: Player colliding with a wall in the air</remarks>
+     */
+    public static void stopPlayerVelocity(int placement) {
+        var pBody = getPlayerBody().velocity;
+        if (pBody[placement] != 0) { //can only check x and z. Checks in order to avoid unnecessary writes
+            getPlayerBody().velocity = new Vector3((placement is 0 ? pBody.x: 0), pBody.y, (placement is 0 ? pBody.z : 0)); //doesn't matter which parity the 
+        }
+    }
 }

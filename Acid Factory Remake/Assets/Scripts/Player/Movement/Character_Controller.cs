@@ -188,13 +188,13 @@ public class Character_Controller : MonoBehaviour {
     // ReSharper disable Unity.PerformanceAnalysis
     /**
      * <summary>Finds the rigidbody attached to the player</summary>
-     * <remarks>The component will always be found</remarks>
+     * <remarks>The component will always be found in a cheap way</remarks>
      */
     public static Rigidbody getPlayerBody() {
         if (pBody) { //pbody is checked against it being null
             return pBody;
-        } init();
-        return getPlayerBody();
+        } init(); //this is only reached IF the player's body is null 
+        return getPlayerBody(); //this statement will never be called under normal circumstances
     }
 
     /**
