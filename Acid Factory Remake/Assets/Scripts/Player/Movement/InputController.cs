@@ -36,12 +36,12 @@ public class InputController : Character_Controller {
     private static float applyRestriction(int i) {
         float velocity = calculateParity(i);
         Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
-        var whyDoesntYouWork = Move.getMove(); 
-        if (restriction != Move.getMove()) {
+        var whyDoesntYouWork = Move.getMove(); //todo some velocity is still added to the player
+        if (restriction != Move.getMove()) { //restriction is correct, getMove isn't
             velocity = processPlayerSpeed(velocity, i);
         } else { //if the player tries to move towards a direction that is restricted
             if (gravity.getDownwardSpeed() > 0f) {
-                gravity.updateDownwardSpeed(-1f);
+                gravity.updateDownwardSpeed(-1f); //todo test if this is ever reached
             } return 0f;
         } return velocity;
     }

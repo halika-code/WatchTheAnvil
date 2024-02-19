@@ -58,7 +58,7 @@ public class GravAmplifier : MonoBehaviour {
             } else {
                 yield return null; 
             }
-        } Move.updateMovement(Move.CanMove.Freely);
+        } 
     }
 
     /**

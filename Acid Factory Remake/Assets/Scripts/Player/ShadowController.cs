@@ -35,7 +35,7 @@ public class ShadowController : MonoBehaviour {
                 var pBodyPos = getPlayerBody().position;
                 setShadowPosition(new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z));
             } yield return null;
-        } while (checkForDistance(lastHitObj));
+        } while (Character_Controller.checkForDistance(lastHitObj));
         renderer.enabled = false;
     }
 
@@ -96,7 +96,10 @@ public class ShadowController : MonoBehaviour {
         sBody.transform.position = new Vector3(pos.x, sBody.position.y, pos.z);
     }
 
-    public static GameObject getShadowBody() {
-        return sBody.gameObject;
+    /**
+     * <summary>Checks if the player is standing on it's shadow</summary>
+     */
+    public static bool checkForDistance() {
+        return Character_Controller.checkForDistance(lastHitObj);
     }
 }
