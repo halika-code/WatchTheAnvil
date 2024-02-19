@@ -99,15 +99,12 @@ public class Collide : MonoBehaviour {
                 if (Math.Abs(obj.contacts[0].normal[i]) is not 0) { //IF this is true, we have the side the player collides with
                     Enum.TryParse<CanMove>(obj.contacts[0].normal[i] > 0 ? (1 + i).ToString() : (2 + i).ToString(), out var restriction);
                     Move.updateMovement(restriction); //note: by design, the restriction will always be between 1-4
-                    GravAmplifier.isAscending = false;  
-                    Debug.Log("Player's velocity: "); //todo remove the player's velocity: check what speed is kept in the player's x/z velocity when the player is clinging to a wall
-                    var asd = getPlayerBody().velocity;
-                    var asd2 = obj.contacts[0].normal[i];
-                            //todo example: player wants to move into north facing wall, z velocity is positive so the z needs to be stopped
-                            //note: obj.contacts.normal index could be interesting here
+                    GravAmplifier.isAscending = false;
+                    VelocityManipulation.stopPlayerVelocity(i);
                 } 
             }
         }
+        
         
     #endregion
 

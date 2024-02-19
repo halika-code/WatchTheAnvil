@@ -38,16 +38,23 @@ public class InputController : Character_Controller {
         Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
         var whyDoesntYouWork = Move.getMove(); 
         if (restriction != Move.getMove()) {
-            if (isAscending && buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button as the last one AND the player is soaring
-                velocity *= (float)MoveVel; //the player must be flyin
-            } else {
-                velocity *= (float)(MoveVel * 1.3); 
-                lastButtonPressed = buttons[i];
-            } 
+            velocity = processPlayerSpeed(velocity, i);
         } else { //if the player tries to move towards a direction that is restricted
             if (gravity.getDownwardSpeed() > 0f) {
                 gravity.updateDownwardSpeed(-1f);
             } return 0f;
+        } return velocity;
+    }
+
+    /**
+     * <summary>Assigns a speed to the player based on the player's current state</summary>
+     */
+    private static float processPlayerSpeed(float velocity, int i) {
+        if (isAscending && buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button as the last one AND the player is soaring
+            velocity *= (float)MoveVel; //the player must be flyin
+        } else {
+            velocity *= (float)(MoveVel * 1.3); 
+            lastButtonPressed = buttons[i];
         } return velocity;
     }
 
