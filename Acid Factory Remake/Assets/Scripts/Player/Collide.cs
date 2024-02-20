@@ -76,16 +76,15 @@ public class Collide : MonoBehaviour {
                 } StartCoroutine(ShadowController.followPlayer());
                 if (!GravAmplifier.isAscending) { //if the player haven't pressed jump yet
                     var pBody = getPlayerBody().velocity;
-                    GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); //todo this isn't kicking in, 
+                    GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); 
                     InputController.toggleToJumpingState(); 
                 }
             } else {
-                processPlatforms();
+                updateMovement(CanMove.Freely);
             }
         }
         
-        private void processPlatforms() {
-            updateMovement(CanMove.Freely);
+        private static void processPlatforms() {
             GravAmplifier.isAscending = false;
         }
 
@@ -104,7 +103,6 @@ public class Collide : MonoBehaviour {
                 } 
             }
         }
-        
         
     #endregion
 

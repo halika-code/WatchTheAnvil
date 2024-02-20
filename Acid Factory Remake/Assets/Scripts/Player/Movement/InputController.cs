@@ -21,6 +21,7 @@ public class InputController : Character_Controller {
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
                 vel[i < 2 ? 0 : 2] = applyRestriction(i);
+                Debug.Log("The player's velocity is: x: " + vel.x + ", z: " + vel.z);
             } 
         } return vel;
     }
@@ -41,7 +42,7 @@ public class InputController : Character_Controller {
             velocity = processPlayerSpeed(velocity, i);
         } else { //if the player tries to move towards a direction that is restricted
             if (gravity.getDownwardSpeed() > 0f) {
-                gravity.updateDownwardSpeed(-1f); //todo test if this is ever reached
+                gravity.updateDownwardSpeed(-1f); 
             } return 0f;
         } return velocity;
     }
