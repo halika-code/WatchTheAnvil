@@ -16,7 +16,7 @@ using static VelocityManipulation;
 public class Character_Controller : MonoBehaviour {
     
     public const double MoveVel = 22D;                  //todo break the velocity manipulation logic from here into a new script called SpeedHandling
-    public const double DampeningCoefficient = 1.7D;
+    public const double DampeningCoefficient = 1.2D;
     /**
      * <summary>Used for calculating the velocity of the player.
      * Important while the player is airborne</summary>
@@ -63,7 +63,8 @@ public class Character_Controller : MonoBehaviour {
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
-            movePlayer(InputController.checkForButtonPress(calculateVelocity()));
+            movePlayer(InputController.checkForButtonPress(calculateDampenedVelocity()));
+            //Debug.Log("Player's speed is: x:" + pBody.velocity.x);
         } if (InputController.checkForItemUse()) { //if the player wants to use the item and the cooldown flag is clear
             Toolbelt.getBelt().fetchItem();
         } //Debug.Log("canMove is " + Move.getMove() + ", Player's prior y vel is: " + priorYVel); //note, just comment this debug out when not in use

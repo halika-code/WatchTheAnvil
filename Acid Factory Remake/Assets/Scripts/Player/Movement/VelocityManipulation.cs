@@ -7,11 +7,13 @@ using Task = System.Threading.Tasks.Task;
 public static class VelocityManipulation {
 
     private static float xSlowDown = 0.04f;
+    private static float ySpeed = 0f;
     
     /**
-     * <summary>Decides what speed the player should be going at the start of the frame</summary>
+     * <summary>Calculates what speed the player should have</summary>
+     * <remarks>Will only get applied to the player's speed if the player haven't pressed buttons mid-processing</remarks>
      */
-    public static Vector3 calculateVelocity() { //new Vector3(0f, pBody.velocity.y, 0f)
+    public static Vector3 calculateDampenedVelocity() { 
         if (GravAmplifier.isAscending) {
             var pVel = getPlayerBody().velocity;
             if (flyingVector == new Vector3(0f, pVel.y, 0f)) { //if the player just jumped
@@ -25,15 +27,23 @@ public static class VelocityManipulation {
     /**
      * <summary>Modifies the calculated velocity for the player to be in it's airborne state</summary>
      */
-    private static void calculateFlyingVelocity(Vector3 pVel) {
-        var diff = flyingVector - pVel; //getting the change in direction
-        flyingVector = pVel; //gets the default values in case no change is detected
-        for (var i = 0; i < 3; i+=2) {
-            if (Math.Abs(Math.Round(diff[i], 1)) > 1.5f) { //filtering for small changes //1.6f for single and 4.38f for multipress
+    private static void calculateFlyingVelocity(Vector3 pVel) { //todo tinker with the movement script in the InputController
+        var haveChanged = false; 
+        var diff = flyingVector - pVel; //getting the change in direction and it's angle 
+        for (var i = 0; i < 3; i+=2) {  //todo the dampening isn't doing isn't proper thing, for some reason its overachieving
+            if (checkForDifference(diff[i], i)) { //filtering for small changes //1.6f for single and 4.38f for multipress
                 flyingVector[i] = Math.Sign(flyingVector[i]) * (Math.Abs(flyingVector[i]) / 
-                    (float)DampeningCoefficient * (checkAgainstUmbrella() ? 0.8f : 1.5f)); //this multiplier crops the gliding distance of the umbrella 
+                    (float)DampeningCoefficient * (checkAgainstUmbrella() ? 1f : 1.5f)); //this multiplier crops the gliding distance of the umbrella 
+                haveChanged = true;
+                Debug.Log(flyingVector[i]);
             } //dividing makes sure the value gets smaller than the original velocity
+        } if (!haveChanged) { 
+            flyingVector = pVel; //gets the default values in case no significant change is detected
         }
+    }
+
+    private static bool checkForDifference(float diff, int i) {
+        return absRound(diff) > 1.5f && absRound(flyingVector[i]) > 0.2f;
     }
 
     /**
@@ -54,7 +64,7 @@ public static class VelocityManipulation {
         if (GravAmplifier.isAscending) { //if false, breaks early
             var pVel = getPlayerBody().velocity;
             for (var i = 0; i < 2; i+=2) {
-                if (Math.Abs(Math.Round(pVel[i])) > 0.05f) {
+                if (absRound(pVel[i]) > 0.05f) {
                     pVel[i] -= checkAgainstUmbrella() ? Math.Sign(pVel[i]) * xSlowDown : 
                         Math.Sign(pVel[i]) * xSlowDown + 0.05f; //normal velocity slowdown : umbrella slowdown
                 } else {
@@ -90,5 +100,12 @@ public static class VelocityManipulation {
         if (pBody[placement] != 0) { //can only check x and z. Checks in order to avoid unnecessary writes
             getPlayerBody().velocity = new Vector3((placement is 0 ? pBody.x: 0), pBody.y, (placement is 2 ? pBody.z : 0)); //doesn't matter which parity the 
         }
+    }
+
+    /**
+     * <summary>Returns a rounded (to the 2nd digit) and absolute value</summary>
+     */
+    public static double absRound(float num) {
+        return Math.Abs(Math.Round(num, 2));
     }
 }

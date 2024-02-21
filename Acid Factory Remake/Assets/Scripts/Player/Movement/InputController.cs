@@ -15,13 +15,11 @@ public class InputController : Character_Controller {
     /**
      * <summary><para>Evaluates the movement vector of the player</para>
      *  Based on the keys supplied.</summary>
-     * <remarks>I wish I could implement this into a switch statement</remarks>
     */
     public static Vector3 checkForButtonPress(Vector3 vel) {
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                vel[i < 2 ? 0 : 2] = applyRestriction(i);
-                Debug.Log("The player's velocity is: x: " + vel.x + ", z: " + vel.z);
+                vel[i < 2 ? 0 : 2] = applyRestriction(i); //this refreshes the player's speed to be the top speed
             } 
         } return vel;
     }
@@ -37,7 +35,7 @@ public class InputController : Character_Controller {
     private static float applyRestriction(int i) {
         float velocity = calculateParity(i);
         Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
-        var whyDoesntYouWork = Move.getMove(); //todo some velocity is still added to the player
+        //var whyDoesntYouWork = Move.getMove();
         if (restriction != Move.getMove()) { //restriction is correct, getMove isn't
             velocity = processPlayerSpeed(velocity, i);
         } else { //if the player tries to move towards a direction that is restricted
@@ -50,7 +48,7 @@ public class InputController : Character_Controller {
     /**
      * <summary>Assigns a speed to the player based on the player's current state</summary>
      */
-    private static float processPlayerSpeed(float velocity, int i) {
+    private static float processPlayerSpeed(float velocity, int i) { //todo modify the speed script to only increase the speed incrementally IF the player is airborne (to a max speed)
         if (isAscending && buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button as the last one AND the player is soaring
             velocity *= (float)MoveVel; //the player must be flyin
         } else {
