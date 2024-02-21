@@ -98,7 +98,6 @@ public class Collide : MonoBehaviour {
                 if (Math.Abs(obj.contacts[0].normal[i]) is not 0) { //IF this is true, we have the side the player collides with
                     Enum.TryParse<CanMove>(obj.contacts[0].normal[i] > 0 ? (1 + i).ToString() : (2 + i).ToString(), out var restriction);
                     Move.updateMovement(restriction); //note: by design, the restriction will always be between 1-4
-                    GravAmplifier.isAscending = false;
                     VelocityManipulation.stopPlayerVelocity(i);
                 } 
             }

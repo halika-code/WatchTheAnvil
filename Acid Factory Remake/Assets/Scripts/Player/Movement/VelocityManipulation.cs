@@ -88,7 +88,7 @@ public static class VelocityManipulation {
     public static void stopPlayerVelocity(int placement) {
         var pBody = getPlayerBody().velocity;
         if (pBody[placement] != 0) { //can only check x and z. Checks in order to avoid unnecessary writes
-            getPlayerBody().velocity = new Vector3((placement is 0 ? pBody.x: 0), pBody.y, (placement is 0 ? pBody.z : 0)); //doesn't matter which parity the 
+            getPlayerBody().velocity = new Vector3((placement is 0 ? pBody.x: 0), pBody.y, (placement is 2 ? pBody.z : 0)); //doesn't matter which parity the 
         }
     }
 }
