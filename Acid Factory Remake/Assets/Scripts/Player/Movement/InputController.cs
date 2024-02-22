@@ -47,14 +47,25 @@ public class InputController : Character_Controller {
 
     /**
      * <summary>Assigns a speed to the player based on the player's current state</summary>
+     * <param name="velocity">A float that houses the orientation of the vector each key-press has</param>
+     * <param name="i">The index denoting which button have been pressed</param>
+     * <returns>The finished velocity</returns>
      */
-    private static float processPlayerSpeed(float velocity, int i) { //todo modify the speed script to only increase the speed incrementally IF the player is airborne (to a max speed)
-        if (isAscending && buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button as the last one AND the player is soaring
-            velocity *= (float)MoveVel; //the player must be flyin
-        } else {
-            velocity *= (float)(MoveVel * 1.3); 
-            lastButtonPressed = buttons[i];
-        } return velocity;
+    private static float processPlayerSpeed(float velocity, int i) {
+        if (isAscending) { //if the player is soaring
+            var asd = Character_Controller.flyingVector;
+            if (buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button, keep a steady speed
+                return velocity * (float)MoveVel; //the player must be flyin todo add the incrementPlayerSpeed here and to the other return
+            } //else, we keep the speed calculated from VelocityManipulation.calculateFlyingVelocity();
+        } lastButtonPressed = buttons[i];
+        return velocity * (float)(MoveVel * 1.25); 
+    }
+
+    /**
+     * <summary>Increments then checks the player's speed</summary>
+     */
+    private static float incrementPlayerSpeed(float desiredSpeed = 0.5f, float limit = (float)MoveVel, int index = 0) { //todo make the desiredSpeed in the processPlayerSpeed be the flyingVector[i] + 0.5f
+        return Math.Abs((int)desiredSpeed) > (int)limit ? limit : desiredSpeed; //casting to int equals to a Math.Floor statement
     }
 
     /**
