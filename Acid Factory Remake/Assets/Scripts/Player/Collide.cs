@@ -85,6 +85,7 @@ public class Collide : MonoBehaviour {
         }
         
         private static void processPlatforms() {
+            flyingVector = Vector3.zero;
             GravAmplifier.isAscending = false;
         }
 

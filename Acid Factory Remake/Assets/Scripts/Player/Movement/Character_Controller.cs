@@ -20,6 +20,7 @@ public class Character_Controller : MonoBehaviour {
     /**
      * <summary>Used for calculating the velocity of the player.
      * Important while the player is airborne</summary>
+     * <remarks>Defined as, and set after platform collision, to [0, 0, 0]</remarks>
      */
     public static Vector3 flyingVector; 
     protected static Rigidbody pBody;

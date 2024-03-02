@@ -11,6 +11,7 @@ public class InputController : Character_Controller {
     public static bool itemCoolDown; //true if the cooldown is activated
     private static KeyCode lastButtonPressed = KeyCode.D;
     private static KeyCode[] buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
+    private static Vector3 lastSpeed = Vector3.zero;
     
     /**
      * <summary><para>Evaluates the movement vector of the player</para>
@@ -19,7 +20,7 @@ public class InputController : Character_Controller {
     public static Vector3 checkForButtonPress(Vector3 vel) {
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                vel[i < 2 ? 0 : 2] = applyRestriction(i); //this refreshes the player's speed to be the top speed
+                vel[i < 2 ? 0 : 2] = applyRestriction(i); 
             } 
         } return vel;
     }
@@ -35,7 +36,6 @@ public class InputController : Character_Controller {
     private static float applyRestriction(int i) {
         float velocity = calculateParity(i);
         Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
-        //var whyDoesntYouWork = Move.getMove();
         if (restriction != Move.getMove()) { //restriction is correct, getMove isn't
             velocity = processPlayerSpeed(velocity, i);
         } else { //if the player tries to move towards a direction that is restricted
@@ -53,19 +53,20 @@ public class InputController : Character_Controller {
      */
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
-            var asd = Character_Controller.flyingVector;
             if (buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button, keep a steady speed
-                return velocity * (float)MoveVel; //the player must be flyin todo add the incrementPlayerSpeed here and to the other return
-            } //else, we keep the speed calculated from VelocityManipulation.calculateFlyingVelocity();
-        } lastButtonPressed = buttons[i];
-        return velocity * (float)(MoveVel * 1.25); 
+                return incrementPlayerSpeed(velocity * flyingVector[i] + 2f, (float)(MoveVel * 1.25));
+            } lastButtonPressed = buttons[i]; 
+            return velocity; //player switching directions, use dampening from VelocityManipulation
+        } if (Math.Abs(flyingVector[i] - velocity * (float)MoveVel) > 0.05f) { //the player is grounded
+            flyingVector[i] = velocity * (float)MoveVel + 2f;
+        } return incrementPlayerSpeed(flyingVector[i]); 
     }
 
     /**
      * <summary>Increments then checks the player's speed</summary>
      */
-    private static float incrementPlayerSpeed(float desiredSpeed = 0.5f, float limit = (float)MoveVel, int index = 0) { //todo make the desiredSpeed in the processPlayerSpeed be the flyingVector[i] + 0.5f
-        return Math.Abs((int)desiredSpeed) > (int)limit ? limit : desiredSpeed; //casting to int equals to a Math.Floor statement
+    private static float incrementPlayerSpeed(float desiredSpeed, float limit = (float)MoveVel * 1.5f) { 
+        return Math.Abs((int)desiredSpeed) > (int)limit ? Math.Sign(desiredSpeed) * limit : desiredSpeed; //casting to int equals to a Math.Floor statement
     }
 
     /**
