@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using static GravAmplifier;
+using static VelocityManipulation;
 
 /**
  * <date>05/01/2024</date>
@@ -9,20 +10,35 @@ using static GravAmplifier;
  */
 public class InputController : Character_Controller {
     public static bool itemCoolDown; //true if the cooldown is activated
-    private static KeyCode lastButtonPressed = KeyCode.D;
+    private static KeyCode lastButtonPressed = KeyCode.Z;
     private static KeyCode[] buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
-    private static Vector3 lastSpeed = Vector3.zero;
     
     /**
      * <summary><para>Evaluates the movement vector of the player</para>
      *  Based on the keys supplied.</summary>
-    */
-    public static Vector3 checkForButtonPress(Vector3 vel) {
+     * <returns>A set of velocity the player will go with IF the player is grounded</returns>
+     */
+    public static Vector3 checkForButtonPress() {
+        var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                vel[i < 2 ? 0 : 2] = applyRestriction(i); 
+                vel[i < 2 ? 0 : 2] = isAscending ? dampenVelocity(i) : applyRestriction(i);
+                if (lastButtonPressed != buttons[i]) {
+                    updateButtonPress(i);
+                }
             } 
         } return vel;
+    }
+
+    private static bool shouldDampen() { 
+        //todo the dampening (while not perfect) is functional but dampening is applied to the movement when it is not supposed to (applied when the player is in the air)
+        //todo create this function where it returns true IF the player is in the air AND have not pressed the same button
+    }
+
+    private static float dampenVelocity(int i) { //todo this function needs to have an async Task.Delay into it with a small number
+        if (lastButtonPressed != buttons[i]) {
+            i += 4; //added 4 instead of 3 to account to the int being 0, 0+3=3 which is in the bounds of expected values, will not trigger the reset
+        } return VelocityManipulation.dampenVelocity(i);
     }
 
     /**
@@ -37,7 +53,7 @@ public class InputController : Character_Controller {
         float velocity = calculateParity(i);
         Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
         if (restriction != Move.getMove()) { //restriction is correct, getMove isn't
-            velocity = processPlayerSpeed(velocity, i);
+            velocity = processPlayerSpeed(velocity, i < 2 ? 0 : 2);
         } else { //if the player tries to move towards a direction that is restricted
             if (gravity.getDownwardSpeed() > 0f) {
                 gravity.updateDownwardSpeed(-1f); 
@@ -54,19 +70,9 @@ public class InputController : Character_Controller {
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
             if (buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button, keep a steady speed
-                return incrementPlayerSpeed(velocity * flyingVector[i] + 2f, (float)(MoveVel * 1.25));
-            } lastButtonPressed = buttons[i]; 
-            return velocity; //player switching directions, use dampening from VelocityManipulation
-        } if (Math.Abs(flyingVector[i] - velocity * (float)MoveVel) > 0.05f) { //the player is grounded
-            flyingVector[i] = velocity * (float)MoveVel + 2f;
-        } return incrementPlayerSpeed(flyingVector[i]); 
-    }
-
-    /**
-     * <summary>Increments then checks the player's speed</summary>
-     */
-    private static float incrementPlayerSpeed(float desiredSpeed, float limit = (float)MoveVel * 1.5f) { 
-        return Math.Abs((int)desiredSpeed) > (int)limit ? Math.Sign(desiredSpeed) * limit : desiredSpeed; //casting to int equals to a Math.Floor statement
+                return incrementPlayerSpeed(velocity * (float)(MoveVel * 1.25));
+            } return -1; //player switching directions, use dampening from VelocityManipulation
+        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
     }
 
     /**
@@ -75,7 +81,7 @@ public class InputController : Character_Controller {
      * <param name="i">The index from the pattern that will be returned</param>
      * <remarks>Could be done in a simplified way</remarks>
      */
-    private static int calculateParity(double i) {
+    public static int calculateParity(double i) {
         var ret = i % 2 is not 0 ? 1 : -1;
         return ret; //note, the integer casting is used to divide by zero and get 0 as result. The brackets are important there, as in we wanna divide then cast
     }
@@ -106,5 +112,9 @@ public class InputController : Character_Controller {
 
     public static bool checkForItemUse() {
         return Input.GetKey(KeyCode.F) && Toolbelt.getBelt().toolInHand /*hand is not null*/ && !itemCoolDown;
+    }
+
+    public static void updateButtonPress(int index) {
+        lastButtonPressed = buttons[index]; 
     }
 }

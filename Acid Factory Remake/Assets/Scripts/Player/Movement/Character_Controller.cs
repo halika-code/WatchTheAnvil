@@ -17,12 +17,6 @@ public class Character_Controller : MonoBehaviour {
     
     public const double MoveVel = 22D;                  //todo break the velocity manipulation logic from here into a new script called SpeedHandling
     public const double DampeningCoefficient = 1.2D;
-    /**
-     * <summary>Used for calculating the velocity of the player.
-     * Important while the player is airborne</summary>
-     * <remarks>Defined as, and set after platform collision, to [0, 0, 0]</remarks>
-     */
-    public static Vector3 flyingVector; 
     protected static Rigidbody pBody;
     private static Transform pHand;
 
@@ -36,7 +30,6 @@ public class Character_Controller : MonoBehaviour {
         setPlayerBody();
         Physics.gravity = new Vector3(0, -30f);
         pHand = GameObject.Find("Hand").transform;
-        flyingVector = Vector3.zero;
     }
 
     /**
@@ -64,7 +57,7 @@ public class Character_Controller : MonoBehaviour {
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
-            movePlayer(InputController.checkForButtonPress(calculateDampenedVelocity()));
+            movePlayer(InputController.checkForButtonPress());
             //Debug.Log("Player's speed is: x:" + pBody.velocity.x);
         } if (InputController.checkForItemUse()) { //if the player wants to use the item and the cooldown flag is clear
             Toolbelt.getBelt().fetchItem();

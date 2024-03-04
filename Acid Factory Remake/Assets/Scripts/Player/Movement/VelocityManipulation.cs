@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Script.Tools.ToolType;
 using UnityEngine;
 using static Character_Controller;
@@ -7,31 +8,28 @@ using Task = System.Threading.Tasks.Task;
 public static class VelocityManipulation {
 
     private static float xSlowDown = 0.04f;
-    private static float ySpeed = 0f;
+    private static int dampeningCounter = 0;
     
     /**
-     * <summary>Calculates what speed the player should have</summary>
-     * <remarks>Will only get applied to the player's speed if the player haven't pressed buttons mid-processing</remarks>
+     * <summary>Increments then checks the player's speed</summary>
      */
-    public static Vector3 calculateDampenedVelocity() {
-        return GravAmplifier.isAscending ? calculateFlyingVelocity(getPlayerBody().velocity) : 
-            new Vector3(0f, getPlayerBody().velocity.y, 0f);
+    public static float incrementPlayerSpeed(float desiredSpeed, float limit = (float)MoveVel * 1.5f) { 
+        return Math.Abs((int)desiredSpeed) > (int)limit ? Math.Sign(desiredSpeed) * limit : desiredSpeed; //casting to int equals to a Math.Floor statement
     }
-
+    
     /**
-     * <summary>Modifies the calculated velocity for the player to be in it's airborne state</summary>
+     * The idea here is I want to reduce the speed of the player with a speed modifier that is incrementally gaining magnitude
      */
-    private static Vector3 calculateFlyingVelocity(Vector3 pVel) { 
-        var haveChanged = false; //gets the default values in case no significant change is detected
-        var diff = flyingVector - pVel;
-        for (var i = 0; i < 3; i+=2) {  
-            if (absRound(diff[i]) > 1.5f && absRound(flyingVector[i]) > 0.2f) { //filtering for small changes //1.6f for single and 4.38f for multipress
-                flyingVector[i] += Math.Sign(flyingVector[i]) * (Math.Abs(flyingVector[i]) / 
-                    (float)DampeningCoefficient * (checkAgainstUmbrella() ? 1f : 1.5f)); //formula breakdown: x += (-1 or +1) * (|x|/1.2D) 
-                haveChanged = true; //todo this dampening doesn't inherit the velocity already in the flyingVelocity
-                Debug.Log(flyingVector[i]);
-            } //dividing makes sure the value gets smaller than the original velocity
-        } return haveChanged ? flyingVector : pVel;
+    public static float dampenVelocity(int index = 0) {  //note, with the i, 0 is -x, 1 is +x, 2 is -z, 3 is +z, <3 is a flag to reset dampening magnitude,
+        if (index > 3) {
+            dampeningCounter = 0;
+            index -= 1;
+        } if (Math.Exp(dampeningCounter)/20 > (float)MoveVel * 1.5f) {
+            Debug.Log("Ohno, dampeningMagnitude got too phat");
+            dampeningCounter = 0;
+        } dampeningCounter++;
+        Debug.Log(dampeningCounter);
+        return incrementPlayerSpeed(InputController.calculateParity(index) * (float)Math.Exp(dampeningCounter)/10);
     }
 
     /**
@@ -87,7 +85,7 @@ public static class VelocityManipulation {
         var pBody = getPlayerBody().velocity;
         if (pBody[placement] != 0) { //can only check x and z. Checks in order to avoid unnecessary writes
             getPlayerBody().velocity = new Vector3((placement is 0 ? pBody.x: 0), pBody.y, (placement is 2 ? pBody.z : 0)); //doesn't matter which parity the 
-        } flyingVector = pBody;
+        }
     }
 
     /**
