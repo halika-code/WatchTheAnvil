@@ -22,20 +22,27 @@ public class InputController : Character_Controller {
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                vel[i < 2 ? 0 : 2] = isAscending ? dampenVelocity(i) : applyRestriction(i);
-                if (lastButtonPressed != buttons[i]) {
+                vel[i < 2 ? 0 : 2] = isAscending && lastButtonPressed != buttons[i] /*Todo the second condition here is not working at all*/
+                    ? dampenVelocity(i) : applyRestriction(i);
+                if (shouldUpdateButton(i)) {
+                    Debug.Log("updating Button");
                     updateButtonPress(i);
                 }
             } 
         } return vel;
     }
 
-    private static bool shouldDampen() { 
-        //todo the dampening (while not perfect) is functional but dampening is applied to the movement when it is not supposed to (applied when the player is in the air)
-        //todo create this function where it returns true IF the player is in the air AND have not pressed the same button
+    /**
+     * The idea here is, this function should only return true if the player's speed matches with the angle calculated from the i variable
+     * and the speed is 50% of the MoveVel, otherwise return false
+     */
+    private static bool shouldUpdateButton(int i) {
+        var pSpeed = pBody.velocity[i < 2 ? 0 : 2]; //fetching the relevant vector of the player
+        return Math.Sign(pSpeed) == calculateParity(i) && Math.Abs(pSpeed) * 0.8 > MoveVel; //if the player's angle is the same as the button's AND the player's speed reaches 80% of the max speed
     }
 
     private static float dampenVelocity(int i) { //todo this function needs to have an async Task.Delay into it with a small number
+        Debug.Log("Dampening Velocity");
         if (lastButtonPressed != buttons[i]) {
             i += 4; //added 4 instead of 3 to account to the int being 0, 0+3=3 which is in the bounds of expected values, will not trigger the reset
         } return VelocityManipulation.dampenVelocity(i);

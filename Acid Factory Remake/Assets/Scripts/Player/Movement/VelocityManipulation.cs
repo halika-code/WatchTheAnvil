@@ -28,7 +28,7 @@ public static class VelocityManipulation {
             Debug.Log("Ohno, dampeningMagnitude got too phat");
             dampeningCounter = 0;
         } dampeningCounter++;
-        Debug.Log(dampeningCounter);
+        Debug.Log("The dampening counter is: " + dampeningCounter);
         return incrementPlayerSpeed(InputController.calculateParity(index) * (float)Math.Exp(dampeningCounter)/10);
     }
 
