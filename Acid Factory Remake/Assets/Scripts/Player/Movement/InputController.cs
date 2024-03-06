@@ -22,8 +22,7 @@ public class InputController : Character_Controller {
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                vel[i < 2 ? 0 : 2] = isAscending && lastButtonPressed != buttons[i] /*Todo the second condition here is not working at all*/
-                    ? dampenVelocity(i) : applyRestriction(i);
+                vel[i < 2 ? 0 : 2] = applyRestriction(i);
                 if (shouldUpdateButton(i)) {
                     Debug.Log("updating Button");
                     updateButtonPress(i);
@@ -37,8 +36,7 @@ public class InputController : Character_Controller {
      * and the speed is 50% of the MoveVel, otherwise return false
      */
     private static bool shouldUpdateButton(int i) {
-        var pSpeed = pBody.velocity[i < 2 ? 0 : 2]; //fetching the relevant vector of the player
-        return Math.Sign(pSpeed) == calculateParity(i) && Math.Abs(pSpeed) * 0.8 > MoveVel; //if the player's angle is the same as the button's AND the player's speed reaches 80% of the max speed
+        return isAscending && lastButtonPressed != buttons[i] && Math.Abs(pBody.velocity[i < 2 ? 0 : 2]) > MoveVel * 0.8; //if the player's angle is the same as the button's AND the player's speed reaches 80% of the max speed
     }
 
     private static float dampenVelocity(int i) { //todo this function needs to have an async Task.Delay into it with a small number
@@ -76,10 +74,9 @@ public class InputController : Character_Controller {
      */
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
-            if (buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button, keep a steady speed
-                return incrementPlayerSpeed(velocity * (float)(MoveVel * 1.25));
-            } return -1; //player switching directions, use dampening from VelocityManipulation
-        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
+            return buttons[i].Equals(lastButtonPressed) ? //if the player is pressing the same button, keep a steady speed
+                incrementPlayerSpeed(velocity * (float)(MoveVel * 1.25)) : dampenVelocity(i); //player switching directions, use dampening from VelocityManipulation
+        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f);  //todo check why the dampenVelocity doesn't work
     }
 
     /**
@@ -121,7 +118,11 @@ public class InputController : Character_Controller {
         return Input.GetKey(KeyCode.F) && Toolbelt.getBelt().toolInHand /*hand is not null*/ && !itemCoolDown;
     }
 
+    /**
+     * <summary>Updates the button to a valid index of the buttons array</summary>
+     * <remarks>If an incorrect index is supplied, the lastButtonPressed will be set to KeyCode.Z</remarks>
+     */
     public static void updateButtonPress(int index) {
-        lastButtonPressed = buttons[index]; 
+        lastButtonPressed = index > 0 && index < buttons.Length ? buttons[index] : KeyCode.Z;
     }
 }

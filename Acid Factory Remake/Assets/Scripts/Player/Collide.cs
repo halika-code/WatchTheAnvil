@@ -86,6 +86,7 @@ public class Collide : MonoBehaviour {
         
         private static void processPlatforms() {
             GravAmplifier.isAscending = false;
+            InputController.updateButtonPress(-1);
         }
 
         /**
