@@ -23,13 +23,12 @@ public static class VelocityManipulation {
     public static float dampenVelocity(int index = 0) {  //note, with the i, 0 is -x, 1 is +x, 2 is -z, 3 is +z, <3 is a flag to reset dampening magnitude,
         if (index > 3) {
             dampeningCounter = 0;
-            index -= 1;
-        } if (Math.Exp(dampeningCounter)/20 > (float)MoveVel * 1.5f) {
-            Debug.Log("Ohno, dampeningMagnitude got too phat");
-            dampeningCounter = 0;
-        } dampeningCounter++;
-        Debug.Log("The dampening counter is: " + dampeningCounter);
-        return incrementPlayerSpeed(InputController.calculateParity(index) * (float)Math.Exp(dampeningCounter)/10);
+            Debug.Log("resetting dampening");
+            index -= 4;
+        } if (Math.Exp(2 + dampeningCounter)/2 < (float)MoveVel * 1.5f) {
+            dampeningCounter++;
+            return incrementPlayerSpeed(InputController.calculateParity(index) * (float)Math.Exp(dampeningCounter)/2);
+        } return incrementPlayerSpeed(InputController.calculateParity(index) / (float)MoveVel / 1.5f);
     }
 
     /**
@@ -93,5 +92,9 @@ public static class VelocityManipulation {
      */
     public static double absRound(float num) {
         return Math.Abs(Math.Round(num, 2));
+    }
+
+    public static void updateDampeningCounter(int i = 0) {
+        dampeningCounter = i >= 0 ? i : 0;
     }
 }

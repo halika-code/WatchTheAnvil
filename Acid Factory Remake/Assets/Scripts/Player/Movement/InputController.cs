@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using static GravAmplifier;
 using static VelocityManipulation;
@@ -10,7 +11,7 @@ using static VelocityManipulation;
  */
 public class InputController : Character_Controller {
     public static bool itemCoolDown; //true if the cooldown is activated
-    private static KeyCode lastButtonPressed = KeyCode.Z;
+    private static KeyCode? lastButtonPressed;
     private static KeyCode[] buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
     
     /**
@@ -22,27 +23,45 @@ public class InputController : Character_Controller {
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                vel[i < 2 ? 0 : 2] = applyRestriction(i);
                 if (shouldUpdateButton(i)) {
                     Debug.Log("updating Button");
                     updateButtonPress(i);
-                }
+                } vel[i < 2 ? 0 : 2] = applyRestriction(i);
             } 
         } return vel;
     }
 
     /**
-     * The idea here is, this function should only return true if the player's speed matches with the angle calculated from the i variable
-     * and the speed is 50% of the MoveVel, otherwise return false
+     * <summary>Checks if the last pressed button should be updated or not</summary>
+     * <returns>True, if the player is airborne and lastButtonPressed is null, or if the player is not pressing the same button
+     * and the player's speed doesn't reach 80% of the maximum velocity
+     * <para>False otherwise</para></returns>
      */
     private static bool shouldUpdateButton(int i) {
-        return isAscending && lastButtonPressed != buttons[i] && Math.Abs(pBody.velocity[i < 2 ? 0 : 2]) > MoveVel * 0.8; //if the player's angle is the same as the button's AND the player's speed reaches 80% of the max speed
-    }
+        var asd = isAscending;
+        var asd2 = lastButtonPressed;
+        var asd5 = asd2 == null;
+        var asd3 = !wasOppositePressed(i);
+        var asd4 = Math.Abs(pBody.velocity[i < 2 ? 0 : 2]) > calculateParity(i) * MoveVel * 0.8; //todo make this work better for negative values (the > doesn't work when comparing negatives)
+        var asd6 = buttons[i] != lastButtonPressed;
+        var leftSide = asd && asd5;
+        var midSide = asd && asd3;
+        var rightSide = asd && asd6 && asd4;
+        return isAscending && lastButtonPressed == null || 
+               isAscending && !wasOppositePressed(i) || 
+               isAscending && buttons[i] != lastButtonPressed && pBody.velocity[i < 2 ? 0 : 2] > calculateParity(i) * MoveVel * 0.8; 
+    } //this here covers for the player flying AND last button being null, if the player have pressed a button mapped to the different axis or 
+    
+    private static bool wasOppositePressed(int i) { //this here is a delegate creation with a variable named code of type KeyCode,
+        if (lastButtonPressed == null) {
+            return true; //this sends in the activation function that will only trigger if that condition turns true
+        } return i + calculateParity(i) * -1 == buttons.ToList().FindIndex(code => code.Equals(lastButtonPressed)); 
+    } //note at that -1 == buttons: the buttons is used to get the INDEX where the lastButtonPressed is kept at inside the array
 
     private static float dampenVelocity(int i) { //todo this function needs to have an async Task.Delay into it with a small number
         Debug.Log("Dampening Velocity");
-        if (lastButtonPressed != buttons[i]) {
-            i += 4; //added 4 instead of 3 to account to the int being 0, 0+3=3 which is in the bounds of expected values, will not trigger the reset
+        if (wasOppositePressed(i)) {
+            i += 4; 
         } return VelocityManipulation.dampenVelocity(i);
     }
 
@@ -58,7 +77,7 @@ public class InputController : Character_Controller {
         float velocity = calculateParity(i);
         Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
         if (restriction != Move.getMove()) { //restriction is correct, getMove isn't
-            velocity = processPlayerSpeed(velocity, i < 2 ? 0 : 2);
+            velocity = processPlayerSpeed(velocity, i);
         } else { //if the player tries to move towards a direction that is restricted
             if (gravity.getDownwardSpeed() > 0f) {
                 gravity.updateDownwardSpeed(-1f); 
@@ -74,9 +93,9 @@ public class InputController : Character_Controller {
      */
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
-            return buttons[i].Equals(lastButtonPressed) ? //if the player is pressing the same button, keep a steady speed
+            return buttons[i].Equals(lastButtonPressed) ? 
                 incrementPlayerSpeed(velocity * (float)(MoveVel * 1.25)) : dampenVelocity(i); //player switching directions, use dampening from VelocityManipulation
-        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f);  //todo check why the dampenVelocity doesn't work
+        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
     }
 
     /**
@@ -123,6 +142,7 @@ public class InputController : Character_Controller {
      * <remarks>If an incorrect index is supplied, the lastButtonPressed will be set to KeyCode.Z</remarks>
      */
     public static void updateButtonPress(int index) {
-        lastButtonPressed = index > 0 && index < buttons.Length ? buttons[index] : KeyCode.Z;
+        lastButtonPressed = index >= 0 && index < buttons.Length ? buttons[index] : null;
+        updateDampeningCounter(index);
     }
 }
