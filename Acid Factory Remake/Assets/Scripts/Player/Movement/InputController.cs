@@ -24,9 +24,9 @@ public class InputController : Character_Controller {
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
                 vel[i < 2 ? 0 : 2] = applyRestriction(i);
-                if (shouldUpdateButton(i, out _)) {
-                    Debug.Log("updating Button");
-                    updateButtonPress(i);
+                if (shouldUpdateButton(i, out var flyingState) && flyingState is not 2) { //todo note: this doesn't update for opposites properly, 
+                    Debug.Log("updating Button");       //todo add a waiting function to updateButtonPress when the flyingState is not 1
+                    updateButtonPress(i);               
                 }
             } 
         } return vel;
@@ -34,6 +34,12 @@ public class InputController : Character_Controller {
 
     /**
      * <summary>Decides if the lastPressedButton needs to be updated or not</summary>
+     * <param name="i">The index the button is pressed in the <see cref="buttons"/>array</param>
+     * <param name="flyingState">An additional returned variable that houses information about the player's button press.
+     * <para>Sets to 0 by default</para>
+     * Sets to 1 when the player moves after a stationary jump
+     * <para>Sets to 2 when the player presses a direction mapped to a different axis</para>
+     * Sets to 3 when the player presses a direction in the opposite direction but the same axis</param>
      * <returns>True, if the player makes a stationary jump then moves,
      * <para>If the player tries to strafe in the air or</para>
      * If the player have been moving in the opposite direction for long enough</returns>
@@ -76,16 +82,6 @@ public class InputController : Character_Controller {
     } //note at that -1 == buttons: the buttons is used to get the INDEX where the lastButtonPressed is kept at inside the array
 
     /**
-     * <summary>Calls the <see cref="VelocityManipulation.dampenVelocity"/> function</summary>
-     */
-    private static float dampenVelocity(int i) { //todo this function needs to have an async Task.Delay into it with a small number
-        Debug.Log("Dampening Velocity");
-        if (buttons[i].Equals(lastButtonPressed) && getDampeningCounter() != 0 || !wasOppositePressed(i)) { //if the keys have updated properly and a reset haven't happened yet OR the player pressed a non-opposite button
-            updateDampeningCounter(); //reset
-        } return VelocityManipulation.dampenVelocity(i);
-    }
-
-    /**
      * <summary>Converts a verified key-press into a restriction applicable to the direction the player is heading
      * <para>Checks the converted restriction against the one applied to the player</para>
      * If a match is found, the player is deemed to be colliding into a wall, the input will be dropped</summary>
@@ -114,8 +110,9 @@ public class InputController : Character_Controller {
      */
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
-            return buttons[i].Equals(lastButtonPressed) ? 
-                incrementPlayerSpeed(velocity * (float)(MoveVel * 1.25)) : dampenVelocity(i); //player switching directions, use dampening from VelocityManipulation
+            return incrementPlayerSpeed(buttons[i].Equals(lastButtonPressed) ? 
+                velocity * (float)(MoveVel * 1.25) : velocity * (float)(MoveVel * 1.25) / 2); 
+            //moving normal : dampening
         } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
     }
 
@@ -164,7 +161,6 @@ public class InputController : Character_Controller {
      */
     public static void updateButtonPress(int index) {
         lastButtonPressed = index >= 0 && index < buttons.Length ? buttons[index] : null;
-        updateDampeningCounter(index);
     }
 
     /**

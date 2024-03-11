@@ -16,23 +16,6 @@ public static class VelocityManipulation {
     public static float incrementPlayerSpeed(float desiredSpeed, float limit = (float)MoveVel * 1.5f) { 
         return Math.Abs((int)desiredSpeed) > (int)limit ? Math.Sign(desiredSpeed) * limit : desiredSpeed; //casting to int equals to a Math.Floor statement
     }
-    
-    /**
-     * The idea here is I want to reduce the speed of the player with a speed modifier that is incrementally gaining magnitude
-     */
-    public static float dampenVelocity(int index = 0) {  //note, with the i, 0 is -x, 1 is +x, 2 is -z, 3 is +z, <3 is a flag to reset dampening magnitude,
-        if (Math.Exp(2 + dampeningCounter)/2 < (float)MoveVel * 1.5f) { //todo perhaps this is wrong
-            dampeningCounter++;
-            var asd = incrementPlayerSpeed(InputController.calculateParity(index) * (float)Math.Exp(dampeningCounter) / 2);
-            Debug.Log("Speed components: dampening: " + dampeningCounter +  
-                      ", Exp: " + Math.Exp(dampeningCounter) + ", cast to float: " + (float)Math.Exp(dampeningCounter) +  ", calculated speed: "+ asd);
-            if (Math.Abs(Math.Sign(asd) - (float)MoveVel * 1.5f) < 0.01f) {
-                Debug.Log("Speed clamped, dampeningCounter at: " + dampeningCounter);
-                return asd;                        //todo what it looks like, after 3 cycles this dampening cannot be entered
-            }
-            return incrementPlayerSpeed(InputController.calculateParity(index) * (float)Math.Exp(dampeningCounter)/2);
-        } return incrementPlayerSpeed(InputController.calculateParity(index) / (float)MoveVel / 1.5f);
-    }
 
     /**
      * <summary>Checks if the umbrella is open</summary>
