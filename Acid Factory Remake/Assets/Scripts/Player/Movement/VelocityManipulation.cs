@@ -13,7 +13,7 @@ public static class VelocityManipulation {
     /**
      * <summary>Increments then checks the player's speed</summary>
      */
-    public static float incrementPlayerSpeed(float desiredSpeed, float limit = (float)MoveVel * 1.5f) { 
+    public static float incrementPlayerSpeed(float desiredSpeed, float limit = (float)MoveVel * 1.5f) {
         return Math.Abs((int)desiredSpeed) > (int)limit ? Math.Sign(desiredSpeed) * limit : desiredSpeed; //casting to int equals to a Math.Floor statement
     }
 

@@ -24,9 +24,9 @@ public class InputController : Character_Controller {
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
                 vel[i < 2 ? 0 : 2] = applyRestriction(i);
-                if (shouldUpdateButton(i, out var flyingState) && flyingState is not 2) { //todo note: this doesn't update for opposites properly, 
+                if (getJumpingState(i, out var flyingState) && flyingState is not 2) {  
                     Debug.Log("updating Button");       //todo add a waiting function to updateButtonPress when the flyingState is not 1
-                    updateButtonPress(i);               
+                    updateButtonPress(i);
                 }
             } 
         } return vel;
@@ -45,7 +45,7 @@ public class InputController : Character_Controller {
      * If the player have been moving in the opposite direction for long enough</returns>
      * Note: this doesn't specifically needs an out var flyingState BUT I feel like it might gonna be useful later
      */
-    private static bool shouldUpdateButton(int i, out int flyingState) {
+    private static bool getJumpingState(int i, out int flyingState) {
         switch (isAscending) {
             default: {
                 flyingState = 0;
@@ -110,8 +110,15 @@ public class InputController : Character_Controller {
      */
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
+            if (!buttons[i].Equals(lastButtonPressed)) {
+                var asd = pBody.velocity[i < 2 ? 0 : 2] + (velocity * (float)(MoveVel * 1.25) / 5);
+                Debug.Log(asd);
+            } 
             return incrementPlayerSpeed(buttons[i].Equals(lastButtonPressed) ? 
-                velocity * (float)(MoveVel * 1.25) : velocity * (float)(MoveVel * 1.25) / 2); 
+                velocity * (float)(MoveVel * 1.25) : 
+                pBody.velocity[i < 2 ? 0 : 2] + (velocity * (float)(MoveVel * 1.25) / 6)); //todo this part of the statement needs changing
+            //todo use the Extras.runTimer(int) as a check when to increment the actual speed of the player,
+            //todo if the timer haven't ticked down then keep using the last speed calculated
             //moving normal : dampening
         } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
     }
