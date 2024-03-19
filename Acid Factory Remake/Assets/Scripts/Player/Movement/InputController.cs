@@ -111,16 +111,11 @@ public class InputController : Character_Controller {
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
             if (!buttons[i].Equals(lastButtonPressed)) {
-                var asd = pBody.velocity[i < 2 ? 0 : 2] + (velocity * (float)(MoveVel * 1.25) / 5);
-                Debug.Log(asd);
-            } 
-            return incrementPlayerSpeed(buttons[i].Equals(lastButtonPressed) ? 
-                velocity * (float)(MoveVel * 1.25) : 
-                pBody.velocity[i < 2 ? 0 : 2] + (velocity * (float)(MoveVel * 1.25) / 6)); //todo this part of the statement needs changing
-            //todo use the Extras.runTimer(int) as a check when to increment the actual speed of the player,
-            //todo if the timer haven't ticked down then keep using the last speed calculated
-            //moving normal : dampening
-        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
+                Extras.runTimer(0.5f);
+                Debug.Log("running timer"); //todo test if this actually stops as intended
+                return pBody.velocity[i < 2 ? 0 : 2] + (velocity * (float)(MoveVel * 1.25) / 5); //dampening
+            } return velocity * (float)(MoveVel * 1.25); //dropping faster
+        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); //moving normal
     }
 
     /**

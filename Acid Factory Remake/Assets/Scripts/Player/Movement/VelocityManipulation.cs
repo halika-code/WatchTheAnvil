@@ -8,7 +8,6 @@ using Task = System.Threading.Tasks.Task;
 public static class VelocityManipulation {
 
     private static float xSlowDown = 0.04f;
-    private static int dampeningCounter = 0;
     
     /**
      * <summary>Increments then checks the player's speed</summary>
@@ -78,13 +77,5 @@ public static class VelocityManipulation {
      */
     public static double absRound(float num) {
         return Math.Abs(Math.Round(num, 2));
-    }
-
-    public static void updateDampeningCounter(int i = 0) {
-        dampeningCounter = i >= 0 ? i : 0;
-    }
-
-    public static int getDampeningCounter() {
-        return dampeningCounter;
     }
 }
