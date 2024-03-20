@@ -70,15 +70,12 @@ public class Collide : MonoBehaviour {
          * <summary>Attempts to reset the player's state into "should fall"</summary>
          */
         private void OnCollisionExit(Collision other) {
-            if (checkForDistance()) { //if the player have left the ground
+            if (checkForDistance()) { //if the player have left the ground without jumping
                 if (getParentName(other.gameObject) is "Platforms" or "Walls" && !GravAmplifier.isAscending) {
-                    jump();
-                } StartCoroutine(ShadowController.followPlayer());
-                if (!GravAmplifier.isAscending) { //if the player haven't pressed jump yet
                     var pBody = getPlayerBody().velocity;
                     GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); 
                     InputController.toggleToJumpingState(); 
-                }
+                } StartCoroutine(ShadowController.followPlayer()); //this must have been disabled
             } else {
                 updateMovement(CanMove.Freely);
             }

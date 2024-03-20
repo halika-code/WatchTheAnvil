@@ -27,7 +27,7 @@ public static class VelocityManipulation {
     }
     
     /**
-    * <summary>Slowly decreases the player's velocity</summary>
+    * <summary>Slowly decreases the player's velocity IF the player is in the air</summary>
     * <remarks>Breaks early if the player is on the ground</remarks>
     */
     public static void velocityDecay() {
