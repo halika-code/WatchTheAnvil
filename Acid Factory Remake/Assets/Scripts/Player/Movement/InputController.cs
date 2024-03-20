@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using static GravAmplifier;
+using static VelocityManipulation;
 
 /**
  * <date>05/01/2024</date>
@@ -9,20 +11,27 @@ using static GravAmplifier;
  */
 public class InputController : Character_Controller {
     public static bool itemCoolDown; //true if the cooldown is activated
-    private static KeyCode lastButtonPressed = KeyCode.D;
-    private static KeyCode[] buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
+    protected static KeyCode? lastButtonPressed;
+    protected static readonly KeyCode[] Buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
     
     /**
      * <summary><para>Evaluates the movement vector of the player</para>
      *  Based on the keys supplied.</summary>
-     * <remarks>I wish I could implement this into a switch statement</remarks>
-    */
-    public static Vector3 checkForButtonPress(Vector3 vel) {
+     * <returns>A set of velocity the player will go with IF the player is grounded</returns>
+     */
+    public static Vector3 checkForButtonPress() {
+        var foundButton = false;
+        var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
-            if (Input.GetKey(buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
+            if (Input.GetKey(Buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
+                foundButton = true;
                 vel[i < 2 ? 0 : 2] = applyRestriction(i);
-                Debug.Log("The player's velocity is: x: " + vel.x + ", z: " + vel.z);
+                if (JumpController.getJumpingState(i, out var flyingState) && flyingState is not 2) {  
+                    updateButtonPress(i);
+                }
             } 
+        } if (!foundButton && !isAscending) { //if the player have not pressed a button AND is grounded
+            vel.Set(vel.x is 0 ? 0 : vel.x * 0.95f, vel.y, vel.z is 0 ? 0 : vel.z * 0.95f); //note: this speed gives the perfect glide on the ground
         } return vel;
     }
 
@@ -30,16 +39,16 @@ public class InputController : Character_Controller {
      * <summary>Converts a verified key-press into a restriction applicable to the direction the player is heading
      * <para>Checks the converted restriction against the one applied to the player</para>
      * If a match is found, the player is deemed to be colliding into a wall, the input will be dropped</summary>
-     * <param name="i">the index pointing to the key pressed from the <see cref="buttons"/> array</param>
+     * <param name="i">the index pointing to the key pressed from the <see cref="Buttons"/> array</param>
      * <remarks>The index supplied is expected to correspond to the placement of the key pressed</remarks>
      * note: this function delves into intricate button manipulations, earning it's place in this script
      */
     private static float applyRestriction(int i) {
-        float velocity = calculateParity(i);
+        var parity = calculateParity(i);
+        float velocity;
         Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
-        var whyDoesntYouWork = Move.getMove(); //todo some velocity is still added to the player
-        if (restriction != Move.getMove()) { //restriction is correct, getMove isn't
-            velocity = processPlayerSpeed(velocity, i);
+        if (restriction != Move.getMove()) { //normal movement
+            velocity = processPlayerSpeed(parity, i);
         } else { //if the player tries to move towards a direction that is restricted
             if (gravity.getDownwardSpeed() > 0f) {
                 gravity.updateDownwardSpeed(-1f); 
@@ -49,14 +58,16 @@ public class InputController : Character_Controller {
 
     /**
      * <summary>Assigns a speed to the player based on the player's current state</summary>
+     * <param name="velocity">A float that houses the orientation of the vector each key-press has</param>
+     * <param name="i">The index denoting which button have been pressed</param>
+     * <returns>The finished velocity</returns>
      */
     private static float processPlayerSpeed(float velocity, int i) {
-        if (isAscending && buttons[i].Equals(lastButtonPressed)) { //if the player is pressing the same button as the last one AND the player is soaring
-            velocity *= (float)MoveVel; //the player must be flyin
-        } else {
-            velocity *= (float)(MoveVel * 1.3); 
-            lastButtonPressed = buttons[i];
-        } return velocity;
+        if (isAscending) { //if the player is soaring
+            if (!Buttons[i].Equals(lastButtonPressed)) {
+                return incrementPlayerSpeed(pBody.velocity[i < 2 ? 0 : 2] + velocity * ((float)MoveVel / 17.5f)); //dampening
+            } return velocity * (float)(MoveVel * 1.25); //dropping faster
+        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); //moving normal
     }
 
     /**
@@ -65,7 +76,7 @@ public class InputController : Character_Controller {
      * <param name="i">The index from the pattern that will be returned</param>
      * <remarks>Could be done in a simplified way</remarks>
      */
-    private static int calculateParity(double i) {
+    protected static int calculateParity(double i) {
         var ret = i % 2 is not 0 ? 1 : -1;
         return ret; //note, the integer casting is used to divide by zero and get 0 as result. The brackets are important there, as in we wanna divide then cast
     }
@@ -96,5 +107,22 @@ public class InputController : Character_Controller {
 
     public static bool checkForItemUse() {
         return Input.GetKey(KeyCode.F) && Toolbelt.getBelt().toolInHand /*hand is not null*/ && !itemCoolDown;
+    }
+
+    /**
+     * <summary>Updates the button to a valid index of the buttons array</summary>
+     * <remarks>If an incorrect index is supplied, the lastButtonPressed will be set to KeyCode.Z</remarks>
+     */
+    public static void updateButtonPress(int index) {
+        lastButtonPressed = index >= 0 && index < Buttons.Length ? Buttons[index] : null;
+    }
+
+    /**
+     * <summary>Finds the index of the lastButtonPressed inside the buttons array</summary>
+     * <returns>The index of the KeyCode corresponding to the lastButtonPressed</returns>
+     * <remarks>This implementation uses a delegate to find the index of the lastButtonPressed within the buttons array</remarks>
+     */
+    protected static int getLastButtonIndex() {
+        return Buttons.ToList().FindIndex(code => code.Equals(lastButtonPressed));
     }
 }

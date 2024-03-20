@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
-using Script.Tools.ToolType;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
 using static VelocityManipulation;
+using static JumpController;
 
 /**
  * <date>17/06/2023</date>
@@ -15,13 +14,7 @@ using static VelocityManipulation;
  */
 public class Character_Controller : MonoBehaviour {
     
-    public const double MoveVel = 22D;                  //todo break the velocity manipulation logic from here into a new script called SpeedHandling
-    public const double DampeningCoefficient = 1.7D;
-    /**
-     * <summary>Used for calculating the velocity of the player.
-     * Important while the player is airborne</summary>
-     */
-    public static Vector3 flyingVector; 
+    public const double MoveVel = 22D; 
     protected static Rigidbody pBody;
     private static Transform pHand;
 
@@ -35,7 +28,6 @@ public class Character_Controller : MonoBehaviour {
         setPlayerBody();
         Physics.gravity = new Vector3(0, -30f);
         pHand = GameObject.Find("Hand").transform;
-        flyingVector = Vector3.zero;
     }
 
     /**
@@ -63,7 +55,7 @@ public class Character_Controller : MonoBehaviour {
     // Update is called once per frame
     private void Update() {
         if (getMove() is not CanMove.Cant) {
-            movePlayer(InputController.checkForButtonPress(calculateVelocity()));
+            movePlayer(InputController.checkForButtonPress());
         } if (InputController.checkForItemUse()) { //if the player wants to use the item and the cooldown flag is clear
             Toolbelt.getBelt().fetchItem();
         } //Debug.Log("canMove is " + Move.getMove() + ", Player's prior y vel is: " + priorYVel); //note, just comment this debug out when not in use
@@ -71,10 +63,7 @@ public class Character_Controller : MonoBehaviour {
 
     
     private void FixedUpdate() {
-        //Debug.Log(GravAmplifier.isAscending? "flyin" : "On the ground");
-        //Debug.Log(getMove() is CanMove.CantJump? "StateFly" : "StateGround");
         if (InputController.checkForJump()) { //wall-jump: the Move state machine can only have 1 state, can be locked out IF I check for isAscending as well
-            //Debug.Log("Jumpin");
             if (Toolbelt.getBelt().checkForTool("Umbrella", out _)) {
                 if (checkAgainstUmbrella()) { //should be a normal jump-arch until 0 then fall slowly 
                     jump(desiredSpeedCap: 0f); //note this assigns a value in here
@@ -84,18 +73,6 @@ public class Character_Controller : MonoBehaviour {
         } velocityDecay(); //needs to be here to have a fixed rate of slowdown
     }
     
-   
-    /**
-     * <summary>Gives the player a starting velocity then based on the desired speed cap, will apply increased gravity until the cap is reached / passed</summary>
-     * <param name="speedUp">The starting Y velocity, by default is <see cref="MoveVel"/> * 3.2 cast into a float</param>
-     * <param name="desiredSpeedCap">The desired terminal velocity, by default is set to -70f</param>
-     */
-    public static void jump(float speedUp = (float)MoveVel * 3.2f, float desiredSpeedCap = -70f) {
-        var pVel = pBody.velocity;
-        GravAmplifier.gravity.falling(new Vector3(pVel.x, speedUp, pVel.z), desiredSpeedCap);
-        incrementXSpeedDown(wait: 3f); //called from here to start the async function
-    }
-
     /**
      * <summary>Calculates if the player is standing on the closest solid object</summary>
      * <returns>True if the player's distance is too far from the raycast's length</returns>
@@ -152,7 +129,7 @@ public class Character_Controller : MonoBehaviour {
         var parentList = new List<string>();
         do {
             parentList.Add(obj.name);
-        }  while ((obj = obj.transform.parent));
+        }  while ((obj = obj.transform.parent)); //while the next object's parent is not null
         return parentList;
     }
 
@@ -174,15 +151,10 @@ public class Character_Controller : MonoBehaviour {
      * <remarks>If the index falls outside the bounds of a traditional Vector3, this function will exit early</remarks>
      */
     public static void movePlayer(float velocity, int index = 1) {
-        if (index <= 2) { //if the 
-            Vector3 pVel;
-            var desiredVel = pVel = pBody.velocity;
-            for (var i = 0; i < 2; i++) {
-                desiredVel[i] = index.Equals(i) ? velocity : pVel[i];
-            } movePlayer(desiredVel);
-        } else {
-            Debug.Log("Whoopy, tried giving " + velocity + " to the " + index + "th element in the player's movement vector");
-        }
+        var desiredVel = pBody.velocity;
+        for (var i = 0; i < 2; i++) {
+            desiredVel[i] = index.Equals(i) ? velocity : pBody.velocity[i];
+        } movePlayer(desiredVel);
     }
 
     // ReSharper disable Unity.PerformanceAnalysis

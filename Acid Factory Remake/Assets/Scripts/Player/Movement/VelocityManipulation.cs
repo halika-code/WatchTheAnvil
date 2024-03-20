@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Script.Tools.ToolType;
 using UnityEngine;
 using static Character_Controller;
@@ -9,31 +10,10 @@ public static class VelocityManipulation {
     private static float xSlowDown = 0.04f;
     
     /**
-     * <summary>Decides what speed the player should be going at the start of the frame</summary>
+     * <summary>Increments then checks the player's speed</summary>
      */
-    public static Vector3 calculateVelocity() { //new Vector3(0f, pBody.velocity.y, 0f)
-        if (GravAmplifier.isAscending) {
-            var pVel = getPlayerBody().velocity;
-            if (flyingVector == new Vector3(0f, pVel.y, 0f)) { //if the player just jumped
-                return pVel;
-            } calculateFlyingVelocity(pVel);  //if the player is flying in the air
-        } else {
-            flyingVector = new Vector3(0f, getPlayerBody().velocity.y, 0f);
-        } return flyingVector;
-    }
-
-    /**
-     * <summary>Modifies the calculated velocity for the player to be in it's airborne state</summary>
-     */
-    private static void calculateFlyingVelocity(Vector3 pVel) {
-        var diff = flyingVector - pVel; //getting the change in direction
-        flyingVector = pVel; //gets the default values in case no change is detected
-        for (var i = 0; i < 3; i+=2) {
-            if (Math.Abs(Math.Round(diff[i], 1)) > 1.5f) { //filtering for small changes //1.6f for single and 4.38f for multipress
-                flyingVector[i] = Math.Sign(flyingVector[i]) * (Math.Abs(flyingVector[i]) / 
-                    (float)DampeningCoefficient * (checkAgainstUmbrella() ? 0.8f : 1.5f)); //this multiplier crops the gliding distance of the umbrella 
-            } //dividing makes sure the value gets smaller than the original velocity
-        }
+    public static float incrementPlayerSpeed(float desiredSpeed, float limit = (float)MoveVel * 1.5f) {
+        return Math.Abs((int)desiredSpeed) > (int)limit ? Math.Sign(desiredSpeed) * limit : desiredSpeed; //casting to int equals to a Math.Floor statement
     }
 
     /**
@@ -47,14 +27,14 @@ public static class VelocityManipulation {
     }
     
     /**
-    * <summary>Slowly decreases the player's velocity</summary>
+    * <summary>Slowly decreases the player's velocity IF the player is in the air</summary>
     * <remarks>Breaks early if the player is on the ground</remarks>
     */
     public static void velocityDecay() {
         if (GravAmplifier.isAscending) { //if false, breaks early
             var pVel = getPlayerBody().velocity;
             for (var i = 0; i < 2; i+=2) {
-                if (Math.Abs(Math.Round(pVel[i])) > 0.05f) {
+                if (absRound(pVel[i]) > 0.05f) {
                     pVel[i] -= checkAgainstUmbrella() ? Math.Sign(pVel[i]) * xSlowDown : 
                         Math.Sign(pVel[i]) * xSlowDown + 0.05f; //normal velocity slowdown : umbrella slowdown
                 } else {
@@ -90,5 +70,12 @@ public static class VelocityManipulation {
         if (pBody[placement] != 0) { //can only check x and z. Checks in order to avoid unnecessary writes
             getPlayerBody().velocity = new Vector3((placement is 0 ? pBody.x: 0), pBody.y, (placement is 2 ? pBody.z : 0)); //doesn't matter which parity the 
         }
+    }
+
+    /**
+     * <summary>Returns a rounded (to the 2nd digit) and absolute value</summary>
+     */
+    public static double absRound(float num) {
+        return Math.Abs(Math.Round(num, 2));
     }
 }
