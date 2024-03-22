@@ -71,13 +71,17 @@ public class Collide : MonoBehaviour {
          */
         private void OnCollisionExit(Collision other) {
             if (checkForDistance()) { //if the player have left the ground without jumping
-                if (getParentName(other.gameObject) is "Platforms" or "Walls" && !GravAmplifier.isAscending) {
-                    var pBody = getPlayerBody().velocity;
-                    GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); 
-                    InputController.toggleToJumpingState(); 
+                if (!GravAmplifier.isAscending) {
+                    if (getParentName(other.gameObject) is "Platforms" or "Walls") {
+                        var pBody = getPlayerBody().velocity;
+                        InputController.toggleToJumpingState(); 
+                        GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); 
+                    } 
+                } else {
+                    updateMovement(CanMove.Freely);
                 } StartCoroutine(ShadowController.followPlayer()); //this must have been disabled
             } else {
-                updateMovement(CanMove.Freely);
+                updateMovement(CanMove.Freely); //case when the player touches the wall affectionately then breaks up with it
             }
         }
         
