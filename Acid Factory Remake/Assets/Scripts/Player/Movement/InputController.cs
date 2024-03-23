@@ -65,7 +65,7 @@ public class InputController : Character_Controller {
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
             if (!Buttons[i].Equals(lastButtonPressed)) {
-                return incrementPlayerSpeed(pBody.velocity[i < 2 ? 0 : 2] + velocity * ((float)MoveVel / 17.5f)); //dampening
+                return incrementPlayerSpeed(pBody.velocity[i < 2 ? 0 : 2] + velocity * ((float)MoveVel / 17.1f)); //dampening
             } return velocity * (float)(MoveVel * 1.25); //dropping faster
         } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); //moving normal
     }

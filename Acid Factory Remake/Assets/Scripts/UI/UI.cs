@@ -3,15 +3,15 @@ using TMPro;
 using UnityEngine;
 
 public class UI : MonoBehaviour {
-    public static TMP_Text points;
-    public static TMP_Text health;
-    public static TMP_Text anvilTimer;
+    private static TMP_Text points;
+    private static TMP_Text health;
+    private static TMP_Text anvilTimer;
 
     private void Start() {
         var canv = GameObject.Find("Canvas").GetComponentsInChildren<TextMeshProUGUI>();
         points = canv[0];
         health = canv[1];
-        anvilTimer = canv[2];
+        anvilTimer = canv[^1];//1st and 2nd is the text, 3rd to x-1 is all the buttons, last is the anvilTimer
     }
 
     /**

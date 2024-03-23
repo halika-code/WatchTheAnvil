@@ -12,6 +12,9 @@ public class Anvil {
     public int aTimer;
     private Rigidbody aBody;
     private Rigidbody tBody;
+    /**
+     * <summary>A flag inside the anvils that is set to true the frame the </summary>
+     */
     public bool isFlying;
 
     /**
@@ -45,20 +48,25 @@ public class Anvil {
     /**
      * <summary>Defines the timer based on the difficulty</summary>
      * <param name="diff">An integer of difficulty ranging from 0 to 3 (and beyond)</param>
-     * <param name="diffNum">An embedded return value that returns the diff variable</param>
-     * <remarks>the out keyword is used here as an exercise, this use is not optimal</remarks>
+     * <returns>Based on the difficulty, returns a number ranging from 20 (tutorial) to 0 (default)</returns>
      */
     private static int setTimer(int diff) {
         switch (diff) {
-            case 0 or 1: {
+            case 0: { //tutorial speed
                 return 20;
-            } case 2: {
+            } case 1: { //easy speed
                 return 10;
-            } case <= 3: {
+            } case 2: { //medium speed
                 return 5;
-            } default: {
-                Debug.Log("Whoopy while setting the timer for the Anvil with a difficulty of " + diff);
+            } case 3: { //hard speed
+                return 3;
+            } case 4: { //storm speed
+                return 2;
+            } case > 4: { //instant speed
                 return 1;
+            }default: {
+                Debug.Log("Whoopy while setting the timer for the Anvil with a difficulty of " + diff);
+                return 0;
             }
         }
     }

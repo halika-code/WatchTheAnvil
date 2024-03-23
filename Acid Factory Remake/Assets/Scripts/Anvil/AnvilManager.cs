@@ -20,19 +20,35 @@ public class AnvilManager : MonoBehaviour {
         waitTimer = 5;
         anvilCounter = 0;
         StartCoroutine(runWait());
+        waitTimer = 20 - (int)Math.Ceiling((double)1*3/2); //resets the wait timer
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     /**
      * <summary>This is the main loop of the anvil, where the <see cref="runWait"/> calls this function</summary>
      * <remarks>Manual implementation of a <see cref="Collide.FixedUpdate"/> event-function</remarks>
      */
     private IEnumerator runAnvils() {
-        anvilCounter++;
-        currentAnvil = new Anvil(Instantiate(preFab, transform, true), 3);
-        currentAnvil.getAnvilBody().transform.localPosition = Vector3.zero;
-        yield return runTimer(currentAnvil);
-        waitTimer = 20 - (int)Math.Ceiling((double)anvilCounter*3/2); //resets the wait timer
-        yield return runWait(); 
+        if (currentAnvil != null) {
+            yield return new WaitUntil(() => !currentAnvil.isFlying); //check if we need to wait for the last anvil to properly land
+        } currentAnvil = new Anvil(Instantiate(preFab, transform, worldPositionStays: true), diff: getDifficulty());
+        if (!currentAnvil.isFlying) { 
+            anvilCounter++;
+            currentAnvil.getAnvilBody().transform.localPosition = Vector3.zero;
+            yield return runTimer(currentAnvil); //waits for the anvil then drops it
+            yield return runWait();             //runs the "replenishment" wait
+            waitTimer = 20 - (int)(anvilCounter * 1.5f); //resets the wait timer
+        } 
+    }
+
+    /**
+     * <summary>Based on the waitTimer, decides what difficulty the anvils should spawn with</summary>
+     */
+    private static int getDifficulty() {
+        return waitTimer switch {
+            > 10 => 1, > 5 => 2, 
+            <  5 => 3,   _ => 0
+        }; //this assigns a return value based on the waitTimer using the lambda ... value ... expression (or whatever)
     }
 
     /**
@@ -46,30 +62,29 @@ public class AnvilManager : MonoBehaviour {
     }
 
     /**
-     * <summary>Runs timer for the anvil's built in timer</summary>
+     * <summary>Runs a Coroutine based timer tailor made for the anvils
+     * <para>Terminates when limit matches with anvil.aTimer</para></summary>
+     * <remarks>Could be remade with async</remarks>
      */
     public static IEnumerator helpRunTimer(Anvil anvil, int limit) {
         while (anvil.aTimer != limit) {
             while (StopWatch.checkWatch()) { //will skip over this IF the stopWatch is not in use
                 yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
             } anvil.aTimer--;
-            Debug.Log("Anvil droppin in " + anvil.aTimer + " seconds");
             UI.updateTimer(anvil.aTimer);
             yield return new WaitForSeconds(0.8f);
         }
     }
 
     /**
-     * <summary>Attempts to keep the player locked on target</summary>
+     * <summary>Attempts to keep the player locked on target
+     * <para>Terminates the seconds the <see cref="Anvil.aTimer"/> is set to 0</para></summary>
      * <remarks>This is a carbon copy of <see cref="ShadowController.followPlayer"/>, could have made it generic if iterators could accept out keyword</remarks>
      */
     private static IEnumerator trackPlayer(Anvil anvil) {
         while (anvil.aTimer is not 0) {
-            if (!anvil.getTarget().activeSelf) {
-                anvil.getTarget().SetActive(true);
-            } if (!ShadowController.findColPoint(out var hit) || hit.collider.gameObject.name is "DeathPane") {
-                anvil.getTarget().SetActive(false);
-            } if (Character_Controller.getParentName(hit.collider.gameObject) is not "Vegetables") {
+            anvil.getTarget().SetActive(ShadowController.findColPoint(out var hit) || hit.collider.gameObject.name is not "DeathPane"); //if the anvil is not too high above ground OR not above a deathpane
+            if (Character_Controller.getParentName(hit.collider.gameObject) is not "Vegetables") {
                 anvil.setTargetPos(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
             } yield return null;
         } anvil.isFlying = true;
@@ -80,12 +95,12 @@ public class AnvilManager : MonoBehaviour {
      */
     public IEnumerator runWait() {
         while (waitTimer > 0) {
-            while (StopWatch.checkWatch()) { //will skip over this IF the stopWatch is not in use
-                yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
-            } Debug.Log("Preparing next anvil in " + waitTimer + " seconds");
-            yield return new WaitForSeconds(0.5f);
+            while (StopWatch.checkWatch()) { //gets caught as soon as stopwatch is in use, does not reach waitTimer but exits as soon as stopwatch is turned off
+                yield return new WaitForFixedUpdate();
+            } yield return new WaitForSeconds(0.5f); //else: 
             waitTimer--;
-        } yield return runAnvils(); //keep in mind, execution returns here as soon as the 1st timer starts ticking
+        } Debug.Log("Wait finished, dropping anvil");
+        yield return runAnvils(); //keep in mind, execution returns here as soon as the 1st timer starts ticking
     }
 
     public static bool isFlyin() {
