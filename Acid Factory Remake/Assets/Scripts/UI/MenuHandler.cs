@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 public class MenuHandler : MonoBehaviour {
-    private TextMeshProUGUI[] buttonArray;
+    private TextMeshProUGUI[] buttonArray; //menu
     public static GameObject menu;
     private TextMeshProUGUI veggieInfo;
     public static GameObject escapeMenu;
