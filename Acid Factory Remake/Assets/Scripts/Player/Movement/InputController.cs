@@ -10,6 +10,7 @@ using static VelocityManipulation;
  * <summary>An extra script that is meant to solely handle inputs</summary>
  */
 public class InputController : Character_Controller {
+    
     public static bool itemCoolDown; //true if the cooldown is activated
     protected static KeyCode? lastButtonPressed;
     protected static readonly KeyCode[] Buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
@@ -33,6 +34,12 @@ public class InputController : Character_Controller {
         } if (!foundButton && !isAscending) { //if the player have not pressed a button AND is grounded
             vel.Set(vel.x is 0 ? 0 : vel.x * 0.95f, vel.y, vel.z is 0 ? 0 : vel.z * 0.95f); //note: this speed gives the perfect glide on the ground
         } return vel;
+    }
+
+    private static void checkForExit() {
+        if (Input.GetKey(KeyCode.Escape)) {
+            
+        }
     }
 
     /**

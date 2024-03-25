@@ -33,9 +33,11 @@ public class VegetablePull : MonoBehaviour {
             switch (parents) {
                 case "Small" or "Carrot" or "Vegetables": {
                     break; //tryin to avoid default with basic plants
-                } case "Beetroot": {
+                } case "Beetroot": { //if this case is entered the calculations are hijacked a bit
                     score++;
-                    break;
+                    RootVeg.updateBeetPoints(score); //score diverted to here
+                    score = 0;  //and a 0 is sent to keep the score to a pure all-carrots
+                    break;      //it is assumed that if a beetroot is pulled the parentList MUST contain a "Beetroot" entry
                 } case "Medium": {
                     score *= 2;
                     break;

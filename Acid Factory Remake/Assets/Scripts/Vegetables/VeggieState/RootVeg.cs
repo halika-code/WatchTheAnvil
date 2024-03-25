@@ -8,6 +8,7 @@ public class RootVeg : MonoBehaviour {
     private List<Rigidbody> cBodyCollective; 
     private List<VegetableVisibility.VegState> vegStateCollective;
     private static RootVeg root;
+    private static int beetPoints = 0;
 
     public void OnEnable() {
         root = this; //if null, assign as this
@@ -80,6 +81,20 @@ public class RootVeg : MonoBehaviour {
                 break;
             }
         }
+    }
+
+    /**
+     * <summary>Updates the beet's count</summary>
+     */
+    public static void updateBeetPoints(int freshPoints) {
+        beetPoints += freshPoints;
+    }
+
+    /**
+     * <summary>Returns an array consisting of the calculated carrot points from UI and the kept beetroot points</summary>
+     */
+    public static int[] getPulledPoints() {
+        return new [] {UI.getVeggiePoints() , beetPoints};
     }
 
     public static RootVeg getRoot() {

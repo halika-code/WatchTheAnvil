@@ -128,8 +128,9 @@ public class Character_Controller : MonoBehaviour {
     public static List<string> getParentName(Transform obj) {
         var parentList = new List<string>();
         do {
+            obj = obj.transform.parent;
             parentList.Add(obj.name);
-        }  while ((obj = obj.transform.parent)); //while the next object's parent is not null
+        }  while (obj.transform.parent); //while the next object's parent is not null
         return parentList;
     }
 

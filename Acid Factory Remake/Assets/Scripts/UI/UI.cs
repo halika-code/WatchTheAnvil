@@ -1,17 +1,30 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 
 public class UI : MonoBehaviour {
+    public static GameObject ui;
     private static TMP_Text points;
     private static TMP_Text health;
     private static TMP_Text anvilTimer;
+    private static TextMeshProUGUI menu;
 
     private void Start() {
-        var canv = GameObject.Find("Canvas").GetComponentsInChildren<TextMeshProUGUI>();
+        ui = GameObject.Find("GeneralUI");
+        var canv = ui.GetComponentsInChildren<TextMeshProUGUI>();
         points = canv[0];
         health = canv[1];
         anvilTimer = canv[^1];//1st and 2nd is the text, 3rd to x-1 is all the buttons, last is the anvilTimer
+    }
+
+    private void Update() {
+        if (Input.GetKey(KeyCode.P)) { //toggles the pause menu
+            MenuHandler.menu.SetActive(!MenuHandler.menu.activeSelf);
+        } if (Input.GetKey(KeyCode.Escape)) { //toggles the escape menu
+            MenuHandler.escapeMenu.SetActive(!MenuHandler.escapeMenu.activeSelf);
+        }
     }
 
     /**
@@ -20,9 +33,13 @@ public class UI : MonoBehaviour {
      */
     public static void updatePoints(int score) {
         points.text = updateText(points, score);
+        MenuHandler.menu.GetComponent<MenuHandler>().updateVeggieTally();
     }
 
-    public static int getCurrentPoints() {
+    /**
+     * <summary>Retrieves the exact points the player has in terms of carrots</summary>
+     */
+    public static int getVeggiePoints() {
         return findNumbers(points.text);
     }
 

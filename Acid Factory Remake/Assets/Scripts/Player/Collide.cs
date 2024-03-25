@@ -22,7 +22,9 @@ public class Collide : MonoBehaviour {
      */
     private void processCollision(string parentName, Collision obj) {
         switch (parentName) {
-            case "Platforms": {
+            case "Foliage" or "Geometry": {
+                goto case "Platforms";
+            } case "Platforms": {
                 if (Math.Floor(Math.Abs(obj.impulse[1])) is 0) { //normally 0 if grounded
                     goto case "Walls";
                 } processPlatforms(); 
@@ -30,8 +32,6 @@ public class Collide : MonoBehaviour {
             } case "Walls": { //in case I need to add stuff in here
                 processWalls(obj);
                 break;
-            } case "Foliage": {
-                goto case "Platforms";
             } case "Anvils": { //updates the flag
                 if (!processAnvil()) {
                     goto case "Platforms"; //this will make the anvil act like a platform

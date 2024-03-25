@@ -32,13 +32,26 @@ public class LevelManager : MonoBehaviour {
 
     public void advanceLevel() {
         var maxPoints = countMaxPoints();
-        if (UI.getCurrentPoints() >= Math.Round(maxPoints * 0.8)) {
+        if (UI.getVeggiePoints() >= Math.Round(maxPoints * 0.8)) {
             Debug.Log("Running into the next level ... kinda");
             killPlayer(); //todo add functionality that loads the next level
         } else {
             gameObject.GetComponentInChildren<TextMeshPro>().text =
-                "Whoops, looks like you tried leaving with " + UI.getCurrentPoints() + " points against " +
+                "Whoops, looks like you tried leaving with " + UI.getVeggiePoints() + " points against " +
                 maxPoints + ", need more than that";
+        }
+    }
+
+    /**
+     * <summary>Attempts to load a level by a given name
+     * <para>If the level name is invalid, an error will be thrown</para></summary>
+     */
+    public static void loadLevel(string levelName) {
+        if (SceneManager.GetSceneByName(levelName) != default) {
+            SceneManager.LoadScene(levelName);
+        }
+        else {
+            Debug.Log("Whoopy, I tried to load a level named " + levelName + ". This level does not exist in the build menu");
         }
     }
 
