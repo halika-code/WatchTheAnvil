@@ -19,14 +19,6 @@ public class UI : MonoBehaviour {
         anvilTimer = canv[^1];//1st and 2nd is the text, 3rd to x-1 is all the buttons, last is the anvilTimer
     }
 
-    private void Update() {
-        if (Input.GetKey(KeyCode.P)) { //toggles the pause menu
-            MenuHandler.menu.SetActive(!MenuHandler.menu.activeSelf);
-        } if (Input.GetKey(KeyCode.Escape)) { //toggles the escape menu
-            MenuHandler.escapeMenu.SetActive(!MenuHandler.escapeMenu.activeSelf);
-        }
-    }
-
     /**
      * <summary>Updates the score of the player with a set value</summary>
      * <param name="score">Points that needed to be updated</param>

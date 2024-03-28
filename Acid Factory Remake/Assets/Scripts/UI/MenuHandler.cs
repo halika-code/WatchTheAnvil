@@ -64,6 +64,25 @@ public class MenuHandler : MonoBehaviour {
         } else {
             veggieTallyText = "You have found " + carrotScore[0] + " carrots and " + carrotScore[1] +" beets. Amazing!";
         } veggieInfo.text = veggieTallyText;
+    }
 
+    /**
+     * <summary>Checks if one of the UI menus are open</summary>
+     * <param name="which">True if the Pause Menu is open, false if the Escape Menu is open
+     * <para>Parameter irrelevant if the main return statement is false</para></param>
+     * <returns>True if any of the UI menus are open, false otherwise</returns>
+     */
+    public static bool isMenuOpen(out bool which) {
+        if (Input.GetKey(KeyCode.P) || Input.GetKey(KeyCode.Escape)) { //todo test this, the menus aren't staying up
+            Debug.Log("Pots");
+        }
+        which = false;
+        if (menu.activeSelf || escapeMenu.activeSelf) {
+            if (menu.activeSelf) {
+                which = true;
+            } if (escapeMenu.activeSelf) {
+                which = false;
+            } return true;
+        } return false;
     }
 }

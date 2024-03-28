@@ -15,12 +15,24 @@ public class InputController : Character_Controller {
     protected static KeyCode? lastButtonPressed;
     protected static readonly KeyCode[] Buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
     
+
+    /**
+     * <summary>Checks for every interaction the player could take</summary>
+     */
+    public static Vector3 checkForButtonPress() {
+        var isMenuOpen = MenuHandler.isMenuOpen(out var whichMenu); //checking if any of the menu is open. The idea here is there should not be any overlapping menu popping up
+        if (checkForExit(isMenuOpen && !whichMenu) && !Extras.isTimerRunning || checkForPauseMenu(isMenuOpen && whichMenu) && !Extras.isTimerRunning) { //if pause / escape is pressed, pots
+            Extras.runTimer(0.5D); //UI interactions should be restricted to a reduced speed to not give the player a stroke
+            return Vector3.zero;
+        } return checkForPlayerInteraction();
+    }
+
     /**
      * <summary><para>Evaluates the movement vector of the player</para>
      *  Based on the keys supplied.</summary>
      * <returns>A set of velocity the player will go with IF the player is grounded</returns>
      */
-    public static Vector3 checkForButtonPress() {
+    private static Vector3 checkForPlayerInteraction() {
         var foundButton = false;
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
@@ -36,10 +48,18 @@ public class InputController : Character_Controller {
         } return vel;
     }
 
-    private static void checkForExit() {
-        if (Input.GetKey(KeyCode.Escape)) {
-            
-        }
+    private static bool checkForExit(bool shouldToggle) {
+        if (Input.GetKey(KeyCode.Escape) && shouldToggle) { //toggles the escape menu
+            MenuHandler.escapeMenu.SetActive(!MenuHandler.escapeMenu.activeSelf);
+            return true;
+        } return false;
+    }
+
+    private static bool checkForPauseMenu(bool shouldToggle) {
+        if (Input.GetKey(KeyCode.P) && shouldToggle) { //toggles the pause menu
+            MenuHandler.menu.SetActive(!MenuHandler.menu.activeSelf);
+            return true;
+        } return false;
     }
 
     /**
