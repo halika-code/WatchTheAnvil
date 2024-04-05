@@ -73,9 +73,6 @@ public class MenuHandler : MonoBehaviour {
      * <returns>True if any of the UI menus are open, false otherwise</returns>
      */
     public static bool isMenuOpen(out bool which) {
-        if (Input.GetKey(KeyCode.P) || Input.GetKey(KeyCode.Escape)) { //todo test this, the menus aren't staying up
-            Debug.Log("Pots");
-        }
         which = false;
         if (menu.activeSelf || escapeMenu.activeSelf) {
             if (menu.activeSelf) {

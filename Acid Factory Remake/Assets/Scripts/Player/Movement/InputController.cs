@@ -21,9 +21,11 @@ public class InputController : Character_Controller {
      */
     public static Vector3 checkForButtonPress() {
         var isMenuOpen = MenuHandler.isMenuOpen(out var whichMenu); //checking if any of the menu is open. The idea here is there should not be any overlapping menu popping up
-        if (checkForExit(isMenuOpen && !whichMenu) && !Extras.isTimerRunning || checkForPauseMenu(isMenuOpen && whichMenu) && !Extras.isTimerRunning) { //if pause / escape is pressed, pots
-            Extras.runTimer(0.5D); //UI interactions should be restricted to a reduced speed to not give the player a stroke
-            return Vector3.zero;
+        if (!Extras.isTimerRunning) {
+            if (checkForExit(!isMenuOpen || !whichMenu) || checkForPauseMenu(!isMenuOpen || whichMenu)) { //if pause / escape is pressed, pots
+                Extras.runTimer(0.1d); //UI interactions should be restricted to a reduced speed to not give the player a stroke
+                return Vector3.zero;
+            }
         } return checkForPlayerInteraction();
     }
 
@@ -47,14 +49,14 @@ public class InputController : Character_Controller {
     }
 
     private static bool checkForExit(bool shouldToggle) {
-        if (Input.GetKey(KeyCode.Escape) && shouldToggle) { //toggles the escape menu
+        if (Input.GetKeyUp(KeyCode.Escape) && shouldToggle) { //toggles the escape menu
             MenuHandler.escapeMenu.SetActive(!MenuHandler.escapeMenu.activeSelf);
             return true;
         } return false;
     }
 
     private static bool checkForPauseMenu(bool shouldToggle) {
-        if (Input.GetKey(KeyCode.P) && shouldToggle) { //toggles the pause menu
+        if (Input.GetKeyUp(KeyCode.P) && shouldToggle) { //toggles the pause menu
             MenuHandler.menu.SetActive(!MenuHandler.menu.activeSelf);
             return true;
         } return false;

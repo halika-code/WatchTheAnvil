@@ -29,7 +29,7 @@ public class Extras {
 
     public static async void runTimer(double milliseconds) {
         isTimerRunning = true;
-        await Task.Delay((int)milliseconds * 1000);
+        await Task.Delay((int)(milliseconds * 1000));
         isTimerRunning = false;
     }
 }
