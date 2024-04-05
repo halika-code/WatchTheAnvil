@@ -33,18 +33,16 @@ public class InputController : Character_Controller {
      * <returns>A set of velocity the player will go with IF the player is grounded</returns>
      */
     private static Vector3 checkForPlayerInteraction() {
-        var foundButton = false;
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(Buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                foundButton = true;
                 vel[i < 2 ? 0 : 2] = applyRestriction(i);
                 if (JumpController.getJumpingState(i, out var flyingState) && flyingState is not 2) {  
                     updateButtonPress(i);
-                }
-            } 
-        } if (!foundButton && !isAscending) { //if the player have not pressed a button AND is grounded
-            vel.Set(vel.x is 0 ? 0 : vel.x * 0.95f, vel.y, vel.z is 0 ? 0 : vel.z * 0.95f); //note: this speed gives the perfect glide on the ground
+                } continue; //if an input is pressed, skip to the next cycle
+            } if (vel[i < 2 ? 0 : 2] is not 0) { //built-in dampening when the player have not pressed a given button
+                vel[i < 2 ? 0 : 2] *= 0.99f;
+            }
         } return vel;
     }
 
@@ -94,7 +92,7 @@ public class InputController : Character_Controller {
             if (!Buttons[i].Equals(lastButtonPressed)) {
                 return incrementPlayerSpeed(pBody.velocity[i < 2 ? 0 : 2] + velocity * ((float)MoveVel / 17.1f)); //dampening
             } return velocity * (float)(MoveVel * 1.25); //dropping faster
-        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); //moving normal
+        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); //moving normal todo the player can drift for some reason while on the floor
     }
 
     /**
@@ -138,7 +136,8 @@ public class InputController : Character_Controller {
 
     /**
      * <summary>Updates the button to a valid index of the buttons array</summary>
-     * <remarks>If an incorrect index is supplied, the lastButtonPressed will be set to KeyCode.Z</remarks>
+     * <remarks>If an incorrect index is supplied, the lastButtonPressed will be set to null</remarks>
+     * <example>Sets in Collide to null, sets in InputController to a relevant index</example>
      */
     public static void updateButtonPress(int index) {
         lastButtonPressed = index >= 0 && index < Buttons.Length ? Buttons[index] : null;

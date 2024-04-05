@@ -7,7 +7,10 @@ using Task = System.Threading.Tasks.Task;
 
 public static class VelocityManipulation {
 
-    private static float xSlowDown = 0.04f;
+    /**
+     * <summary>Normally 0.04f</summary>
+     */
+    private static float xSlowDown = 0.08f;
     
     /**
      * <summary>Increments then checks the player's speed</summary>
@@ -31,17 +34,15 @@ public static class VelocityManipulation {
     * <remarks>Breaks early if the player is on the ground</remarks>
     */
     public static void velocityDecay() {
-        if (GravAmplifier.isAscending) { //if false, breaks early
-            var pVel = getPlayerBody().velocity;
-            for (var i = 0; i < 2; i+=2) {
-                if (absRound(pVel[i]) > 0.05f) {
-                    pVel[i] -= checkAgainstUmbrella() ? Math.Sign(pVel[i]) * xSlowDown : 
-                        Math.Sign(pVel[i]) * xSlowDown + 0.05f; //normal velocity slowdown : umbrella slowdown
-                } else {
-                    pVel[i] = 0;
-                }
-            } getPlayerBody().velocity = pVel;
-        }
+        var pVel = getPlayerBody().velocity;
+        for (var i = 0; i < 2; i+=2) {
+            if (absRound(pVel[i]) > 0.05f) {
+                pVel[i] -= checkAgainstUmbrella() ? Math.Sign(pVel[i]) * xSlowDown : 
+                    Math.Sign(pVel[i]) * xSlowDown + 0.05f; //normal velocity slowdown : umbrella slowdown
+            } else {
+                pVel[i] = 0;
+            }
+        } getPlayerBody().velocity = pVel;
     }
 
     /**
