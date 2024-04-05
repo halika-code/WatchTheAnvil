@@ -32,8 +32,8 @@ public class VegStateController : MonoBehaviour {
         if (checkIfPlayerIsInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, 
                 new []{pBody.transform.position.x, pBody.transform.position.z}, 20)) { 
             if (state is VegState.Hidden) { //the idea here is if the player is close, the player will be inside a border
-               StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
-               getRoot().updateCollective(getIndexOfVeg(cBody), VegState.Visible);
+                StartCoroutine(VeggieAnim.animateCarrot(cBody, state)); 
+                getRoot().updateCollective(getIndexOfVeg(cBody), VegState.Visible);
             } 
         } else if (state is VegState.Visible) { 
             StartCoroutine(VeggieAnim.animateCarrot(cBody, state));

@@ -36,6 +36,7 @@ public class Character_Controller : MonoBehaviour {
     private static void setPlayerBody() {
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
+        pBody.interpolation = RigidbodyInterpolation.Interpolate;
         if (GameObject.Find("Enter") != null) {
             var burrowPos = GameObject.Find("Enter").gameObject.transform.position;
             pBody.position = new Vector3(burrowPos.x, burrowPos.y + 2f, burrowPos.z);
