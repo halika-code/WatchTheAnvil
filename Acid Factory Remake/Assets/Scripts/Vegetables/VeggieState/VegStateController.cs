@@ -28,45 +28,14 @@ public class VegStateController : MonoBehaviour {
      * <param name="state">The corresponding state to the vegetable</param>
      * <remarks>It is assumed here that the given state parameter corresponds to the object linked to the cBody parameter</remarks>
      */
-    private void checkForPlayerDistance(Rigidbody cBody, VegState state) {
-        if (checkIfPlayerIsInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, 
-                new []{pBody.transform.position.x, pBody.transform.position.z}, 20)) { 
-            if (state is VegState.Hidden) { //the idea here is if the player is close, the player will be inside a border
+    public void checkForPlayerDistance(Rigidbody cBody, VegState state) {
+        if (checkIfPlayerIsInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, new []{pBody.transform.position.x, pBody.transform.position.z}, 20)) { 
+            if (!VeggieAnim.checkIfAnimIsRunning(cBody)) { //the idea here is if the player is close, the player will be inside a border
                 StartCoroutine(VeggieAnim.animateCarrot(cBody, state)); 
-                getRoot().updateCollective(getIndexOfVeg(cBody), VegState.Visible);
             } 
-        } else if (state is VegState.Visible) { 
+        } else if (state is not VegState.Hidden) {
             StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
-            getRoot().updateCollective(getIndexOfVeg(cBody), VegState.Hidden);
-        }
-    }
-
-    /**
-     * <summary>Attempts to find the index of the vegetable in question</summary>
-     * <param name="cObj">The vegetable in question</param>
-     * <returns>The found index inside the cBodyCollective</returns>
-     * <remarks>If an exact match in the hierarchy wasn't found, the 1st index is returned</remarks>
-     */
-    private static int getIndexOfVeg(Component cObj) {
-        for (var i = 0; i < getRoot().getBodyCollective().Count; i++) {
-            if (cObj.name.Equals(getRoot().getBodyCollective()[i].name)) { //preliminary check if the Veggie3 is a Veggie3
-                if (checkIfEqual(getParentName(cObj.transform), getParentName(getRoot().getBodyCollective()[i].transform))) {
-                    return i; //a more detailed check based on the hierarchy of the veggie, mainly to improve efficiency
-                }
-            }
-        } return 0;
-    }
-
-    /**
-     * <summary>Checks properly if two list-string's match</summary>
-     */
-    private static bool checkIfEqual(List<string> cObj, List<string> vObj) {
-        var retVal = true;
-        for (var i = 0; i < cObj.Count; i++) {
-            if (!cObj[i].Equals(vObj[i])) {
-                retVal = false;
-            }
-        } return retVal;
+        } 
     }
 
     /**
@@ -107,5 +76,9 @@ public class VegStateController : MonoBehaviour {
      */
     public static bool checkIfPlayerIsInBorder(float[] objPos, float[] pPos, int borderLength) {
         return pClose(pInBorder(objPos, pPos, borderLength));
+    }
+
+    public static VegStateController getController() {
+        return GameObject.Find("Vegetables").GetComponent<VegStateController>();
     }
 }

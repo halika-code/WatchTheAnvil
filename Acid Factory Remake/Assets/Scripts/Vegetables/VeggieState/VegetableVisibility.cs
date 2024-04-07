@@ -1,7 +1,7 @@
 using UnityEngine;
 
-public class VegetableVisibility {
-    public enum VegState {
+public static class VegetableVisibility {
+    public enum VegState : int{
         Visible,
         Hidden
     }
