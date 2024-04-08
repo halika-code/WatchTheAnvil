@@ -13,25 +13,28 @@ public static class VeggieAnim {
      * the int is it's state: 0: not running, 1: going up, 2: going down</summary>
      */
     private static readonly Dictionary<string, int> IsAnimRunning = new();
-    private static bool ready = true;
     private static readonly float[] RaiseHeights = {2.58f*2, 1.33f*2, 0.52f*2, 3.2f}; //big, medium, small veggie and flower
     /**
      * <summary>The idea here is to have the carrot pop out of the ground then abruptly stop
      * <para>The carrot is supposed to shoot up then slow slightly (and naturally) before abruptly stopping, all popped out or hidden</para></summary>
      */
     public static IEnumerator animateCarrot(Rigidbody targetCBody, VegState state) { //note: the opposite effect will be applied to the veggie compared to the state
-        animCooldown(state);
-        var vegList = getKey(targetCBody);
+        IsAnimRunning.Add(getKey(targetCBody), state is VegState.Hidden ? 1 : 2);
         var y = targetCBody.position.y; //original y speed, needs to stay outside otherwise the veggies will ascend uncontrollably
-        IsAnimRunning.Add(vegList, state is VegState.Hidden ? 1 : 2);
-        if (IsAnimRunning[vegList] is 1) { //if it is hidden, so gonna be visible
-            runBackUpTimer(targetCBody);
-        } for (var i = state is VegState.Hidden ? 10 : 6 ; i > 0; i--) {
+         for (var i = state is VegState.Hidden ? 10 : 6 ; i > 0; i--) {
             targetCBody.position = new Vector3(targetCBody.position.x, y + (getModifier(targetCBody, state) / i), targetCBody.position.z);
             yield return new WaitForSeconds(0.008f);
-        } Enum.TryParse<VegState>((((int)state + 1) % 2).ToString(), out var vegState); //this here flips the state to the opposite (from hidden to visible for example)
+        } stopAnim(targetCBody, state);
+    }
+    
+    /**
+     * <summary>Helper function of <see cref="animateCarrot"/>
+     * <para>Winds down the animation for the given vegetable</para></summary>
+     */
+    private static void stopAnim(Component targetCBody, VegState state) {
+        Enum.TryParse<VegState>((((int)state + 1) % 2).ToString(), out var vegState); //this here flips the state to the opposite (from hidden to visible for example)
+        IsAnimRunning.Remove(getKey(targetCBody));
         getRoot().updateCollective(getIndexOfVeg(targetCBody), vegState);
-        IsAnimRunning.Remove(vegList);
     }
     
     /**
@@ -102,26 +105,9 @@ public static class VeggieAnim {
         list.Add(cBody.name);
         return getKey(list);
     }
-
+    
     /**
-     * <summary>Sends down a veggie if it gets stuck up</summary>
-     */
-    private static async void runBackUpTimer(Rigidbody key) {
-        await Task.Delay(4000);
-        if (IsAnimRunning[getKey(key)] is 1) {
-            IsAnimRunning.Remove(getKey(key)); //remove the veggie from the dictionary to have checkIfAnimRunning
-            VegStateController.getController().checkForPlayerDistance(key, VegState.Visible);
-        } 
-    }
-
-    private static async void animCooldown(VegState state) {
-        ready = false;
-        await Task.Delay(state is VegState.Visible ? 4000 : 2000); //wanna wait longer while the veggie is visible
-        ready = true;
-    }
-
-    /**
-     * <summary>Checks if a given vegetable is in the list of running vegetables</summary> //todo note: this works as intended
+     * <summary>Checks if a given vegetable is in the list of running vegetables</summary>
      * 
      */
     public static bool checkIfAnimIsRunning(Rigidbody key) {

@@ -23,19 +23,24 @@ public class VegStateController : MonoBehaviour {
     }
     
     /**
-     * <summary>Handles down what to do when the player is in the aura of a vegetable</summary>
-     * <param name="cBody">A link to the vegetable in question</param>
-     * <param name="state">The corresponding state to the vegetable</param>
+     * <summary>Prepares the animation of a given plant</summary>
+     * <param name="cBody">A link to the plant in question</param>
+     * <param name="state">The corresponding state to the plant</param>
      * <remarks>It is assumed here that the given state parameter corresponds to the object linked to the cBody parameter</remarks>
+     * note: the idea with this if tree is if the vegetable selected for animation is
+     * in a wrong state given the current state of the environment, leave early.
+     * This way only the vegetable that tries to get animated in an intended environment gets animated
      */
     public void checkForPlayerDistance(Rigidbody cBody, VegState state) {
-        if (checkIfPlayerIsInBorder(new []{cBody.transform.position.x, cBody.transform.position.z}, new []{pBody.transform.position.x, pBody.transform.position.z}, 20)) { 
-            if (!VeggieAnim.checkIfAnimIsRunning(cBody)) { //the idea here is if the player is close, the player will be inside a border
-                StartCoroutine(VeggieAnim.animateCarrot(cBody, state)); 
-            } 
-        } else if (state is not VegState.Hidden) {
-            StartCoroutine(VeggieAnim.animateCarrot(cBody, state));
-        } 
+        if (!VeggieAnim.checkIfAnimIsRunning(cBody)) { //if an animation is playing don't do anything
+            if (checkIfPlayerIsInBorder(new[] { cBody.transform.position.x, cBody.transform.position.z }, new[] { pBody.transform.position.x, pBody.transform.position.z }, 20)) {
+                if (state is VegState.Visible) { //if the veggie is inside the border BUT is visible
+                    return;
+                } 
+            } else if (state is VegState.Hidden) { //if the player is outside the activation border AND the veggie is hidden
+                return;
+            } StartCoroutine(VeggieAnim.animateCarrot(cBody, state)); //this statement is only reached when the veggie AND the environment is in the proper state
+        }
     }
 
     /**
@@ -78,6 +83,7 @@ public class VegStateController : MonoBehaviour {
         return pClose(pInBorder(objPos, pPos, borderLength));
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis note: this function is rarely called in VeggieAnim.runStuckCountdown in a faulty instance
     public static VegStateController getController() {
         return GameObject.Find("Vegetables").GetComponent<VegStateController>();
     }
