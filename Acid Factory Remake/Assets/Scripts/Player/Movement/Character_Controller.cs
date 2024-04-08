@@ -36,7 +36,6 @@ public class Character_Controller : MonoBehaviour {
     private static void setPlayerBody() {
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
-        pBody.interpolation = RigidbodyInterpolation.Interpolate;
         if (GameObject.Find("Enter") != null) {
             var burrowPos = GameObject.Find("Enter").gameObject.transform.position;
             pBody.position = new Vector3(burrowPos.x, burrowPos.y + 2f, burrowPos.z);
@@ -117,7 +116,8 @@ public class Character_Controller : MonoBehaviour {
      * <remarks>Will find the name no matter how deep the object is in the hierarchy</remarks>
      */
     public static string getParentName(GameObject obj) {
-        return getParentName(obj.transform)[^1];
+        var parentList = getParentName(obj.transform);
+        return parentList[^1] is "Geometry" ? parentList[^2] : parentList[^1];
     }
     
     /**
