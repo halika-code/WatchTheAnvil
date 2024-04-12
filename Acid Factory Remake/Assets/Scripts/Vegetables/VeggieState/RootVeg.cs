@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Script.Tools.ToolType;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class RootVeg : MonoBehaviour {

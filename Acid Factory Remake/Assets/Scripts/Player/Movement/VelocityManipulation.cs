@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using Script.Tools.ToolType;
 using UnityEngine;
 using static Character_Controller;
@@ -11,6 +10,8 @@ public static class VelocityManipulation {
      * <summary>Normally 0.04f</summary>
      */
     private static float xSlowDown = 0.08f;
+    private static float dampenedSpeed;
+    private static bool isDampening;
     
     /**
      * <summary>Increments then checks the player's speed</summary>
@@ -43,6 +44,28 @@ public static class VelocityManipulation {
                 pVel[i] = 0;
             }
         } getPlayerBody().velocity = pVel;
+    }
+
+    public static float processInitialDampening(int i, float velocity) {
+        if (Math.Round(getPlayerBody().velocity[i < 2 ? 0 : 2], 2) < 0.1d) {
+            dampenSpeed(velocity * (float)MoveVel + 2f);
+            return dampenedSpeed;
+        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
+    }
+    
+    private static void dampenSpeed(float speed) {
+        if (!isDampening) { //if the player have zero speed
+            isDampening = true;
+            dampenedSpeed = speed * 0.8f;
+        } if (Math.Abs(dampenedSpeed) < Math.Abs(speed)) {
+            dampenedSpeed *= 1.01f;
+            return;
+        } resetDampening();
+    }
+    
+    public static void resetDampening() {
+        isDampening = false;
+        dampenedSpeed = 0f;
     }
 
     /**

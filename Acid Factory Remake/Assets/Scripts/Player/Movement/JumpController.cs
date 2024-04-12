@@ -1,4 +1,3 @@
-using System.Numerics;
 using static GravAmplifier;
 using static VelocityManipulation;
 using Vector3 = UnityEngine.Vector3;

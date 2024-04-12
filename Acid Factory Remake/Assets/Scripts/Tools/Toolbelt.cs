@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Script.Tools.ToolType;
 using Unity.VisualScripting;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 /**

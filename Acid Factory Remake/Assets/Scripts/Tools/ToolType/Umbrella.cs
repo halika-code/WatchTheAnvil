@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Script.Tools.ToolType {
     public class Umbrella : global::Tools { 
         public bool isOpen;

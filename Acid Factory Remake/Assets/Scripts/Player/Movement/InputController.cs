@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using static GravAmplifier;
 using static VelocityManipulation;
+using Task = System.Threading.Tasks.Task;
 
 /**
  * <date>05/01/2024</date>
@@ -37,12 +39,18 @@ public class InputController : Character_Controller {
     private static Vector3 checkForPlayerInteraction() {
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.D)) {
+                Debug.Log("pots");
+            }
             if (Input.GetKey(Buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
                 vel[i < 2 ? 0 : 2] = applyRestriction(i);
                 if (JumpController.getJumpingState(i, out var flyingState) && flyingState is not 2) {  
                     updateButtonPress(i);
-                } continue; //if an input is pressed, skip to the next cycle
-            } if (vel[i < 2 ? 0 : 2] is not 0) { //built-in dampening when the player have not pressed a given button
+                } continue; //if an input is pressed, skip to the next cycle, down below we can expect the button processed "above" will not be modified
+            } if (Math.Round(vel[(i is 0 ? 4 : i-1) < 2 ? 0 : 2], 2) > 1d) { //todo test why doesn't this work
+                                            //the idea here is this will check the previous velocity calculated and if it is not 0
+                resetDampening();           //reset the dampening. IF this statement is reached, the player have not pressed this button
+            } if (Math.Round(vel[i < 2 ? 0 : 2], 2) > 1d) { //built-in dampening when the player have not pressed a given button
                 vel[i < 2 ? 0 : 2] *= 0.99f;
             }
         } return vel;
@@ -82,7 +90,7 @@ public class InputController : Character_Controller {
             } return 0f;
         } return velocity;
     }
-
+    
     /**
      * <summary>Assigns a speed to the player based on the player's current state</summary>
      * <param name="velocity">A float that houses the orientation of the vector each key-press has</param>
@@ -94,8 +102,8 @@ public class InputController : Character_Controller {
             if (!Buttons[i].Equals(lastButtonPressed)) {
                 return incrementPlayerSpeed(pBody.velocity[i < 2 ? 0 : 2] + velocity * ((float)MoveVel / 17.1f)); //dampening
             } return velocity * (float)(MoveVel * 1.25); //dropping faster
-        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); //moving normal todo the player can drift for some reason while on the floor
-    }
+        } return processInitialDampening(i, velocity);
+    } //moving normal
 
     /**
      * <summary>Toggles between -1 and 1 based on the value given.

@@ -1,7 +1,4 @@
-using System;
 using System.Collections;
-using System.Threading;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using static AnvilManager;
