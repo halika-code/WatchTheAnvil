@@ -10,8 +10,8 @@ public static class VelocityManipulation {
      * <summary>Normally 0.04f</summary>
      */
     private static float xSlowDown = 0.08f;
-    private static float dampenedSpeed;
-    private static bool isDampening;
+    private static float[] dampenedSpeed = {0f, 0f};
+    private static bool[] isDampening = {false, false};
     
     /**
      * <summary>Increments then checks the player's speed</summary>
@@ -47,25 +47,25 @@ public static class VelocityManipulation {
     }
 
     public static float processInitialDampening(int i, float velocity) {
-        if (Math.Round(getPlayerBody().velocity[i < 2 ? 0 : 2], 2) < 0.1d) {
-            dampenSpeed(velocity * (float)MoveVel + 2f);
-            return dampenedSpeed;
+        if (Math.Round(getPlayerBody().velocity[i < 2 ? 0 : 2], 2) < 10d) {
+            dampenSpeed(i, velocity * (float)MoveVel + 2f);
+            return dampenedSpeed[i < 2 ? 0 : 1];
         } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
     }
     
-    private static void dampenSpeed(float speed) {
-        if (!isDampening) { //if the player have zero speed
-            isDampening = true;
-            dampenedSpeed = speed * 0.8f;
-        } if (Math.Abs(dampenedSpeed) < Math.Abs(speed)) {
-            dampenedSpeed *= 1.01f;
+    private static void dampenSpeed(int i, float speed) {
+        if (!isDampening[i < 2 ? 0 : 1]) { //if the player have zero speed
+            isDampening[i < 2 ? 0 : 1] = true;
+            dampenedSpeed[i < 2 ? 0 : 1] = speed * 0.4f;
+        } if (Math.Abs(dampenedSpeed[i < 2 ? 0 : 1]) < Math.Abs(speed)) {
+            dampenedSpeed[i < 2 ? 0 : 1] *= 1.1f;
             return;
-        } resetDampening();
+        } resetDampening(i); //if the max speed is reached, wipe the current dampening 
     }
     
-    public static void resetDampening() {
-        isDampening = false;
-        dampenedSpeed = 0f;
+    public static void resetDampening(int i) {
+        isDampening[i < 2 ? 0 : 1] = false;
+        dampenedSpeed[i < 2 ? 0 : 1] = 0f;
     }
 
     /**

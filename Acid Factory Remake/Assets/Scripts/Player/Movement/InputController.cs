@@ -39,21 +39,28 @@ public class InputController : Character_Controller {
     private static Vector3 checkForPlayerInteraction() {
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.D)) {
-                Debug.Log("pots");
-            }
             if (Input.GetKey(Buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
                 vel[i < 2 ? 0 : 2] = applyRestriction(i);
+                Debug.Log(i < 2 ? "X velocity is: " + vel[0] : "Y velocity is: " + vel[2]);
                 if (JumpController.getJumpingState(i, out var flyingState) && flyingState is not 2) {  
                     updateButtonPress(i);
                 } continue; //if an input is pressed, skip to the next cycle, down below we can expect the button processed "above" will not be modified
-            } if (Math.Round(vel[(i is 0 ? 4 : i-1) < 2 ? 0 : 2], 2) > 1d) { //todo test why doesn't this work
-                                            //the idea here is this will check the previous velocity calculated and if it is not 0
-                resetDampening();           //reset the dampening. IF this statement is reached, the player have not pressed this button
+            } if (absRound(vel[getIndexOfVel(i) < 2 ? 0 : 2]) > 1d) { 
+                resetDampening(i); //if the player have not pressed the current button, hard reset dampening
             } if (Math.Round(vel[i < 2 ? 0 : 2], 2) > 1d) { //built-in dampening when the player have not pressed a given button
                 vel[i < 2 ? 0 : 2] *= 0.99f;
             }
         } return vel;
+    }
+
+    /**
+     * <summary>Attempts to get the opposite index of the velocity for the player</summary>
+     */
+    private static int getIndexOfVel(int i) { //todo the player still can't move towards a negative direction.
+                                              //todo Not sure what's wrong but this code is untested, I figure bug is in VelocityMAnipulation
+        if (i is 0) {
+            return 4;
+        } return i < 2 ? 2 : 0;
     }
 
     private static bool checkForExit(bool shouldToggle) {
