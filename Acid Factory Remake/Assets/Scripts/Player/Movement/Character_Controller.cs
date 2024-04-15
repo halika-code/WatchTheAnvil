@@ -117,7 +117,9 @@ public class Character_Controller : MonoBehaviour {
      */
     public static string getParentName(GameObject obj) {
         var parentList = getParentName(obj.transform);
-        return parentList[^1] is "Geometry" ? parentList[^2] : parentList[^1];
+        if (parentList.Count is 1) {
+            parentList.Add(obj.name);
+        } return parentList[^1] is "Geometry" ? parentList[^2] : parentList[^1];
     }
     
     /**

@@ -1,3 +1,4 @@
+using System.Linq;
 using static GravAmplifier;
 using static VelocityManipulation;
 using Vector3 = UnityEngine.Vector3;
@@ -34,18 +35,18 @@ public class JumpController : InputController {
         switch (isAscending) {
             case true when lastButtonPressed == null: {  //stationary jump then movement
                 flyingState = 1;
-                return true;
+                break;
             } case true when lastButtonPressed != Buttons[i] && !wasOppositePressed(i): { //air-strafing
                 flyingState = 2;
-                return true;
+                break;
             } case true when lastButtonPressed != Buttons[i] && speedHighEnough(getPlayerBody().velocity[i < 2 ? 0 : 2], calculateParity(i)): { //opposite air movement with high enough speed,
                 flyingState = 3;
-                return true; //note, when this statement is checked against, velocity dampening is expected to be making the movement
+                break; //note, when this statement is checked against, velocity dampening is expected to be making the movement
             } default: { //opposite air movement with low speed
                 flyingState = 0;
                 return false;
             }
-        } 
+        } return true;
     }
 
     /**
@@ -56,23 +57,34 @@ public class JumpController : InputController {
             return pSpeed > MoveVel * 0.8f;
         } return pSpeed < -MoveVel * 0.8f;
     }
+
+        /**
+     * <summary>Finds the index of the lastButtonPressed inside the buttons array</summary>
+     * <returns>The index of the KeyCode corresponding to the lastButtonPressed</returns>
+     * <remarks>This implementation uses a delegate to find the index of the lastButtonPressed within the buttons array</remarks>
+     */
+    private static int getLastButtonIndex() {
+        return Buttons.ToList().FindIndex(code => code.Equals(lastButtonPressed));
+    }
     
     /**
      * <summary>Checks if the opposite key have been pressed</summary>
      * <returns>True, if the player presses a button that is mapped to the opposite parity of a given axis
      * <para>False if the player presses the same button or a button assigned to a different axis</para></returns>
-     * <example>Scenario: The player presses 'A' after 'W':
+     * <example>Scenario: The player presses 'W' after 'A':
      * <para>An i of value of 3 is given while the lastButtonPressed is KeyCode.A. The lastButtonPressed is converted into an index using <see cref="InputController.getLastButtonIndex"/>
      * and the value of 3 is compared against a value of 0.</para>
      * For the return condition, the two numbers are checked to not be the same (1st condition: true), and to be equal when 1 * (-1)
      * is added to the i variable, to arrive at the expected opposite value: 2 (2nd condition: false)
      * </example>
-     * <remarks> Example uses default button mappings</remarks>
+     * <remarks> Example uses default button mappings
+     * <para>This function will function properly as long as there is exactly 4 keys in the registered button mappings</para></remarks>
      */
-    private static bool wasOppositePressed(int i) { //this here is a delegate creation with a variable named code of type KeyCode,
+    private static bool wasOppositePressed(int i) { 
         if (lastButtonPressed == null) {
             return true;
-        } return getLastButtonIndex() != i && i + calculateParity(i) * -1 == getLastButtonIndex(); 
+        } return getLastButtonIndex() != i &&  /*below on the left I grab the parity the i corresponds with (negative or positive in any axis)*/
+                 getOpposite(i) == getLastButtonIndex(); //I can calculate the opposite value of the current index by grabbing the parity I got, multiply by -1 (flip it to the other side) and add i to it, which consistently puts it to the opposite key
     } //note at that -1 == buttons: the buttons is used to get the INDEX where the lastButtonPressed is kept at inside the array
-    
+
 }

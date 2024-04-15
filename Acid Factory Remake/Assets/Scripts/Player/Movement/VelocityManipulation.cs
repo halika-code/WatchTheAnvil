@@ -59,13 +59,12 @@ public static class VelocityManipulation {
             dampenedSpeed[i < 2 ? 0 : 1] = speed * 0.4f;
         } if (Math.Abs(dampenedSpeed[i < 2 ? 0 : 1]) < Math.Abs(speed)) {
             dampenedSpeed[i < 2 ? 0 : 1] *= 1.1f;
-            return;
-        } resetDampening(i); //if the max speed is reached, wipe the current dampening 
+        }
     }
     
     public static void resetDampening(int i) {
-        isDampening[i < 2 ? 0 : 1] = false;
-        dampenedSpeed[i < 2 ? 0 : 1] = 0f;
+        isDampening[i] = false;
+        dampenedSpeed[i] = 0f;
     }
 
     /**

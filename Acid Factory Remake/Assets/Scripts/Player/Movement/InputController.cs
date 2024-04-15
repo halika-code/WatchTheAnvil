@@ -40,27 +40,22 @@ public class InputController : Character_Controller {
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(Buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                vel[i < 2 ? 0 : 2] = applyRestriction(i);
+                if (Input.GetKey(KeyCode.D)) {
+                    Debug.Log("Pots");
+                }
+                if (wasOppositePressed(vel, i)) { 
+                    resetDampening(i < 2 ? 0 : 1); //if the player have not pressed the current button, hard reset dampening
+                } vel[truncateIndex(i)] = applyRestriction(i);
                 Debug.Log(i < 2 ? "X velocity is: " + vel[0] : "Y velocity is: " + vel[2]);
                 if (JumpController.getJumpingState(i, out var flyingState) && flyingState is not 2) {  
                     updateButtonPress(i);
                 } continue; //if an input is pressed, skip to the next cycle, down below we can expect the button processed "above" will not be modified
-            } if (absRound(vel[getIndexOfVel(i) < 2 ? 0 : 2]) > 1d) { 
-                resetDampening(i); //if the player have not pressed the current button, hard reset dampening
-            } if (Math.Round(vel[i < 2 ? 0 : 2], 2) > 1d) { //built-in dampening when the player have not pressed a given button
-                vel[i < 2 ? 0 : 2] *= 0.99f;
+            } if (absRound(vel[truncateIndex(i)]) > 1d) { //built-in dampening when the player have not pressed a given button
+                vel[truncateIndex(i)] *= 0.99f;
+            } else {
+                resetDampening(i < 2 ? 0 : 1);
             }
         } return vel;
-    }
-
-    /**
-     * <summary>Attempts to get the opposite index of the velocity for the player</summary>
-     */
-    private static int getIndexOfVel(int i) { //todo the player still can't move towards a negative direction.
-                                              //todo Not sure what's wrong but this code is untested, I figure bug is in VelocityMAnipulation
-        if (i is 0) {
-            return 4;
-        } return i < 2 ? 2 : 0;
     }
 
     private static bool checkForExit(bool shouldToggle) {
@@ -107,7 +102,7 @@ public class InputController : Character_Controller {
     private static float processPlayerSpeed(float velocity, int i) {
         if (isAscending) { //if the player is soaring
             if (!Buttons[i].Equals(lastButtonPressed)) {
-                return incrementPlayerSpeed(pBody.velocity[i < 2 ? 0 : 2] + velocity * ((float)MoveVel / 17.1f)); //dampening
+                return incrementPlayerSpeed(pBody.velocity[truncateIndex(i)] + velocity * ((float)MoveVel / 17.1f)); //dampening
             } return velocity * (float)(MoveVel * 1.25); //dropping faster
         } return processInitialDampening(i, velocity);
     } //moving normal
@@ -119,8 +114,7 @@ public class InputController : Character_Controller {
      * <remarks>Could be done in a simplified way</remarks>
      */
     protected static int calculateParity(double i) {
-        var ret = i % 2 is not 0 ? 1 : -1;
-        return ret; //note, the integer casting is used to divide by zero and get 0 as result. The brackets are important there, as in we wanna divide then cast
+        return i % 2 is not 0 ? 1 : -1; //note, the integer casting is used to divide by zero and get 0 as result. The brackets are important there, as in we wanna divide then cast
     }
 
     /**
@@ -159,13 +153,36 @@ public class InputController : Character_Controller {
     public static void updateButtonPress(int index) {
         lastButtonPressed = index >= 0 && index < Buttons.Length ? Buttons[index] : null;
     }
+    
+    /**
+     * <summary>The idea here is if we get the opposite speed</summary>
+     */
+    private static bool wasOppositePressed(Vector3 vel, int i) { //the i is the current button pressed, 
+        var lastStoredIndex = getIndexFromVelocity(vel, i is 0 ? 2 : i-1); //if i is 0 then send 2, otherwise do the usual truncation
+        var oppositeParity = calculateParity(getOpposite(i)); //todo ideas for this to work: I could use the lastStoredIndex and check against the current index
+        var check = lastStoredIndex == i; //todo I should use the getOpposite to like check if the lastStoredIndex is equal to i
+        return true;
+    }
 
     /**
-     * <summary>Finds the index of the lastButtonPressed inside the buttons array</summary>
-     * <returns>The index of the KeyCode corresponding to the lastButtonPressed</returns>
-     * <remarks>This implementation uses a delegate to find the index of the lastButtonPressed within the buttons array</remarks>
+     * <summary>Calculates the index of the button that is opposite to the button assigned to i</summary>
+     * <remarks>under index of buttons I mean <see cref="Buttons"/></remarks>
      */
-    protected static int getLastButtonIndex() {
-        return Buttons.ToList().FindIndex(code => code.Equals(lastButtonPressed));
+    protected static int getOpposite(int i) {
+       return i + calculateParity(i) * -1;
+    }
+
+    /**
+     * <summary>Fetches the index used in the main <see cref="checkForPlayerInteraction"/>'s for loop
+     * by using the speed of the player and a given index</summary>
+     */
+    private static int getIndexFromVelocity(Vector3 vel, int index) {
+        if (absRound(vel[truncateIndex(index)]) > 1f) {
+            return (Math.Sign(vel[truncateIndex(index)]) is -1 ? 0 : 1) + index;
+        } return 0;
+    }
+
+    private static int truncateIndex(int i) {
+        return i < 2 ? 0 : 2;
     }
 }
