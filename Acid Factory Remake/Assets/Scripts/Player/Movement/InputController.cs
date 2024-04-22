@@ -155,13 +155,18 @@ public class InputController : Character_Controller {
     }
     
     /**
-     * <summary>The idea here is if we get the opposite speed</summary>
+     * <summary>Checks the current index extracted from the player's speed against the future index given</summary>
+     * <returns>true if the current index is found to be the opposite of the future index
+     * <para>False otherwise</para></returns>
+     * <param name="vel">The previous speed the player had</param>
+     * <param name="i">The index of the button currently pressed</param>
+     * <remarks>Doesn't matter which button the player presses, this function will find the</remarks>
      */
     private static bool wasOppositePressed(Vector3 vel, int i) { //the i is the current button pressed, 
-        var lastStoredIndex = getIndexFromVelocity(vel, i is 0 ? 2 : i-1); //if i is 0 then send 2, otherwise do the usual truncation
-        var oppositeParity = calculateParity(getOpposite(i)); //todo ideas for this to work: I could use the lastStoredIndex and check against the current index
-        var check = lastStoredIndex == i; //todo I should use the getOpposite to like check if the lastStoredIndex is equal to i
-        return true;
+        var getCurrentIndex = getIndexFromVelocity(vel, i is 0 ? 3 : i - 1); //todo test if the i is 0 actually returns the proper index when pressing A
+        var getOppositeIndex = getOpposite(i);
+        return getIndexFromVelocity(vel, i is 0 ? 3 : i-1) == getOpposite(i); 
+                                                        //if i = 0
     }
 
     /**
@@ -175,13 +180,18 @@ public class InputController : Character_Controller {
     /**
      * <summary>Fetches the index used in the main <see cref="checkForPlayerInteraction"/>'s for loop
      * by using the speed of the player and a given index</summary>
+     * <param name="vel">The speed the player has</param>
+     * <param name="index">The index of the speed within the vel parameter that should be processed</param>
      */
     private static int getIndexFromVelocity(Vector3 vel, int index) {
-        if (absRound(vel[truncateIndex(index)]) > 1f) {
-            return (Math.Sign(vel[truncateIndex(index)]) is -1 ? 0 : 1) + index;
+        if (absRound(vel[truncateIndex(index)]) > 1f) { //if the index in question contains an actual speed and not just float imprecision data (usually 1.26*10^-6)
+            return (Math.Sign(vel[truncateIndex(index)]) is -1 ? 0 : 1) + index; //the + index is used
         } return 0;
     }
 
+    /**
+     * <summary>Truncates the index to either 0 or 2</summary>
+     */
     private static int truncateIndex(int i) {
         return i < 2 ? 0 : 2;
     }
