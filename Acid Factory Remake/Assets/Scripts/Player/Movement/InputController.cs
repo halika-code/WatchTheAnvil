@@ -40,13 +40,9 @@ public class InputController : Character_Controller {
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
             if (Input.GetKey(Buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                if (Input.GetKey(KeyCode.D)) {
-                    Debug.Log("Pots");
-                }
                 if (wasOppositePressed(vel, i)) { 
                     resetDampening(i < 2 ? 0 : 1); //if the player have not pressed the current button, hard reset dampening
                 } vel[truncateIndex(i)] = applyRestriction(i);
-                Debug.Log(i < 2 ? "X velocity is: " + vel[0] : "Y velocity is: " + vel[2]);
                 if (JumpController.getJumpingState(i, out var flyingState) && flyingState is not 2) {  
                     updateButtonPress(i);
                 } continue; //if an input is pressed, skip to the next cycle, down below we can expect the button processed "above" will not be modified
@@ -126,8 +122,7 @@ public class InputController : Character_Controller {
         if (Input.GetKey(KeyCode.Space) && !isAscending) {
             toggleToJumpingState();
             return true;
-        } //Debug.Log("canFly: " + isAscending + ", Pressed lump: " + Input.GetKey(KeyCode.Space));
-        return false;
+        } return false;
     }
 
     public static void toggleToJumpingState() {
@@ -141,6 +136,9 @@ public class InputController : Character_Controller {
         return Input.GetKey(KeyCode.E);
     }
 
+    /**
+     * <summary>Checks if the player has pressed the correct button AND can use an item</summary>
+     */
     public static bool checkForItemUse() {
         return Input.GetKey(KeyCode.F) && Toolbelt.getBelt().toolInHand /*hand is not null*/ && !itemCoolDown;
     }
@@ -163,10 +161,7 @@ public class InputController : Character_Controller {
      * <remarks>Doesn't matter which button the player presses, this function will find the</remarks>
      */
     private static bool wasOppositePressed(Vector3 vel, int i) { //the i is the current button pressed, 
-        var getCurrentIndex = getIndexFromVelocity(vel, i is 0 ? 3 : i - 1); //todo test if the i is 0 actually returns the proper index when pressing A
-        var getOppositeIndex = getOpposite(i);
-        return getIndexFromVelocity(vel, i is 0 ? 3 : i-1) == getOpposite(i); 
-                                                        //if i = 0
+        return getIndexFromVelocity(vel, i) is -1 || getIndexFromVelocity(vel, i) == getOpposite(i); 
     }
 
     /**
@@ -185,8 +180,8 @@ public class InputController : Character_Controller {
      */
     private static int getIndexFromVelocity(Vector3 vel, int index) {
         if (absRound(vel[truncateIndex(index)]) > 1f) { //if the index in question contains an actual speed and not just float imprecision data (usually 1.26*10^-6)
-            return (Math.Sign(vel[truncateIndex(index)]) is -1 ? 0 : 1) + index; //the + index is used
-        } return 0;
+            return (Math.Sign(vel[truncateIndex(index)]) is -1 ? 0 : 1) + truncateIndex(index); //the + index is used
+        } return -1;
     }
 
     /**
