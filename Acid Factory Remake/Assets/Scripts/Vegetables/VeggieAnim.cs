@@ -23,7 +23,9 @@ public static class VeggieAnim {
          for (var i = state is VegState.Hidden ? 10 : 6 ; i > 0; i--) {
             targetCBody.position = new Vector3(targetCBody.position.x, y + (getModifier(targetCBody, state) / i), targetCBody.position.z);
             yield return new WaitForSeconds(0.008f);
-        } stopAnim(targetCBody, state);
+        } stopAnim(targetCBody, state);        //todo add integration to the animator: IF this function is called, be able to find the GrassHolder and trigger the ExitState (and hide the GrassHolder)
+                                                    //todo also add a condition to the start state (only start when the animation is finished)
+                                            //todo also add a flip-book style animation to the big-carrot
     }
     
     /**
