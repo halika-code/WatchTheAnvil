@@ -47,7 +47,7 @@ public static class VelocityManipulation {
     }
 
     public static float processInitialDampening(int i, float velocity) {
-        if (Math.Round(getPlayerBody().velocity[i < 2 ? 0 : 2], 2) < 10d) {
+        if (absRound(getPlayerBody().velocity[i < 2 ? 0 : 2]) < 10f) {
             dampenSpeed(i, velocity * (float)MoveVel + 2f);
             return dampenedSpeed[i < 2 ? 0 : 1];
         } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
@@ -56,10 +56,8 @@ public static class VelocityManipulation {
     private static void dampenSpeed(int i, float speed) {
         if (!isDampening[i < 2 ? 0 : 1]) { //if the player have zero speed
             isDampening[i < 2 ? 0 : 1] = true;
-            dampenedSpeed[i < 2 ? 0 : 1] = speed * 0.4f;
-        } if (Math.Abs(dampenedSpeed[i < 2 ? 0 : 1]) < Math.Abs(speed)) {
-            dampenedSpeed[i < 2 ? 0 : 1] *= 1.1f;
-        }
+            dampenedSpeed[i < 2 ? 0 : 1] = speed * 0.2f;
+        } dampenedSpeed[i < 2 ? 0 : 1] *= 1.07f;
     }
     
     public static void resetDampening(int i) {
