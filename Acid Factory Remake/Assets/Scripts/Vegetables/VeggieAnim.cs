@@ -24,8 +24,7 @@ public static class VeggieAnim {
             targetCBody.position = new Vector3(targetCBody.position.x, y + (getModifier(targetCBody, state) / i), targetCBody.position.z);
             yield return new WaitForSeconds(0.008f);
         } stopAnim(targetCBody, state);        //todo add integration to the animator: IF this function is called, be able to find the GrassHolder and trigger the ExitState (and hide the GrassHolder)
-                                                    //todo also add a condition to the start state (only start when the animation is finished)
-                                            //todo also add a flip-book style animation to the big-carrot
+                                                    //todo note: in order to make a flip-book animation I have to use materials instead of images
     }
     
     /**
@@ -113,5 +112,9 @@ public static class VeggieAnim {
      */
     public static bool checkIfAnimIsRunning(Rigidbody key) {
         return IsAnimRunning.ContainsKey(getKey(key));
+    }
+
+    public static bool shouldStopAnim(Rigidbody key) {
+        return checkIfAnimIsRunning(key);
     }
 }
