@@ -7,24 +7,28 @@ using static Character_Controller;
 using static VegetableVisibility;
 
 public static class VeggieAnim {
+
+    private static Animator anim = GameObject.Find("LeafHolder").GetComponent<Animator>();
     /**
      * <summary>The RigidBody is the reference to the veggie being animated,
      * the int is it's state: 0: not running, 1: going up, 2: going down</summary>
      */
     private static readonly Dictionary<string, int> IsAnimRunning = new();
     private static readonly float[] RaiseHeights = {2.58f*2, 1.33f*2, 0.52f*2, 3.2f}; //big, medium, small veggie and flower
+
     /**
      * <summary>The idea here is to have the carrot pop out of the ground then abruptly stop
      * <para>The carrot is supposed to shoot up then slow slightly (and naturally) before abruptly stopping, all popped out or hidden</para></summary>
      */
     public static IEnumerator animateCarrot(Rigidbody targetCBody, VegState state) { //note: the opposite effect will be applied to the veggie compared to the state
-        IsAnimRunning.Add(getKey(targetCBody), state is VegState.Hidden ? 1 : 2);
-        var y = targetCBody.position.y; //original y speed, needs to stay outside otherwise the veggies will ascend uncontrollably
-         for (var i = state is VegState.Hidden ? 10 : 6 ; i > 0; i--) {
+        toggleAnimState(targetCBody, state, true);
+        if (state is VegState.Hidden) {
+            changeSprites(targetCBody, VegState.Hidden);
+        } var y = targetCBody.position.y; //original y speed, needs to stay outside otherwise the veggies will ascend uncontrollably
+        for (var i = state is VegState.Hidden ? 10 : 6 ; i > 0; i--) {
             targetCBody.position = new Vector3(targetCBody.position.x, y + (getModifier(targetCBody, state) / i), targetCBody.position.z);
             yield return new WaitForSeconds(0.008f);
-        } stopAnim(targetCBody, state);        //todo add integration to the animator: IF this function is called, be able to find the GrassHolder and trigger the ExitState (and hide the GrassHolder)
-                                                    //todo note: in order to make a flip-book animation I have to use materials instead of images
+        } stopAnim(targetCBody, state);
     }
     
     /**
@@ -32,9 +36,33 @@ public static class VeggieAnim {
      * <para>Winds down the animation for the given vegetable</para></summary>
      */
     private static void stopAnim(Component targetCBody, VegState state) {
+        if (state is VegState.Visible) {
+            changeSprites(targetCBody, VegState.Visible);
+        } toggleAnimState(targetCBody, state, false);
         Enum.TryParse<VegState>((((int)state + 1) % 2).ToString(), out var vegState); //this here flips the state to the opposite (from hidden to visible for example)
-        IsAnimRunning.Remove(getKey(targetCBody));
         getRoot().updateCollective(getIndexOfVeg(targetCBody), vegState);
+    }
+
+    private static void toggleAnimState(Component vegBody, VegState state, bool isInit) {
+        if (isInit) {
+            IsAnimRunning.Add(getKey(vegBody), state is VegState.Hidden ? 1 : 2);
+        } else {
+            IsAnimRunning.Remove(getKey(vegBody));
+        }
+    }
+
+    /**
+     * <summary>Toggles the enabled status of the spriteHolders for a given veggie</summary>
+     */
+    private static void changeSprites(Component vegBody, VegState state) {
+        Debug.Log("Changing sprites to " + (state is VegState.Visible ? "Bush" : "GeneralSprite") + " for " + vegBody.name);
+        var sprites = new List<Transform>();
+        for (var i = 0; i < vegBody.transform.childCount; i++) { //a touch bit overkill
+            sprites.Add(vegBody.transform.GetChild(i));
+        } if (vegBody.name is not "Flower") {
+            sprites[1].gameObject.SetActive(state is VegState.Visible); //toggles the bush to disable if needed 
+            sprites[0].gameObject.SetActive(!sprites[1].gameObject.activeSelf); //spriteHolder
+        } 
     }
     
     /**

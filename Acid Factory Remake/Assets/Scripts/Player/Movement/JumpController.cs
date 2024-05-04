@@ -11,7 +11,7 @@ public class JumpController : InputController {
      * <param name="speedUp">The starting Y velocity, by default is <see cref="Character_Controller.MoveVel"/> * 3.2 cast into a float</param>
      * <param name="desiredSpeedCap">The desired terminal velocity, by default is set to -70f</param>
      */
-    public static void jump(float speedUp = (float)MoveVel * 3.2f, float desiredSpeedCap = -70f) {
+    public static void jump(float speedUp = (float)MoveVel * 3f, float desiredSpeedCap = -70f) {
         var pVel = pBody.velocity;
         gravity.falling(new Vector3(pVel.x, speedUp, pVel.z), desiredSpeedCap);
         incrementXSpeedDown(wait: 3f); //called from here to start the async function

@@ -2,13 +2,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class VegetablePull : MonoBehaviour {
+    private static readonly int padding = 2;
     
     /**
      * <summary>Disables the vegetable</summary>
      */
     public static void pullVegetable(Collider veggie) {
         RootVeg.getRoot().removeVeg(veggie.attachedRigidbody, out _);
-        veggie.gameObject.SetActive(false); //todo create placement for the carrots to fly to
+        veggie.gameObject.SetActive(false); //todo find the facing angle the player is looking at the vegetables,
+                                            //todo deviate from that slightly then launch the veggies with MoveVel
+    }
+
+    private static void findNearestStableGround(Rigidbody veggie) {
+        var pBody = Character_Controller.getPlayerBody();
+        var distanceAngle = pBody.position - veggie.position;
+        var ray = new Ray(veggie.position, distanceAngle * 2f); //in theory this is the distance the veggie needs to go
+        //todo have the veggie move to that position (add that to the veggie's position) to check if that is a valid position
     }
 
     /**

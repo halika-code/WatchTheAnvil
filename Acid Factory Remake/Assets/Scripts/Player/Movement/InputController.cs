@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static GravAmplifier;
 using static VelocityManipulation;
+using Debug = UnityEngine.Debug;
 using Task = System.Threading.Tasks.Task;
 
 /**
@@ -39,19 +41,53 @@ public class InputController : Character_Controller {
     private static Vector3 checkForPlayerInteraction() {
         var vel = pBody.velocity;
         for (var i = 0; i <= 3; i++) {
-            if (Input.GetKey(Buttons[i]) && Move.getMove() != Move.CanMove.Cant) { //Note: casting to int practically performs a Math.Floor operation
-                if (wasOppositePressed(vel, i)) { 
-                    resetDampening(i < 2 ? 0 : 1); //if the player have not pressed the current button, hard reset dampening
-                } vel[truncateIndex(i)] = applyRestriction(i);
-                if (JumpController.getJumpingState(i, out var flyingState) && flyingState is not 2) {  
-                    updateButtonPress(i);
-                } continue; //if an input is pressed, skip to the next cycle, down below we can expect the button processed "above" will not be modified
+            if (Input.GetKey(Buttons[i]) && Move.getMove() != Move.CanMove.Cant) {
+                vel = handleButtonPress(vel, i);
+                continue; //if an input is pressed, skip to the next cycle
             } if (absRound(vel[truncateIndex(i)]) > 1d) { //built-in dampening when the player have not pressed a given button
                 vel[truncateIndex(i)] *= 0.99f;
             } else {
-                resetDampening(i < 2 ? 0 : 1);
+                resetDampening(i);
             }
         } return vel;
+    }
+    
+    /**
+     * <summary>Processes changes in the movement state
+     * based on the player's button inputs</summary>
+     */
+    private static Vector3 handleButtonPress(Vector3 vel, int i) { 
+        if (wasOppositePressed(vel, i)) { 
+            resetDampening(i); //if the player have not pressed the current button, hard reset dampening
+        } vel[truncateIndex(i)] = applyRestriction(i);
+        if (JumpController.getJumpingState(i, out var flyingState) && flyingState is not 2) {  
+            updateButtonPress(i);
+        } return vel;
+    }
+
+    /**
+     * <summary>Gets the index of the movement key-press the player have pressed</summary>
+     * <param name="j">The optional return variable containing the exact index found
+     * <para>Will be set to -1 if no key have been pressed</para></param>
+     * <returns>True if a movement key have been pressed, false otherwise</returns>
+     */
+    public static bool checkIfMovementPressed(out int j) {
+        for (var i = 0; i <= 3; i++) {
+            if (Input.GetKey(Buttons[i])) {
+                j = i;
+                return true;
+            }
+        } j = -1; 
+        return false;
+    }
+    
+    /**
+     * <summary>Modifies the dampening velocity of the player to be the full speed</summary>
+     */
+    public static void shouldRestoreDampening() {
+        if (checkIfMovementPressed(out var i)) {
+            setDampening((float)MoveVel, i);
+        }
     }
 
     private static bool checkForExit(bool shouldToggle) {
@@ -187,7 +223,9 @@ public class InputController : Character_Controller {
     /**
      * <summary>Truncates the index to either 0 or 2</summary>
      */
-    private static int truncateIndex(int i) {
-        return i < 2 ? 0 : 2;
+    public static int truncateIndex(int i, bool setting = true) {
+        if (setting) { //normal truncation
+            return i < 2 ? 0 : 2;
+        } return i < 2 ? 0 : 1; //specialized truncation
     }
 }

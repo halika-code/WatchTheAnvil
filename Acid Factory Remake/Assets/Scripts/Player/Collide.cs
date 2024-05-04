@@ -60,7 +60,7 @@ public class Collide : MonoBehaviour {
         private void OnCollisionEnter(Collision collision) {
             if (!VegetablePull.validateVegetable(collision.gameObject)) {
                 processCollision(getParentName(collision.gameObject), collision);
-            } 
+            } InputController.shouldRestoreDampening();
         }
         
         /**
@@ -83,7 +83,9 @@ public class Collide : MonoBehaviour {
         }
         
         private static void processPlatforms() {
-            GravAmplifier.isAscending = false;
+            if (!InputController.checkIfMovementPressed(out _)) { //if no keys have been pressed, stop movement
+                getPlayerBody().velocity = Vector3.zero;
+            } GravAmplifier.isAscending = false;
             InputController.updateButtonPress(-1);
         }
 

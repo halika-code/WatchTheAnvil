@@ -14,7 +14,7 @@ using static JumpController;
  */
 public class Character_Controller : MonoBehaviour {
     
-    public const double MoveVel = 22D; 
+    public const double MoveVel = 25D; 
     protected static Rigidbody pBody;
     private static Transform pHand;
 

@@ -2,16 +2,70 @@ using System;
 using Script.Tools.ToolType;
 using UnityEngine;
 using static Character_Controller;
+using static InputController;
 using Task = System.Threading.Tasks.Task;
 
 public static class VelocityManipulation {
-
-    /**
-     * <summary>Normally 0.04f</summary>
-     */
+    
     private static float xSlowDown = 0.08f;
-    private static float[] dampenedSpeed = {0f, 0f};
-    private static bool[] isDampening = {false, false};
+    
+    #region InputSpecificCalculations
+        private static float[] dampenedSpeed = {0f, 0f};
+        private static bool[] isDampening = {false, false};
+    
+        /**
+         * <summary>Slowly decreases the player's velocity IF the player is in the air</summary>
+         * <remarks>Breaks early if the player is on the ground</remarks>
+         */
+        public static void velocityDecay() {
+            var pVel = getPlayerBody().velocity;
+            for (var i = 0; i < 2; i+=2) {
+                if (absRound(pVel[i]) > 0.05f) {
+                    pVel[i] -= checkAgainstUmbrella() ? Math.Sign(pVel[i]) * xSlowDown : 
+                        Math.Sign(pVel[i]) * xSlowDown + 0.05f; //normal velocity slowdown : umbrella slowdown
+                } else {
+                    pVel[i] = 0;
+                }
+            } getPlayerBody().velocity = pVel;
+        }
+        
+        /**
+         * <summary>Adds an initial speed penalty to the player during the first handful of frames of movement</summary>
+         */
+        public static float processInitialDampening(int i, float velocity) {
+            if (absRound(getPlayerBody().velocity[truncateIndex(i)]) < 10f) {
+                dampenSpeed(i, velocity * (float)MoveVel + 2f);
+                return dampenedSpeed[truncateIndex(i, false)];
+            } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
+        }
+            
+        /**
+         * <summary>Increments the dampening component of the player's speed</summary>
+         */
+        private static void dampenSpeed(int i, float speed) {
+            if (!isDampening[truncateIndex(i, false)]) { //if the player have zero speed
+                isDampening[truncateIndex(i, false)] = true;
+                dampenedSpeed[truncateIndex(i, false)] = speed * 0.2f;
+            } dampenedSpeed[truncateIndex(i, false)] *= 1.07f;
+        }
+        
+        /**
+         * <summary>Hard-resets the player's dampening components</summary>
+         */
+        public static void resetDampening(int i) {
+            isDampening[truncateIndex(i, false)] = false;
+            dampenedSpeed[truncateIndex(i, false)] = 0f;
+        }
+
+        /**
+         * <summary>Sets the dampening to a given speed</summary>
+         */
+        public static void setDampening(float val, int i) {
+            isDampening[truncateIndex(i, false)] = true;
+            dampenedSpeed[truncateIndex(i, false)] = val;
+        }
+        
+    #endregion
     
     /**
      * <summary>Increments then checks the player's speed</summary>
@@ -28,41 +82,6 @@ public static class VelocityManipulation {
     public static bool checkAgainstUmbrella() {
         var tool = Toolbelt.getBelt().toolInHand;
         return Toolbelt.checkHand() && tool.name.Contains("Umbrella") && ((Umbrella)tool).isOpen;
-    }
-    
-    /**
-    * <summary>Slowly decreases the player's velocity IF the player is in the air</summary>
-    * <remarks>Breaks early if the player is on the ground</remarks>
-    */
-    public static void velocityDecay() {
-        var pVel = getPlayerBody().velocity;
-        for (var i = 0; i < 2; i+=2) {
-            if (absRound(pVel[i]) > 0.05f) {
-                pVel[i] -= checkAgainstUmbrella() ? Math.Sign(pVel[i]) * xSlowDown : 
-                    Math.Sign(pVel[i]) * xSlowDown + 0.05f; //normal velocity slowdown : umbrella slowdown
-            } else {
-                pVel[i] = 0;
-            }
-        } getPlayerBody().velocity = pVel;
-    }
-
-    public static float processInitialDampening(int i, float velocity) {
-        if (absRound(getPlayerBody().velocity[i < 2 ? 0 : 2]) < 10f) {
-            dampenSpeed(i, velocity * (float)MoveVel + 2f);
-            return dampenedSpeed[i < 2 ? 0 : 1];
-        } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 
-    }
-    
-    private static void dampenSpeed(int i, float speed) {
-        if (!isDampening[i < 2 ? 0 : 1]) { //if the player have zero speed
-            isDampening[i < 2 ? 0 : 1] = true;
-            dampenedSpeed[i < 2 ? 0 : 1] = speed * 0.2f;
-        } dampenedSpeed[i < 2 ? 0 : 1] *= 1.07f;
-    }
-    
-    public static void resetDampening(int i) {
-        isDampening[i] = false;
-        dampenedSpeed[i] = 0f;
     }
 
     /**
