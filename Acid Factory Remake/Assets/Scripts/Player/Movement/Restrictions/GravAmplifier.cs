@@ -49,7 +49,7 @@ public class GravAmplifier : MonoBehaviour {
      * <remarks>Coroutine falls out when the <see cref="Character_Controller.isAscending"/> flag is cleared (false)</remarks>
      */
     private IEnumerator gravAmplifier(float desiredSpeed = -70f) {
-        desiredSpeedCap = desiredSpeed; //todo something catastrophically wrong happened here for it to not run at all anymore
+        desiredSpeedCap = desiredSpeed;
         while (isAscending) { //here the arch is kept at a downwards angle
             movePlayer(hop.y);
             if (hop.y > desiredSpeedCap) { //normal execution

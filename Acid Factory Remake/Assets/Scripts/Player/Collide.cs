@@ -1,5 +1,6 @@
 using System;
 using Script.Tools.ToolType;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
@@ -22,7 +23,8 @@ public class Collide : MonoBehaviour {
             case "Foliage" or "Geometry": {
                 goto case "Platforms";
             } case "Platforms": {
-                if (Math.Floor(Math.Abs(obj.impulse[1])) is 0) { //normally 0 if grounded
+                if (checkIfCollidingWithPlatform(obj)) { //normally 0 if grounded
+                    Debug.Log("Sidetracked to walls");
                     goto case "Walls";
                 } processPlatforms(); 
                 break;
@@ -53,12 +55,16 @@ public class Collide : MonoBehaviour {
         }
     }
 
+    private static bool checkIfCollidingWithPlatform(Collision obj) { //todo test if, by doing a full jump, the player will not get stuck (will get a negative velocity through gravAmplifier). When this returns true the player must be on a flat-ish surface
+        return obj.contacts[0].normal[2] > 0.8f || Math.Floor(Math.Abs(obj.impulse[1])) is 0 && !obj.transform.name.Contains("Platform");
+    }
+
     #region PlatformCollision
         /**
          * <summary>handles the logic behind solid object collision</summary>
          */
         private void OnCollisionEnter(Collision collision) {
-            if (!VegetablePull.validateVegetable(collision.gameObject)) {
+            if (!VegetablePull.validateVegetable(collision.gameObject) && !collision.gameObject.name.Contains("VegPatch")) {
                 processCollision(getParentName(collision.gameObject), collision);
             } InputController.shouldRestoreDampening();
         }

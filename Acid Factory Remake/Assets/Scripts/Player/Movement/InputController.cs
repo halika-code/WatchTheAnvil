@@ -56,7 +56,7 @@ public class InputController : Character_Controller {
      * <summary>Processes changes in the movement state
      * based on the player's button inputs</summary>
      */
-    private static Vector3 handleButtonPress(Vector3 vel, int i) { 
+    private static Vector3 handleButtonPress(Vector3 vel, int i) {
         if (wasOppositePressed(vel, i)) { 
             resetDampening(i); //if the player have not pressed the current button, hard reset dampening
         } vel[truncateIndex(i)] = applyRestriction(i);
@@ -113,16 +113,12 @@ public class InputController : Character_Controller {
      * note: this function delves into intricate button manipulations, earning it's place in this script
      */
     private static float applyRestriction(int i) {
-        var parity = calculateParity(i);
-        float velocity;
         Enum.TryParse((i + 1).ToString(), out Move.CanMove restriction); //this finds the restriction
         if (restriction != Move.getMove()) { //normal movement
-            velocity = processPlayerSpeed(parity, i);
-        } else { //if the player tries to move towards a direction that is restricted
-            if (gravity.getDownwardSpeed() > 0f) {
-                gravity.updateDownwardSpeed(-1f); 
-            } return 0f;
-        } return velocity;
+            return processPlayerSpeed(calculateParity(i), i);
+        } if (gravity.getDownwardSpeed() > 0f) {  //if the player tries to move towards a direction that is restricted
+            gravity.updateDownwardSpeed(-1f); 
+        } return 0f;
     }
     
     /**
@@ -222,10 +218,10 @@ public class InputController : Character_Controller {
 
     /**
      * <summary>Truncates the index to either 0 or 2</summary>
+     * <param name="i">The index to truncate to</param>
+     * <param name="setting">A variable that switches the return condition to </param>
      */
     public static int truncateIndex(int i, bool setting = true) {
-        if (setting) { //normal truncation
-            return i < 2 ? 0 : 2;
-        } return i < 2 ? 0 : 1; //specialized truncation
+        return i < 2 ? 0 : setting ? 2 /*normal truncation*/ : 1 /*specialized truncation*/;
     }
 }

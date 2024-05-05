@@ -33,7 +33,7 @@ public static class VelocityManipulation {
          * <summary>Adds an initial speed penalty to the player during the first handful of frames of movement</summary>
          */
         public static float processInitialDampening(int i, float velocity) {
-            if (absRound(getPlayerBody().velocity[truncateIndex(i)]) < 10f) {
+            if (absRound(dampenedSpeed[truncateIndex(i, false)]) < 0.1f || absRound(getPlayerBody().velocity[truncateIndex(i)]) < 10f) {
                 dampenSpeed(i, velocity * (float)MoveVel + 2f);
                 return dampenedSpeed[truncateIndex(i, false)];
             } return incrementPlayerSpeed(velocity * (float)MoveVel + 2f); 

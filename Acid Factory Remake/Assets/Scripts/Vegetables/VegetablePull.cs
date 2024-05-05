@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Random = System.Random;
 
 public class VegetablePull : MonoBehaviour {
     private static readonly int padding = 2;
@@ -9,15 +10,26 @@ public class VegetablePull : MonoBehaviour {
      */
     public static void pullVegetable(Collider veggie) {
         RootVeg.getRoot().removeVeg(veggie.attachedRigidbody, out _);
-        veggie.gameObject.SetActive(false); //todo find the facing angle the player is looking at the vegetables,
+         //todo find the facing angle the player is looking at the vegetables,
                                             //todo deviate from that slightly then launch the veggies with MoveVel
+        findNearestStableGround(veggie.attachedRigidbody);
     }
 
     private static void findNearestStableGround(Rigidbody veggie) {
-        var pBody = Character_Controller.getPlayerBody();
-        var distanceAngle = pBody.position - veggie.position;
-        var ray = new Ray(veggie.position, distanceAngle * 2f); //in theory this is the distance the veggie needs to go
-        //todo have the veggie move to that position (add that to the veggie's position) to check if that is a valid position
+        var vegPos = veggie.position;
+        var distanceAngle = (Character_Controller.getPlayerBody().position - 
+                             new Vector3(vegPos.x + getRNG(), vegPos.y, vegPos.z + getRNG())) * (float)Character_Controller.MoveVel;
+        veggie.position += distanceAngle; //todo have the veggie move to that position (add that to the veggie's position) to check if that is a valid position
+        //var ray = new Ray(vegPos, distanceAngle); //in theory this is the distance the veggie needs to go
+        
+    }
+
+    private static float getRNG() {
+        var rand = new Random();
+        var next = rand.Next(1, 5) * 0.05f;
+        if (next % 2 != 0) {
+            next *= -0.1f;
+        } return next;
     }
 
     /**
