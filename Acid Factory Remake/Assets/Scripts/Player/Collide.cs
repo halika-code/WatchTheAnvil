@@ -23,7 +23,7 @@ public class Collide : MonoBehaviour {
             case "Foliage" or "Geometry": {
                 goto case "Platforms";
             } case "Platforms": {
-                if (checkIfCollidingWithPlatform(obj)) { //normally 0 if grounded
+                if (checkIfCollidingWithWalls(obj)) { //normally 0 if grounded
                     Debug.Log("Sidetracked to walls");
                     goto case "Walls";
                 } processPlatforms(); 
@@ -55,8 +55,13 @@ public class Collide : MonoBehaviour {
         }
     }
 
-    private static bool checkIfCollidingWithPlatform(Collision obj) { //todo test if, by doing a full jump, the player will not get stuck (will get a negative velocity through gravAmplifier). When this returns true the player must be on a flat-ish surface
-        return obj.contacts[0].normal[2] > 0.8f || Math.Floor(Math.Abs(obj.impulse[1])) is 0 && !obj.transform.name.Contains("Platform");
+    /**
+     * <summary>Checks the object the player have collided with if it can be considered a wall</summary>
+     * <returns>True if the object's normal is angled upwards enough
+     * <para>False otherwise</para></returns>
+     */
+    private static bool checkIfCollidingWithWalls(Collision obj) {
+        return !(obj.contacts[0].normal[1] > 0.7f);
     }
 
     #region PlatformCollision

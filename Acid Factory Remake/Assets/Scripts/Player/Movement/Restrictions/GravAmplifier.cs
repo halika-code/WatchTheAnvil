@@ -21,7 +21,7 @@ public class GravAmplifier : MonoBehaviour {
      * Only the y component can be modified outside the script</summary>
      * <remarks>Use <see cref="updateDownwardSpeed"/> to modify it's speed while the coroutine is running</remarks>
      */
-    public static Vector3 hop;
+    private static Vector3 hop;
     /**
      * <summary>A boolean flag that, alongside the can't jump state, keeps track if the player is air-borne</summary>
      * <remarks>Set to true the frame when the game registers a space bar press, set to false when the player hits a PLATFORM</remarks>
