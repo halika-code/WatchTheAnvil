@@ -18,8 +18,9 @@ public class VegetablePull : MonoBehaviour {
     private static void findNearestStableGround(Rigidbody veggie) {
         var vegPos = veggie.position;
         var distanceAngle = (Character_Controller.getPlayerBody().position - 
-                             new Vector3(vegPos.x + getRNG(), vegPos.y, vegPos.z + getRNG())) * (float)Character_Controller.MoveVel;
-        veggie.position += distanceAngle; //todo have the veggie move to that position (add that to the veggie's position) to check if that is a valid position
+                             new Vector3(vegPos.x + getRNG(), vegPos.y+ 2f, vegPos.z + getRNG())) * (float)Character_Controller.MoveVel;
+        veggie.position += distanceAngle; //todo create a formula that launches the veggie using velocity (and gravity, toggling it on and off) instead of targeting a spot
+                        //todo the idea here is there should be a script that listens when a given veggie makes a collision, if that happens turn off the gravity
         //var ray = new Ray(vegPos, distanceAngle); //in theory this is the distance the veggie needs to go
         
     }
