@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -36,9 +37,9 @@ public class Character_Controller : MonoBehaviour {
     private static void setPlayerBody() {
         pBody = GameObject.Find("Player").GetComponent<Rigidbody>();
         pBody.freezeRotation = true;
-        if (GameObject.Find("Enter") != null) {
+        if (GameObject.Find("Enter")) {
             var burrowPos = GameObject.Find("Enter").gameObject.transform.position;
-            pBody.position = new Vector3(burrowPos.x, burrowPos.y + 2f, burrowPos.z);
+            pBody.position = new Vector3(burrowPos.x, burrowPos.y + 4f, burrowPos.z);
         }
     }
 
@@ -78,9 +79,7 @@ public class Character_Controller : MonoBehaviour {
      * <returns>True if the player's distance is too far from the raycast's length</returns>
      */
     public static bool checkForDistance() {
-        if (ShadowController.findColPoint(out var hit)) {
-            return hit.distance > (pBody.transform.localScale.y/2)+1f; //the idea here is with the localScale I can get the height of the player from this data
-        } return false;
+        return ShadowController.findColPoint(out var hit) || checkForDistance(hit);
     }
     
     /**
@@ -88,7 +87,7 @@ public class Character_Controller : MonoBehaviour {
      * <returns>True if the player's distance is too far from the raycast's length</returns>
      */
     public static bool checkForDistance(RaycastHit hit) {
-        return hit.distance > (pBody.transform.localScale.y/2)+1f;
+        return hit.distance > 4.6f;
     }
     
     /**

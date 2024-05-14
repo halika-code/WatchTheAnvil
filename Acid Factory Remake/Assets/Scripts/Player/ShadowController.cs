@@ -11,12 +11,14 @@ public class ShadowController : MonoBehaviour {
     private new static MeshRenderer renderer;
     private static Rigidbody sBody;
     private static RaycastHit lastHitObj;
+    private static bool isRunning;
     
     private void Start() {
         sBody = gameObject.GetComponent<Rigidbody>();
         renderer = gameObject.GetComponent<MeshRenderer>();
-        findPlatform(); //equal to "lastHitObj = new RayCastHit();"
-        StartCoroutine(followPlayer());
+        if (!findPlatform()) { //terminate early if the player is grounded
+            return;     //save some performance
+        } StartCoroutine(followPlayer()); 
     }
 
     /**
@@ -25,50 +27,52 @@ public class ShadowController : MonoBehaviour {
      * <remarks>This is designed to run forever and is supposed to get stopped as soon as the player lands</remarks>
      */
     public static IEnumerator followPlayer() { //var hit is the container of the collider of the object that was hit 
-        var counter = 0;
-        if (!renderer.enabled) {
-            renderer.enabled = true;
-        } do {
-            if (checkForPlatform(counter, out counter)) {
-                var pBodyPos = getPlayerBody().position;
-                setShadowPosition(new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z));
-            } yield return null;
-        } while (Character_Controller.checkForDistance(lastHitObj));
-        renderer.enabled = false;
-    }
-
-    /**
-     * <summary>A helper function for <see cref="followPlayer()"/>
-     * Decides if the platform in memory have been purged or not.
-     * <para>If so, the said distance is refreshed</para></summary>
-     * <remarks>Also checks if the the last object hit is an expected one or not</remarks>
-     */
-    private static bool checkForPlatform(int counter, out int count) {
-        counter++;
-        if (lastHitObj.collider || counter > 9) { //every 10th loop OR if the lastHitObj have been dumped mid-loop, update y position
-            findPlatform();
-            counter = 0;
-        } count = counter;
-        return getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text");
-    }
-
-    /**
-     * <summary>Updates the point the player is directly under</summary>
-     */
-    private static void findPlatform() {
-        if (!findColPoint(out lastHitObj)) {
-            renderer.enabled = false;
+        if (!isRunning) { //if an instance is not running yet
+            var counter = 0;
+            isRunning = true;
+            do {
+                if (checkForPlatform(counter, out counter)) { //repositions the shadow to better follow the player
+                    var pBodyPos = getPlayerBody().position;
+                    setShadowPosition(new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z)); //move the shadow's position to be exactly underneath the player, smugly on top the floor
+                } yield return null;
+            } while (renderer.enabled); 
+            isRunning = false;
         }
     }
 
     /**
+     * <summary>Checks if there is ground underneath the player
+     * <para>If so, the lastHitObj will get updated</para></summary>
+     */
+    private static bool checkForPlatform(int counter, out int count) {
+        counter++;
+        if (lastHitObj.collider || counter > 9) { //every 10th loop OR if the lastHitObj have been dumped mid-loop, update y position
+            count = 0;
+            return findPlatform(); //return true as long as the floor underneath the player is a valid one and is far down (but not too far)
+        } count = counter;
+        return getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text");
+        //returns true as long as the object underneath is not a tool or a type of text
+    }
+
+    /**
+     * <summary>Updates the point the player is directly under
+     * <para>If no valid floor is found, the shadow is terminated instead</para></summary>
+     */
+    private static bool findPlatform() {
+        if (!findColPoint(out lastHitObj) || !checkForDistance(lastHitObj) || lastHitObj.collider.name is "DeathPane") {
+            renderer.enabled = false;
+            return false;  //if no valid floor is found or the distance between the floor and player is insignificant
+        } return true;
+    }
+
+    /**
      * <summary>Fetches the collision point the Raycast finds underneath the player</summary>
-     * <param name="hit">A container for the object struck by the ray</param>
+     * <param name="hit">A container of the object struck by the ray</param>
      * <returns>True if a hit was detected within 30f distance, false otherwise</returns>
      */
     public static bool findColPoint(out RaycastHit hit) {
         var ray = new Ray(getPlayerBody().position, Vector3.down);
-        return Physics.Raycast(ray, out hit, 100f);
+        return Physics.Raycast(ray, out hit, 50f);
     }
 
     /**
@@ -92,12 +96,5 @@ public class ShadowController : MonoBehaviour {
      */
     public static void moveShadow(Vector3 pos) {
         sBody.transform.position = new Vector3(pos.x, sBody.position.y, pos.z);
-    }
-
-    /**
-     * <summary>Checks if the player is standing on it's shadow</summary>
-     */
-    public static bool checkForDistance() {
-        return Character_Controller.checkForDistance(lastHitObj);
     }
 }

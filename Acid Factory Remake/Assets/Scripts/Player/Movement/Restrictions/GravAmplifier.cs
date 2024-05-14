@@ -19,7 +19,7 @@ public class GravAmplifier : MonoBehaviour {
     /**
      * <summary>A variable that keeps the calculated speed the player will inherit from the amplified gravity.
      * Only the y component can be modified outside the script</summary>
-     * <remarks>Use <see cref="updateDownwardSpeed"/> to modify it's speed while the coroutine is running</remarks>
+     * <remarks>Use <see cref="updateDownwardSpeed"/> to modify its speed while the coroutine is running</remarks>
      */
     private static Vector3 hop;
     /**
@@ -36,6 +36,7 @@ public class GravAmplifier : MonoBehaviour {
 
     /**
      * <summary>Starts <see cref="gravAmplifier"/> as a coroutine</summary>
+     * note: function needed here for JumpController to reach gravAmplifier
      */
     public void falling(Vector3 velocity, float desiredSpeed = -70f) {
         hop = velocity;
