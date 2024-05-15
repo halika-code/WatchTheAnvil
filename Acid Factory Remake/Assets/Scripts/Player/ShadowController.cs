@@ -35,8 +35,8 @@ public class ShadowController : MonoBehaviour {
                     var pBodyPos = getPlayerBody().position;
                     setShadowPosition(new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z)); //move the shadow's position to be exactly underneath the player, smugly on top the floor
                 } yield return null;
-            } while (renderer.enabled); 
-            isRunning = false;
+            } while (renderer.enabled || lastHitObj.collider.name is "DeathPane"); //loop until the renderer is visible (or the last hit object is the deathpane). This will exit when the player is too close to the ground
+            isRunning = false; //todo the while statement will not end normally, check why the findPlatform won't work
         }
     }
 
@@ -50,7 +50,8 @@ public class ShadowController : MonoBehaviour {
             count = 0;
             return findPlatform(); //return true as long as the floor underneath the player is a valid one and is far down (but not too far)
         } count = counter;
-        return getParentName(lastHitObj.collider.gameObject) is not "Tools" || !getParentName(lastHitObj.collider.gameObject).Contains("Text");
+        return getParentName(lastHitObj.collider.gameObject) is not "Tools" || 
+               !getParentName(lastHitObj.collider.gameObject).Contains("Text");
         //returns true as long as the object underneath is not a tool or a type of text
     }
 
@@ -59,10 +60,8 @@ public class ShadowController : MonoBehaviour {
      * <para>If no valid floor is found, the shadow is terminated instead</para></summary>
      */
     private static bool findPlatform() {
-        if (!findColPoint(out lastHitObj) || !checkForDistance(lastHitObj) || lastHitObj.collider.name is "DeathPane") {
-            renderer.enabled = false;
-            return false;  //if no valid floor is found or the distance between the floor and player is insignificant
-        } return true;
+        renderer.enabled = findColPoint(out lastHitObj) || checkForDistance(lastHitObj); //if no valid floor is found or the distance between the floor and player is insignificant
+        return renderer.enabled; 
     }
 
     /**
