@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using static Character_Controller;
@@ -16,7 +17,7 @@ public class ShadowController : MonoBehaviour {
     private void Start() {
         sBody = gameObject.GetComponent<Rigidbody>();
         renderer = gameObject.GetComponent<MeshRenderer>();
-        if (!findPlatform()) { //terminate early if the player is grounded
+        if (!validatePlatform()) { //terminate early if the player is grounded
             return;     //save some performance
         } StartCoroutine(followPlayer()); 
     }
@@ -31,12 +32,13 @@ public class ShadowController : MonoBehaviour {
             var counter = 0;
             isRunning = true;
             do {
+                yield return null;
                 if (checkForPlatform(counter, out counter)) { //repositions the shadow to better follow the player
                     var pBodyPos = getPlayerBody().position;
                     setShadowPosition(new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z)); //move the shadow's position to be exactly underneath the player, smugly on top the floor
-                } yield return null;
-            } while (renderer.enabled || lastHitObj.collider.name is "DeathPane"); //loop until the renderer is visible (or the last hit object is the deathpane). This will exit when the player is too close to the ground
-            isRunning = false; //todo the while statement will not end normally, check why the findPlatform won't work
+                }
+            } while (renderer.enabled); //loop until the renderer is visible (or the last hit object is the deathpane). This will exit when the player is too close to the ground
+            isRunning = false; //todo the while statement will not end normally, check why the validatePlatform won't work
         }
     }
 
@@ -48,7 +50,7 @@ public class ShadowController : MonoBehaviour {
         counter++;
         if (lastHitObj.collider || counter > 9) { //every 10th loop OR if the lastHitObj have been dumped mid-loop, update y position
             count = 0;
-            return findPlatform(); //return true as long as the floor underneath the player is a valid one and is far down (but not too far)
+            return validatePlatform(); //return true as long as the floor underneath the player is a valid one and is far down (but not too far)
         } count = counter;
         return getParentName(lastHitObj.collider.gameObject) is not "Tools" || 
                !getParentName(lastHitObj.collider.gameObject).Contains("Text");
@@ -56,11 +58,13 @@ public class ShadowController : MonoBehaviour {
     }
 
     /**
-     * <summary>Updates the point the player is directly under
-     * <para>If no valid floor is found, the shadow is terminated instead</para></summary>
+     * <summary>Attempts to validate the current platform underneath the player
+     * <para>If the platform is too far or is meant to kill the player, the shadow will get disabled</para></summary>
+     * <remarks>Note: the lastHitObj is, under normal circumstances, updated here</remarks>
      */
-    private static bool findPlatform() {
-        renderer.enabled = findColPoint(out lastHitObj) || checkForDistance(lastHitObj); //if no valid floor is found or the distance between the floor and player is insignificant
+    private static bool validatePlatform() {
+        renderer.enabled = findColPoint(out lastHitObj) && (Math.Sign(getPlayerBody().velocity.y) is not -1 || checkForDistance(lastHitObj)) /*is there a valid platform beneath the player who is not descending towards it*/
+                           && !lastHitObj.collider.name.Contains("Death"); //is the platform found not the death-pane
         return renderer.enabled; 
     }
 

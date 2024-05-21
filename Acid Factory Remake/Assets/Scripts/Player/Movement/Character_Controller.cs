@@ -64,13 +64,13 @@ public class Character_Controller : MonoBehaviour {
 
     
     private void FixedUpdate() {
-        if (InputController.checkForJump()) { //wall-jump: the Move state machine can only have 1 state, can be locked out IF I check for isAscending as well
+        if (InputController.checkForJump()) {
             if (Toolbelt.getBelt().checkForTool("Umbrella", out _)) {
                 if (checkAgainstUmbrella()) { //should be a normal jump-arch until 0 then fall slowly 
-                    jump(desiredSpeedCap: 0f); //note this assigns a value in here
-                    return;
-                } 
+                    jump(desiredSpeedCap: 0f); 
+                } return; //doesn't matter if this return is inside the checkAgainstUmbrella or not as long as it is inside checkForTool
             } jump();
+            StartCoroutine(ShadowController.followPlayer());
         } velocityDecay(); //needs to be here to have a fixed rate of slowdown
     }
     
@@ -84,7 +84,8 @@ public class Character_Controller : MonoBehaviour {
     
     /**
      * <summary>An overloaded version from <see cref="checkForDistance()"/> where the rayCastHit is given</summary>
-     * <returns>True if the player's distance is too far from the raycast's length</returns>
+     * <returns>True if the player is far enough away from the closest ground (4.6f)</returns>
+     * <remarks>4.59f is roughly the player's height plus some extra deviations. Anything above and the player is soaring</remarks>
      */
     public static bool checkForDistance(RaycastHit hit) {
         return hit.distance > 4.6f;
