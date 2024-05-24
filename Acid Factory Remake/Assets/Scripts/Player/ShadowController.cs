@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Character_Controller;
 
@@ -17,9 +18,9 @@ public class ShadowController : MonoBehaviour {
     private void Start() {
         sBody = gameObject.GetComponent<Rigidbody>();
         renderer = gameObject.GetComponent<MeshRenderer>();
-        if (!validatePlatform()) { //terminate early if the player is grounded
-            return;     //save some performance
-        } StartCoroutine(followPlayer()); 
+        if (validatePlatform()) {
+            StartCoroutine(followPlayer());
+        }
     }
 
     /**
@@ -31,14 +32,13 @@ public class ShadowController : MonoBehaviour {
         if (!isRunning) { //if an instance is not running yet
             var counter = 0;
             isRunning = true;
-            do {
-                yield return null;
+            while (GravAmplifier.isAscending) { //loop until the renderer is visible (or the last hit object is the deathpane). This will exit when the player is too close to the ground
                 if (checkForPlatform(counter, out counter)) { //repositions the shadow to better follow the player
                     var pBodyPos = getPlayerBody().position;
                     setShadowPosition(new Vector3(pBodyPos.x, lastHitObj.point.y + 0.02f, pBodyPos.z)); //move the shadow's position to be exactly underneath the player, smugly on top the floor
-                }
-            } while (renderer.enabled); //loop until the renderer is visible (or the last hit object is the deathpane). This will exit when the player is too close to the ground
-            isRunning = false; //todo the while statement will not end normally, check why the validatePlatform won't work
+                } yield return null;
+            } renderer.enabled = false; //needs to have this here in case the player lands outside the checkForPlatform cycle
+            isRunning = false;
         }
     }
 
@@ -48,7 +48,7 @@ public class ShadowController : MonoBehaviour {
      */
     private static bool checkForPlatform(int counter, out int count) {
         counter++;
-        if (lastHitObj.collider || counter > 9) { //every 10th loop OR if the lastHitObj have been dumped mid-loop, update y position
+        if (lastHitObj.collider.IsUnityNull() || counter > 9) { //every 10th loop OR if the lastHitObj have been dumped mid-loop, update y position
             count = 0;
             return validatePlatform(); //return true as long as the floor underneath the player is a valid one and is far down (but not too far)
         } count = counter;
@@ -63,18 +63,31 @@ public class ShadowController : MonoBehaviour {
      * <remarks>Note: the lastHitObj is, under normal circumstances, updated here</remarks>
      */
     private static bool validatePlatform() {
-        renderer.enabled = findColPoint(out lastHitObj) && (Math.Sign(getPlayerBody().velocity.y) is not -1 || checkForDistance(lastHitObj)) /*is there a valid platform beneath the player who is not descending towards it*/
-                           && !lastHitObj.collider.name.Contains("Death"); //is the platform found not the death-pane
-        return renderer.enabled; 
+        var pSpeed = getPlayerBody().velocity;
+        if (findColPoint(out lastHitObj, getSp(pSpeed.x), -1f, getSp(pSpeed.z)) && !lastHitObj.collider.name.Contains("Death")) { //if the player is above valid ground that is not the deathpane
+            if (Math.Sign(getPlayerBody().velocity.y) is not -1 || checkForDistance(lastHitObj)) { //if the player is gaining altitude or far from the ground
+                renderer.enabled = true;
+                return true;
+            } 
+        } renderer.enabled = false;
+        return false;
+    }
+
+    private static float getSp(float speed, float defVal = 0f) {
+        return VelocityManipulation.absRound(speed) > 0.2f ? Math.Sign(speed) * 0.2f : defVal;
     }
 
     /**
      * <summary>Fetches the collision point the Raycast finds underneath the player</summary>
      * <param name="hit">A container of the object struck by the ray</param>
+     * <param name="x">A default value that can manipulate the raycast's firing direction</param>
+     * <param name="y">A default value that can manipulate the raycast's firing direction</param>
+     * <param name="z">A default value that can manipulate the raycast's firing direction</param>
      * <returns>True if a hit was detected within 30f distance, false otherwise</returns>
      */
-    public static bool findColPoint(out RaycastHit hit) {
-        var ray = new Ray(getPlayerBody().position, Vector3.down);
+    public static bool findColPoint(out RaycastHit hit, float x = 0, float y = -1, float z = 0) {
+        var ray = !renderer.enabled ? new Ray(getPlayerBody().position, Vector3.down) : /*Use a different angle if the shadow is enabled (to not re-enable while above the death-pit)*/
+            new Ray(getPlayerBody().position, new Vector3(x, y, z));
         return Physics.Raycast(ray, out hit, 50f);
     }
 

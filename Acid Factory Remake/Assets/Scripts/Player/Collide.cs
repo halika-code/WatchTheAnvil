@@ -29,7 +29,7 @@ public class Collide : MonoBehaviour {
                 } processPlatforms(); 
                 break;
             } case "Walls": { //in case I need to add stuff in here
-                processWalls(obj);
+                processWalls(obj); //todo for some reason the player gets stuck on a wall when just moving into it. Looks like the gravity refuses to stop accelerating
                 break;
             } case "Anvils": { //updates the flag
                 if (!processAnvil()) {

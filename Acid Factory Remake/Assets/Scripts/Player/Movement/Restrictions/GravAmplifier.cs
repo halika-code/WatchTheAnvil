@@ -23,7 +23,7 @@ public class GravAmplifier : MonoBehaviour {
      */
     private static Vector3 hop;
     /**
-     * <summary>A boolean flag that, alongside the can't jump state, keeps track if the player is air-borne</summary>
+     * <summary>A boolean flag that keeps track if the player is air-borne</summary>
      * <remarks>Set to true the frame when the game registers a space bar press, set to false when the player hits a PLATFORM</remarks>
      */
     public static bool isAscending; //note: is set to true in the checkForJump function.
