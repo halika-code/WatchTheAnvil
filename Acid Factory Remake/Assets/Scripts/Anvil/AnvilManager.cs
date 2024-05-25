@@ -32,7 +32,7 @@ public class AnvilManager : MonoBehaviour {
         if (currentAnvil != null) {
             yield return new WaitUntil(() => !currentAnvil.isFlying); //check if we need to wait for the last anvil to properly land
         } currentAnvil = new Anvil(Instantiate(preFab, transform, worldPositionStays: true), diff: getDifficulty());
-        if (!currentAnvil.isFlying) { 
+        if (!currentAnvil.isFlying) { //todo what it looks like, the waitTime does not reset properly (or gets skipped)
             anvilCounter++;
             currentAnvil.getAnvilBody().transform.localPosition = Vector3.zero;
             yield return runTimer(currentAnvil); //waits for the anvil then drops it

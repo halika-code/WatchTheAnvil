@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Move;
@@ -68,7 +69,8 @@ public class Character_Controller : MonoBehaviour {
             if (Toolbelt.getBelt().checkForTool("Umbrella", out _)) {
                 if (checkAgainstUmbrella()) { //should be a normal jump-arch until 0 then fall slowly 
                     jump(desiredSpeedCap: 0f); 
-                } return; //doesn't matter if this return is inside the checkAgainstUmbrella or not as long as it is inside checkForTool
+                    return; //this needs to be here to not have the player frozen in place while having the umbrella in hand (but closed)
+                } 
             } jump();
             StartCoroutine(ShadowController.followPlayer());
         } velocityDecay(); //needs to be here to have a fixed rate of slowdown
@@ -79,7 +81,7 @@ public class Character_Controller : MonoBehaviour {
      * <returns>True if the player's distance is too far from the raycast's length</returns>
      */
     public static bool checkForDistance() {
-        return ShadowController.findColPoint(out var hit) || checkForDistance(hit);
+        return ShadowController.findColPoint(out var hit) && checkForDistance(hit);
     }
     
     /**
@@ -116,10 +118,7 @@ public class Character_Controller : MonoBehaviour {
      * <remarks>Will find the name no matter how deep the object is in the hierarchy</remarks>
      */
     public static string getParentName(GameObject obj) {
-        var parentList = getParentName(obj.transform);
-        if (parentList.Count is 1) {
-            parentList.Add(obj.name);
-        } return parentList[^1] is "Geometry" ? parentList[^2] : parentList[^1];
+        return getParentName(obj.transform)[^1];
     }
     
     /**
@@ -129,7 +128,7 @@ public class Character_Controller : MonoBehaviour {
      * <remarks>Works with objects that doesn't "normally" have a gameObject attached</remarks>
      */
     public static List<string> getParentName(Transform obj) {
-        var parentList = new List<string>();
+        var parentList = new List<string>() {obj.name};
         do {
             obj = obj.transform.parent;
             parentList.Add(obj.name);

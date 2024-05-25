@@ -24,12 +24,11 @@ public class Collide : MonoBehaviour {
                 goto case "Platforms";
             } case "Platforms": {
                 if (checkIfCollidingWithWalls(obj)) { //normally 0 if grounded
-                    Debug.Log("Sidetracked to walls");
                     goto case "Walls";
                 } processPlatforms(); 
                 break;
             } case "Walls": { //in case I need to add stuff in here
-                processWalls(obj); //todo for some reason the player gets stuck on a wall when just moving into it. Looks like the gravity refuses to stop accelerating
+                processWalls(obj); 
                 break;
             } case "Anvils": { //updates the flag
                 if (!processAnvil()) {
@@ -70,8 +69,10 @@ public class Collide : MonoBehaviour {
          */
         private void OnCollisionEnter(Collision collision) {
             if (!VegetablePull.validateVegetable(collision.gameObject) && !collision.gameObject.name.Contains("VegPatch")) {
-                processCollision(getParentName(collision.gameObject), collision);
-            } InputController.shouldRestoreDampening();
+                processCollision(getParentName(collision.gameObject), collision); //todo for some reason the umbrella can still
+                                                                                  //todo invoke an OnCollisionEnter even though it's collider is disabled ... perhaps the hand has it's collider enabled?
+                                                                                  //todo note: bug also in AnvilManager
+            } InputController.shouldRestoreDampening(); 
         }
         
         /**
@@ -79,7 +80,7 @@ public class Collide : MonoBehaviour {
          */
         private void OnCollisionExit(Collision other) {
             if (checkForDistance() && !GravAmplifier.isAscending) { //if the player have left the ground without jumping
-                if (getParentName(other.gameObject) is "Platforms" or "Walls") {
+                if (platformCheck(other.transform)) {
                     var pBody = getPlayerBody().velocity;
                     InputController.toggleToJumpingState(); 
                     GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); 
@@ -87,6 +88,15 @@ public class Collide : MonoBehaviour {
                 return;
             } updateMovement(CanMove.Freely); //case when the player touches the wall affectionately then breaks up with it
         }
+
+        /**
+         * <summary>checks if the object the player have collided with is located in the platform side of the hierarchy</summary>
+         * <param name="colTrans">The transform of the object the player have collided with</param>
+         * <returns>True if the object has any parent objects (or empties) that has "Platform" in it's name</returns>
+         */
+        private static bool platformCheck(Transform colTrans) {
+            return getParentName(colTrans).Find(colName => colName.Contains("Platform")) != null; 
+        } //rundown: gets the parent-name of the object in a List<string> form, then finds any name that has "platform" in it's name using a delegate function
         
         private static void processPlatforms() {
             if (!InputController.checkIfMovementPressed(out _)) { //if no keys have been pressed, stop movement

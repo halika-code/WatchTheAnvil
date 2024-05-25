@@ -26,7 +26,7 @@ namespace Script.Tools.ToolType {
         public override void useItem() {
             if (!inUse) {
                 inUse = true;
-                if (ShadowController.findColPoint(Character_Controller.getPlayerHand().gameObject, out var hitPos)) { //todo test this
+                if (ShadowController.findColPoint(Character_Controller.getPlayerHand().gameObject, out var hitPos)) {
                     dropTNT(hitPos.point);
                 } else {
                     Debug.Log("Whoopy, couldn't find a platform to place the dynamite at");

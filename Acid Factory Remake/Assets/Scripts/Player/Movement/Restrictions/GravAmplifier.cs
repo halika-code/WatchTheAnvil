@@ -62,6 +62,7 @@ public class GravAmplifier : MonoBehaviour {
         } 
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     /**
      * <summary>Updates the currently applied speed-cap (thus toggling the terminal velocity)</summary>
      * <param name="state">True for strong (-70f), false for low (0f)</param>
