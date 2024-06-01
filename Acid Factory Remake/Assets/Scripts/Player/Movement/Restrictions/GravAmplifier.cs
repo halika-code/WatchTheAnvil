@@ -67,11 +67,11 @@ public class GravAmplifier : MonoBehaviour {
     // ReSharper disable Unity.PerformanceAnalysis
     /**
      * <summary>Updates the currently applied speed-cap (thus toggling the terminal velocity)</summary>
-     * <param name="state">True for strong (-70f), false for low (0f)</param>
+     * <param name="state">False for strong (-70f), true for low (-10f)</param>
      */
     public void updateSpeedCap(bool state) {
         if (isAscending) { //if the player is soaring
-            desiredSpeedCap = state ? -70f : -10f;
+            desiredSpeedCap = state ? -10f : -70f;
         } else {
             Debug.Log("Hmmm, that did nothing ... nice umbrella though");
         }
