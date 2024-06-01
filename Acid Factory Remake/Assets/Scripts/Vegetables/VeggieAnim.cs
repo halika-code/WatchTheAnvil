@@ -26,6 +26,7 @@ public static class VeggieAnim {
             changeSprites(targetCBody, VegState.Hidden);
         } var y = targetCBody.position.y; //original y speed, needs to stay outside otherwise the veggies will ascend uncontrollably
         for (var i = state is VegState.Hidden ? 10 : 6 ; i > 0; i--) {
+            //Debug.Log($"Looping {targetCBody.name}, loop is: {i}, y is: {y}, getModifier: {getModifier(targetCBody, state) / i}");
             targetCBody.position = new Vector3(targetCBody.position.x, y + (getModifier(targetCBody, state) / i), targetCBody.position.z);
             yield return new WaitForSeconds(0.008f);
         } stopAnim(targetCBody, state);
@@ -99,7 +100,7 @@ public static class VeggieAnim {
      * </summary>
      */
     private static float getModifier(Component targetBody, VegState state) {
-        switch (getParentName(targetBody.transform)[0]) {
+        switch (getParentName(targetBody.transform)[1]) {
             case "Large": {
                 return state is VegState.Visible ? RaiseHeights[0] * -1 : RaiseHeights[0];
             } case "Medium": {
