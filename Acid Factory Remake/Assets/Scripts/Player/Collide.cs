@@ -1,9 +1,9 @@
 using System;
 using Script.Tools.ToolType;
-using Unity.VisualScripting;
 using UnityEngine;
 using static Character_Controller;
 using static Move;
+using static InputController;
 using Object = UnityEngine.Object;
 
 /**
@@ -39,8 +39,9 @@ public class Collide : MonoBehaviour {
                 hurtPlayer();
                 break;
             } case "Tools": {
-                processTools(obj.gameObject); //tools without triggers include helmet, vest, slippers ...
-                break;
+                if (!obj.gameObject.GetComponent<Collider>().isTrigger) {
+                    processTools(obj.gameObject); //tools without triggers include helmet, vest, slippers ...
+                } break;
             } case "Burrow": {
                 if (obj.gameObject.name is "Exit") {
                     LevelManager.getLevelLoader().advanceLevel();
@@ -69,10 +70,8 @@ public class Collide : MonoBehaviour {
          */
         private void OnCollisionEnter(Collision collision) {
             if (!VegetablePull.validateVegetable(collision.gameObject) && !collision.gameObject.name.Contains("VegPatch")) {
-                processCollision(getParentName(collision.gameObject), collision); //todo for some reason the umbrella can still
-                                                                                  //todo invoke an OnCollisionEnter even though it's collider is disabled ... perhaps the hand has it's collider enabled?
-                                                                                  //todo note: bug also in AnvilManager
-            } InputController.shouldRestoreDampening(); 
+                processCollision(getParentName(collision.gameObject), collision); 
+            } shouldRestoreDampening(); 
         }
         
         /**
@@ -82,7 +81,7 @@ public class Collide : MonoBehaviour {
             if (checkForDistance() && !GravAmplifier.isAscending) { //if the player have left the ground without jumping
                 if (platformCheck(other.transform)) {
                     var pBody = getPlayerBody().velocity;
-                    InputController.toggleToJumpingState(); 
+                    toggleToJumpingState(); 
                     GravAmplifier.gravity.falling(new Vector3(pBody.x, -10f, pBody.z)); 
                 } StartCoroutine(ShadowController.followPlayer()); //this must have been disabled
                 return;
@@ -99,10 +98,10 @@ public class Collide : MonoBehaviour {
         } //rundown: gets the parent-name of the object in a List<string> form, then finds any name that has "platform" in it's name using a delegate function
         
         private static void processPlatforms() {
-            if (!InputController.checkIfMovementPressed(out _)) { //if no keys have been pressed, stop movement
+            if (!checkIfMovementPressed(out _)) { //if no keys have been pressed, stop movement
                 getPlayerBody().velocity = Vector3.zero;
             } GravAmplifier.isAscending = false;
-            InputController.updateButtonPress(-1);
+            updateButtonPress(-1);
         }
 
         /**
@@ -123,6 +122,8 @@ public class Collide : MonoBehaviour {
     #endregion
 
     #region ToolCollision
+
+        
         /** 
          * <summary>Attempts to pick-up item from the floor that are pickup-able</summary>
          * <remarks>Added an override that jumps straight to OnTriggerStay instead of processing logic</remarks>
@@ -143,7 +144,8 @@ public class Collide : MonoBehaviour {
          * <remarks>It is assumed that an object with a trigger flag set is a kind of tool</remarks>
          */
         private void OnTriggerStay(Collider other) {
-            if (InputController.checkForActionButton()) {
+            if (checkForActionButton()) {
+                runButtonCooldown();
                 if (VegetablePull.validateVegetable(other.gameObject)) {
                     processVegetables(other);
                 } else if (Toolbelt.checkForCorrectToolType(other.name)) {
@@ -151,14 +153,7 @@ public class Collide : MonoBehaviour {
                 } 
             }
         }
-
-        private void OnTriggerExit(Collider other) {
-            if (InputController.itemCoolDown) { //this re-enables the player to pick-up the tool dropped to the floor
-                InputController.itemCoolDown = false;
-            }
-        }
-
-        #endregion
+    #endregion
     
     /**
      * <summary>Initiates the logic behind the vegetable pulls
@@ -197,9 +192,7 @@ public class Collide : MonoBehaviour {
     private static void processTools(Object obj) {
         var tool = Toolbelt.getBelt().findTool(obj, true); //problem here, tool gets set as null
         if (tool != null) { //if the tool found is not null AND the player isn't attempting to spam-pickup the same tool
-            if (!InputController.itemCoolDown) {
-                Toolbelt.getBelt().handleTool(tool);
-            }
+            Toolbelt.getBelt().handleTool(tool);
         } else {
             Debug.Log("Whoopy while trying to process " + obj.name + " as a tool");
         }

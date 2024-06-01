@@ -53,7 +53,6 @@ public class Toolbelt : MonoBehaviour {
             canPickup = false;
             if (toolInHand != null) {
                 throwToolFromHand(); 
-                runItemCoolDown();
             } addTool(tool);
             canPickup = true;
         }
@@ -86,13 +85,7 @@ public class Toolbelt : MonoBehaviour {
                 ((StopWatch)toolInHand).useItem();
                 break;
             }
-        } runItemCoolDown();
-    }
-    
-    private static async void runItemCoolDown() {
-        InputController.itemCoolDown = true;
-        await Task.Delay(500);
-        InputController.itemCoolDown = false;
+        }
     }
 
     /**
@@ -137,14 +130,14 @@ public class Toolbelt : MonoBehaviour {
      * <para>False: to the player's hand</para></param>
      */
     private void transferToolState(bool whereTo) {
-        var handBody = toolInHand.GetComponent<Tools>().GetComponent<Rigidbody>();
-        handBody.useGravity = whereTo;
-        handBody.isKinematic = !whereTo;
-        handBody.GetComponent<Collider>().enabled = whereTo;
-        toolInHand.transform.parent = handBody.useGravity ? GameObject.Find("Tools").transform : Character_Controller.getPlayerHand(); 
-        if (whereTo) {
+        toolInHand.GetComponent<Collider>().enabled = whereTo;
+        toolInHand.transform.parent = whereTo ? GameObject.Find("Tools").transform : Character_Controller.getPlayerHand(); 
+        if (!whereTo) {
+            Destroy(toolInHand.GetComponent<Rigidbody>());
+        } else {
+            toolInHand.AddComponent<Rigidbody>().isKinematic = true;
             removeTool(toolInHand.gameObject.name);
-        }
+        } 
     }
     
     public void checkForDurability(Equipment tool) {

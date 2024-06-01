@@ -14,11 +14,9 @@ using Task = System.Threading.Tasks.Task;
  * <summary>An extra script that is meant to solely handle inputs</summary>
  */
 public class InputController : Character_Controller {
-    
-    public static bool itemCoolDown; //true if the cooldown is activated
     protected static KeyCode? lastButtonPressed;
     protected static readonly KeyCode[] Buttons = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W };
-    
+    private static bool isActionPressed = false;
 
     /**
      * <summary>Checks for every interaction the player could take</summary>
@@ -31,6 +29,20 @@ public class InputController : Character_Controller {
                 return Vector3.zero;
             }
         } return checkForPlayerInteraction();
+    }
+    
+    /**
+     * <summary>Runs a wait script that escapes from the loop
+     * the first frame the player releases a given button</summary>
+     */
+    public static async void runButtonCooldown() {
+        while (!Input.GetKeyUp(KeyCode.E) && Input.GetKey(KeyCode.E)) {
+            if (!isActionPressed) {
+                isActionPressed = true;
+                await Task.Delay(100);
+                continue;
+            } await Task.Yield();
+        } isActionPressed = false;
     }
 
     /**
@@ -165,14 +177,14 @@ public class InputController : Character_Controller {
      * <summary>Checks if the player have pressed the E key</summary>
      */
     public static bool checkForActionButton() {
-        return Input.GetKey(KeyCode.E);
+        return Input.GetKey(KeyCode.E)  && !isActionPressed;
     }
 
     /**
      * <summary>Checks if the player has pressed the correct button AND can use an item</summary>
      */
     public static bool checkForItemUse() {
-        return Input.GetKey(KeyCode.F) && Toolbelt.getBelt().toolInHand /*hand is not null*/ && !itemCoolDown;
+        return Input.GetKeyUp(KeyCode.F) && Toolbelt.getBelt().toolInHand /*hand is not null*/;
     }
 
     /**

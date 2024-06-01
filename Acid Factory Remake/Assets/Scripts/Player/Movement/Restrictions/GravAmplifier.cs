@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using static Character_Controller;
@@ -53,12 +54,13 @@ public class GravAmplifier : MonoBehaviour {
         desiredSpeedCap = desiredSpeed;
         while (isAscending) { //here the arch is kept at a downwards angle
             movePlayer(hop.y);
-            if (hop.y > desiredSpeedCap) { //normal execution
-                hop.y -= (float)MoveVel;
-                yield return Wait; //waits a bit to apply the speed reduction, producing an arch
-            } else {
-                yield return null; 
-            }
+            if (Math.Abs(hop.y - desiredSpeedCap) > 0.1f) {
+                if (hop.y >= desiredSpeedCap) { //normal execution
+                    hop.y -= (float)MoveVel / 1.2f;
+                } else {
+                    hop.y = desiredSpeedCap;
+                }
+            } yield return Wait; //waits a bit to apply the speed reduction, producing an arch
         } 
     }
 
@@ -69,7 +71,7 @@ public class GravAmplifier : MonoBehaviour {
      */
     public void updateSpeedCap(bool state) {
         if (isAscending) { //if the player is soaring
-            desiredSpeedCap = state ? -70f : 0f;
+            desiredSpeedCap = state ? -70f : -10f;
         } else {
             Debug.Log("Hmmm, that did nothing ... nice umbrella though");
         }

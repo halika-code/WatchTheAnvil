@@ -58,7 +58,7 @@ public class Character_Controller : MonoBehaviour {
     private void Update() {
         if (getMove() is not CanMove.Cant) {
             movePlayer(InputController.checkForButtonPress());
-        } if (InputController.checkForItemUse()) { //if the player wants to use the item and the cooldown flag is clear
+        } if (InputController.checkForItemUse()) { //if the player wants to use the item
             Toolbelt.getBelt().fetchItem();
         } //Debug.Log("canMove is " + Move.getMove() + ", Player's prior y vel is: " + priorYVel); //note, just comment this debug out when not in use
     }
@@ -68,7 +68,7 @@ public class Character_Controller : MonoBehaviour {
         if (InputController.checkForJump()) {
             if (Toolbelt.getBelt().checkForTool("Umbrella", out _)) {
                 if (checkAgainstUmbrella()) { //should be a normal jump-arch until 0 then fall slowly 
-                    jump(desiredSpeedCap: 0f); 
+                    jump(desiredSpeedCap: -10f); 
                     return; //this needs to be here to not have the player frozen in place while having the umbrella in hand (but closed)
                 } 
             } jump();
