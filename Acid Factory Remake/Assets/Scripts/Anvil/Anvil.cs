@@ -22,7 +22,7 @@ public class Anvil {
      * <para>that has a default difficulty of 1</para></summary>
      */
     public Anvil(GameObject anvil) {
-        aTimer = setTimer(1);
+        aTimer = 10;
         prepAnvil(anvil);
     }
 
@@ -34,7 +34,7 @@ public class Anvil {
      * <remarks>a difficulty score of 4 and above will be handled as 3 while a value of -1 and less will set the difficulty to impossible</remarks>
      */
     public Anvil(GameObject anvil, int diff) {
-        aTimer = setTimer(diff);
+        aTimer = diff;
         prepAnvil(anvil);
     }
     
@@ -43,32 +43,6 @@ public class Anvil {
         aBody = anvil.GetComponent<Rigidbody>();
         aBody.position = new Vector3(0f, 50f, 0f);
         setTarget(aBody.GetComponentsInChildren<Rigidbody>());
-    }
-    
-    /**
-     * <summary>Defines the timer based on the difficulty</summary>
-     * <param name="diff">An integer of difficulty ranging from 0 to 3 (and beyond)</param>
-     * <returns>Based on the difficulty, returns a number ranging from 20 (tutorial) to 0 (default)</returns>
-     */
-    private static int setTimer(int diff) {
-        switch (diff) {
-            case 0: { //tutorial speed
-                return 20;
-            } case 1: { //easy speed
-                return 10;
-            } case 2: { //medium speed
-                return 5;
-            } case 3: { //hard speed
-                return 3;
-            } case 4: { //storm speed
-                return 2;
-            } case > 4: { //instant speed
-                return 1;
-            }default: {
-                Debug.Log("Whoopy while setting the timer for the Anvil with a difficulty of " + diff);
-                return 0;
-            }
-        }
     }
 
     /**

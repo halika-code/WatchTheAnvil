@@ -31,9 +31,11 @@ public class Collide : MonoBehaviour {
                 processWalls(obj); 
                 break;
             } case "Anvils": { //updates the flag
-                if (!processAnvil()) {
-                    goto case "Platforms"; //this will make the anvil act like a platform
-                } break;
+                if (obj.transform.childCount != 0) { //if the anvil have more than 0 child (as in, the target underneath)
+                    if (processAnvil()) { //if the anvil have smashed the player
+                        break;
+                    }
+                } goto case "Platforms";
             } case "DeathPane" /*when !invincibility *//*this here adds a simple extra condition to the case to match*/: {
                 failSafe();
                 hurtPlayer();
@@ -94,7 +96,7 @@ public class Collide : MonoBehaviour {
          * <returns>True if the object has any parent objects (or empties) that has "Platform" in it's name</returns>
          */
         private static bool platformCheck(Transform colTrans) {
-            return getParentName(colTrans).Find(colName => colName.Contains("Platform")) != null; 
+            return getParentName(colTrans).Find(colName => colName.Contains("Platform") || colName.Contains("Anvils")) != null; 
         } //rundown: gets the parent-name of the object in a List<string> form, then finds any name that has "platform" in it's name using a delegate function
         
         private static void processPlatforms() {

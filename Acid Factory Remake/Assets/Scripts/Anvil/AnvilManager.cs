@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using Script.Tools.ToolType;
+using Unity.VisualScripting;
 using UnityEngine;
+using Random = System.Random;
 
 /**
  * <date>18/09/2023</date>
@@ -11,16 +13,17 @@ using UnityEngine;
  */
 
 public class AnvilManager : MonoBehaviour {
+    private static Transform aManager;
     public static Anvil currentAnvil;
     public static int waitTimer;
-    private int anvilCounter;
     public GameObject preFab;
+    private Random rand;
 
     private void Start() {
         waitTimer = 5;
-        anvilCounter = 0;
+        rand = new Random();
+        aManager = gameObject.transform;
         StartCoroutine(runWait());
-        waitTimer = 20 - (int)Math.Ceiling((double)1*3/2); //resets the wait timer
     }
 
     // ReSharper disable Unity.PerformanceAnalysis
@@ -31,24 +34,37 @@ public class AnvilManager : MonoBehaviour {
     private IEnumerator runAnvils() {
         if (currentAnvil != null) {
             yield return new WaitUntil(() => !currentAnvil.isFlying); //check if we need to wait for the last anvil to properly land
-        } currentAnvil = new Anvil(Instantiate(preFab, transform, worldPositionStays: true), diff: getDifficulty());
-        if (!currentAnvil.isFlying) { //todo what it looks like, the waitTime does not reset properly (or gets skipped)
-            anvilCounter++;
+        } currentAnvil = new Anvil(Instantiate(preFab, transform, worldPositionStays: true), counterBasedDiff());
+        if (!currentAnvil.isFlying) {
             currentAnvil.getAnvilBody().transform.localPosition = Vector3.zero;
             yield return runTimer(currentAnvil); //waits for the anvil then drops it
             yield return runWait();             //runs the "replenishment" wait
-            waitTimer = 20 - (int)(anvilCounter * 1.5f); //resets the wait timer
         } 
+    }
+    
+    /**
+     * <summary>Sets a period where anvils cannot spawn</summary>
+     */
+    public IEnumerator runWait() {
+        while (waitTimer > 0) {
+            while (StopWatch.checkWatch()) { //gets caught as soon as stopwatch is in use, does not reach waitTimer but exits as soon as stopwatch is turned off
+                yield return new WaitForFixedUpdate();
+            } yield return new WaitForSeconds(0.5f); 
+            waitTimer--;
+        } waitTimer = rand.Next(12, 21) - (int)(getAnvilCount() * 1.5f); //resets the wait timer
+        yield return runAnvils(); //keep in mind, execution returns here as soon as the 1st timer starts ticking
     }
 
     /**
-     * <summary>Based on the waitTimer, decides what difficulty the anvils should spawn with</summary>
+     * <summary>Based on how many anvils there are in the field,
+     * adjusts the difficulty of the drop-frequency</summary>
      */
-    private static int getDifficulty() {
-        return waitTimer switch {
-            > 10 => 1, > 5 => 2, 
-            <  5 => 3,   _ => 0
-        }; //this assigns a return value based on the waitTimer using the lambda ... value ... expression (or whatever)
+    private static int counterBasedDiff() {
+        return getAnvilCount() switch {
+            <= 4 => 5, < 7 => 4,
+            < 11 => 3, > 14 => 2,
+            _ => 1
+        };
     }
 
     /**
@@ -90,21 +106,12 @@ public class AnvilManager : MonoBehaviour {
         } anvil.isFlying = true;
     }
 
-    /**
-     * <summary>Sets a period where anvils cannot spawn</summary>
-     */
-    public IEnumerator runWait() {
-        while (waitTimer > 0) {
-            while (StopWatch.checkWatch()) { //gets caught as soon as stopwatch is in use, does not reach waitTimer but exits as soon as stopwatch is turned off
-                yield return new WaitForFixedUpdate();
-            } yield return new WaitForSeconds(0.5f); //else: 
-            waitTimer--;
-        } Debug.Log("Wait finished, dropping anvil");
-        yield return runAnvils(); //keep in mind, execution returns here as soon as the 1st timer starts ticking
-    }
-
     public static bool isFlyin() {
         return currentAnvil.isFlying;
+    }
+
+    public static int getAnvilCount() {
+        return aManager.childCount;
     }
 
     /**
