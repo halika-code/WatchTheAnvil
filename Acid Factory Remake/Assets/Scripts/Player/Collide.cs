@@ -21,7 +21,9 @@ public class Collide : MonoBehaviour {
     private void processCollision(string parentName, Collision obj) {
         switch (parentName) {
             case "Foliage" or "Geometry": {
-                goto case "Platforms";
+                if (obj.transform.name.Contains("Death")) {
+                    goto case "DeathPane";
+                } goto case "Platforms";
             } case "Platforms": {
                 if (checkIfCollidingWithWalls(obj)) { //normally 0 if grounded
                     goto case "Walls";
