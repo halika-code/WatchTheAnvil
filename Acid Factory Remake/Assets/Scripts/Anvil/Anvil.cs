@@ -51,10 +51,22 @@ public class Anvil {
     public IEnumerator dropAnvil() {
         var tarVel = aBody.velocity;
         aBody.velocity = new Vector3(tarVel.x, -100f, tarVel.z);
-        do {
+        while (!haveLanded()) {
             yield return new WaitForFixedUpdate();
-        } while (!haveLanded());
-        AnvilManager.freezeAnvil();
+        } checkLanding();
+    }
+
+    /**
+     * <summary>Decides what should happen with the anvil that have successfully landed
+     * <para>Destroys itself (if the anvil have landed on a hazardous space)</para>
+     * <para>Disables itself otherwise</para></summary>
+     */
+    private static void checkLanding() {
+        ShadowController.findColPoint(AnvilManager.currentAnvil.aBody.gameObject, out var hit);
+        if (hit.collider.name.Contains("Death")) {
+            AnvilManager.disableAnvil();
+            return;
+        } AnvilManager.freezeAnvil();
     }
 
     /**
@@ -72,10 +84,13 @@ public class Anvil {
         return aBody;
     }
 
+    /**
+     * <summary>Checks if the anvil have landed</summary>
+     * <returns>True if the anvil have a velocity greater than 0 or if have not started flying
+     * <para>False otherwise</para></returns>
+     */
     private bool haveLanded() {
-        if (isFlying) {
-            return aBody.velocity.y > 0f;
-        } return true;
+        return !isFlying || VelocityManipulation.absRound(aBody.velocity.y) < 0.1f;
 
     }
     

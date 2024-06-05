@@ -93,7 +93,7 @@ namespace Script.Tools.ToolType {
                 currentAnvil.freezeAnvil();
                 return currentAnvil.dropAnvil();
             } return waitTimer is 0 ? //if the anvil have spawned
-                helpRunTimer(currentAnvil, currentAnvil.aTimer is 3 ? 3 : 0) : /*deciding if after the freeze, the anvil should target or not */
+                helpRunTimer(currentAnvil.aTimer is 3 ? 3 : 0) : /*deciding if after the freeze, the anvil should target or not */
                 GameObject.Find("Anvils").GetComponent<AnvilManager>().runWait(); //if the anvil is just waiting to spawn, I expect this to be the less-costly option
         }
         #endregion 

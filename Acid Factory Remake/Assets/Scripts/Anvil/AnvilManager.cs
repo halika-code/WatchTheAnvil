@@ -37,7 +37,7 @@ public class AnvilManager : MonoBehaviour {
         } currentAnvil = new Anvil(Instantiate(preFab, transform, worldPositionStays: true), counterBasedDiff());
         if (!currentAnvil.isFlying) {
             currentAnvil.getAnvilBody().transform.localPosition = Vector3.zero;
-            yield return runTimer(currentAnvil); //waits for the anvil then drops it
+            yield return runTimer(); //waits for the anvil then drops it
             yield return runWait();             //runs the "replenishment" wait
         } 
     }
@@ -70,11 +70,11 @@ public class AnvilManager : MonoBehaviour {
     /**
      * <summary>Starts a timer, then attempts to murder the player</summary>
      */
-    private IEnumerator runTimer(Anvil anvil) {
-        yield return helpRunTimer(anvil, 3);  //wait until the aTimer is 3
-        StartCoroutine(trackPlayer(anvil));
-        yield return helpRunTimer(anvil, 0); //spend the rest of the timer
-        StartCoroutine(anvil.dropAnvil());
+    private IEnumerator runTimer() {
+        yield return helpRunTimer(3);  //wait until the aTimer is 3
+        StartCoroutine(trackPlayer());
+        yield return helpRunTimer(0); //spend the rest of the timer
+        StartCoroutine(currentAnvil.dropAnvil());
     }
 
     /**
@@ -82,12 +82,12 @@ public class AnvilManager : MonoBehaviour {
      * <para>Terminates when limit matches with anvil.aTimer</para></summary>
      * <remarks>Could be remade with async</remarks>
      */
-    public static IEnumerator helpRunTimer(Anvil anvil, int limit) {
-        while (anvil.aTimer != limit) {
+    public static IEnumerator helpRunTimer(int limit) {
+        while (currentAnvil.aTimer != limit) {
             while (StopWatch.checkWatch()) { //will skip over this IF the stopWatch is not in use
                 yield return new WaitForFixedUpdate(); //if the StopWatch is in use, wait for a hot second
-            } anvil.aTimer--;
-            UI.updateTimer(anvil.aTimer);
+            } currentAnvil.aTimer--;   
+            UI.updateTimer(currentAnvil.aTimer);
             yield return new WaitForSeconds(0.8f);
         }
     }
@@ -97,20 +97,20 @@ public class AnvilManager : MonoBehaviour {
      * <para>Terminates the seconds the <see cref="Anvil.aTimer"/> is set to 0</para></summary>
      * <remarks>This is a carbon copy of <see cref="ShadowController.followPlayer"/>, could have made it generic if iterators could accept out keyword</remarks>
      */
-    private static IEnumerator trackPlayer(Anvil anvil) {
-        while (anvil.aTimer is not 0) {
-            anvil.getTarget().SetActive(ShadowController.findColPoint(out var hit) || hit.collider.gameObject.name is not "DeathPane"); //if the anvil is not too high above ground OR not above a deathpane
-            if (Character_Controller.getParentName(hit.collider.gameObject) is not "Vegetables") {
-                anvil.setTargetPos(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
+    private static IEnumerator trackPlayer() {
+        while (currentAnvil.aTimer is not 0) {
+            if (!StopWatch.checkWatch()) {
+                currentAnvil.getTarget().SetActive(ShadowController.findColPoint(out var hit) && hit.collider.gameObject.name is not "DeathPane"); //if the anvil is not too high above ground OR not above a deathpane
+                currentAnvil.setTargetPos(new Vector3(hit.point.x, hit.point.y+0.1f, hit.point.z));
             } yield return null;
-        } anvil.isFlying = true;
+        } currentAnvil.isFlying = true;
     }
 
     public static bool isFlyin() {
         return currentAnvil.isFlying;
     }
 
-    public static int getAnvilCount() {
+    private static int getAnvilCount() {
         return aManager.childCount;
     }
 

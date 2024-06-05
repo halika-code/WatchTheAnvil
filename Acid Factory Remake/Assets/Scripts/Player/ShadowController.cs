@@ -88,7 +88,7 @@ public class ShadowController : MonoBehaviour {
     public static bool findColPoint(out RaycastHit hit, float x = 0, float y = -1, float z = 0) {
         var ray = !renderer.enabled ? new Ray(getPlayerBody().position, Vector3.down) : /*Use a different angle if the shadow is enabled (to not re-enable while above the death-pit)*/
             new Ray(getPlayerBody().position, new Vector3(x, y, z));
-        return Physics.Raycast(ray, out hit, 50f);
+        return Physics.Raycast(ray, out hit, 200f);
     }
 
     /**
