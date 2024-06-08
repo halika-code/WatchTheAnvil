@@ -64,7 +64,7 @@ public class Collide : MonoBehaviour {
      * <returns>True if the object's normal is angled upwards enough
      * <para>False otherwise</para></returns>
      */
-    private static bool checkIfCollidingWithWalls(Collision obj) {
+    public static bool checkIfCollidingWithWalls(Collision obj) {
         return !(obj.contacts[0].normal[1] > 0.7f) || obj.relativeVelocity[1] < 0.5f; //the normal is almost always correct, in rare cases the relative velocity (dunno where it came from) is always correct
     }
 
@@ -82,7 +82,7 @@ public class Collide : MonoBehaviour {
          * <summary>Attempts to reset the player's state into "should fall"</summary>
          */
         private void OnCollisionExit(Collision other) {
-            if (checkForDistance() && !GravAmplifier.isAscending) { //if the player have left the ground without jumping
+            if (isFarFromGround(getPlayerBody().gameObject) && !GravAmplifier.isAscending) { //if the player have left the ground without jumping
                 if (platformCheck(other.transform)) {
                     var pBody = getPlayerBody().velocity;
                     toggleToJumpingState(); 

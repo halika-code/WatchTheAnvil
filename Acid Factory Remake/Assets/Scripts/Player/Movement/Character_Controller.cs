@@ -78,18 +78,18 @@ public class Character_Controller : MonoBehaviour {
     
     /**
      * <summary>Calculates if the player is standing on the closest solid object</summary>
-     * <returns>True if the player's distance is too far from the raycast's length</returns>
+     * <returns>True if the player's distance is too far from approximately 4.6 units of distance</returns>
      */
-    public static bool checkForDistance() {
-        return ShadowController.findColPoint(out var hit) && checkForDistance(hit);
+    public static bool isFarFromGround(GameObject targetBody, float x = 0f, float y = -1f, float z = 0f) {
+        return ShadowController.findColPoint(targetBody, out var hit, x, y, z) && isFarFromGround(hit);
     }
     
     /**
-     * <summary>An overloaded version from <see cref="checkForDistance()"/> where the rayCastHit is given</summary>
+     * <summary>An overloaded version from <see cref="checkForDistance(UnityEngine.GameObject)"/> where the rayCastHit is given</summary>
      * <returns>True if the player is far enough away from the closest ground (4.6f)</returns>
      * <remarks>4.59f is roughly the player's height plus some extra deviations. Anything above and the player is soaring</remarks>
      */
-    public static bool checkForDistance(RaycastHit hit) {
+    public static bool isFarFromGround(RaycastHit hit) {
         return hit.distance > 4.6f;
     }
     

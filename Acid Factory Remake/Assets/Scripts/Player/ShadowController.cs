@@ -65,7 +65,7 @@ public class ShadowController : MonoBehaviour {
     private static bool validatePlatform() {
         var pSpeed = getPlayerBody().velocity;
         if (findColPoint(out lastHitObj, getSp(pSpeed.x), -1f, getSp(pSpeed.z)) && !lastHitObj.collider.name.Contains("Death")) { //if the player is above valid ground that is not the deathpane
-            if (Math.Sign(getPlayerBody().velocity.y) is not -1 || checkForDistance(lastHitObj)) { //if the player is gaining altitude or far from the ground
+            if (Math.Sign(getPlayerBody().velocity.y) is not -1 || isFarFromGround(lastHitObj)) { //if the player is gaining altitude or far from the ground
                 renderer.enabled = true;
                 return true;
             } 
@@ -77,6 +77,10 @@ public class ShadowController : MonoBehaviour {
         return VelocityManipulation.absRound(speed) > 0.2f ? Math.Sign(speed) * 0.2f : defVal;
     }
 
+    private static bool shootRay(Ray ray, out RaycastHit hit) {
+        return Physics.Raycast(ray, out hit, 200f);
+    }
+
     /**
      * <summary>Fetches the collision point the Raycast finds underneath the player</summary>
      * <param name="hit">A container of the object struck by the ray</param>
@@ -86,9 +90,10 @@ public class ShadowController : MonoBehaviour {
      * <returns>True if a hit was detected within 30f distance, false otherwise</returns>
      */
     public static bool findColPoint(out RaycastHit hit, float x = 0, float y = -1, float z = 0) {
-        var ray = !renderer.enabled ? new Ray(getPlayerBody().position, Vector3.down) : /*Use a different angle if the shadow is enabled (to not re-enable while above the death-pit)*/
-            new Ray(getPlayerBody().position, new Vector3(x, y, z));
-        return Physics.Raycast(ray, out hit, 200f);
+        return shootRay(!renderer.enabled
+            ? new Ray(getPlayerBody().position, Vector3.down)
+            : /*Use a different angle if the shadow is enabled (to not re-enable while above the death-pit)*/
+            new Ray(getPlayerBody().position, new Vector3(x, y, z)), out hit);
     }
 
     /**
@@ -98,8 +103,20 @@ public class ShadowController : MonoBehaviour {
      * <returns>True if a hit is detected within 20f distance, false otherwise</returns>
      */
     public static bool findColPoint(GameObject parentObj, out RaycastHit hit) {
-        var ray = new Ray(parentObj.transform.position, Vector3.down);
-        return Physics.Raycast(ray, out hit, 20f);
+        return shootRay(new Ray(parentObj.transform.position, Vector3.down), out hit);
+    }
+    
+    /**
+     * <summary>Fetches the collision point the Raycast finds towards a desired position for the desired GameObject for a longs distance</summary>
+     * <param name="parentObj">The object the ray should shoot underneath from</param>
+     * <param name="hit">A container for the object struck by the ray, including exact collision position</param>
+     * <param name="x">A default value that can manipulate the raycast's firing direction</param>
+     * <param name="y">A default value that can manipulate the raycast's firing direction</param>
+     * <param name="z">A default value that can manipulate the raycast's firing direction</param>
+     * <returns>True if a hit is detected within 20f distance, false otherwise</returns>
+     */
+    public static bool findColPoint(GameObject parentObj, out RaycastHit hit, float x = 0, float y = -1, float z = 0) {
+        return shootRay(new Ray(parentObj.transform.position, new Vector3(x, y, z)), out hit);
     }
 
     private static void setShadowPosition(Vector3 pos) {

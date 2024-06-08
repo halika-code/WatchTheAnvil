@@ -11,7 +11,7 @@ public class JumpController : InputController {
      * <param name="speedUp">The starting Y velocity, by default is <see cref="Character_Controller.MoveVel"/> * 2.9 cast into a float</param>
      * <param name="desiredSpeedCap">The desired terminal velocity (this sets how fast the player will fall, by default is set to -70f but can also be set to 0 for unity's gravity to float the player away</param>
      */
-    public static void jump(float speedUp = (float)MoveVel * 2.9f, float desiredSpeedCap = -70f) { //note: modifying the speedUp will screw with Character_Controller.checkForDistance()
+    public static void jump(float speedUp = (float)MoveVel * 2.9f, float desiredSpeedCap = -70f) { //note: modifying the speedUp will screw with Character_Controller.isFarFromGround()
         var pVel = pBody.velocity;
         gravity.falling(new Vector3(pVel.x, speedUp, pVel.z), desiredSpeedCap);
         incrementXSpeedDown(wait: 3f); //called from here to start the async function

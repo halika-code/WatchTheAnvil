@@ -10,26 +10,19 @@ public class VegetablePull : MonoBehaviour {
      */
     public static void pullVegetable(Collider veggie) {
         RootVeg.getRoot().removeVeg(veggie.attachedRigidbody, out _);
-         //todo find the facing angle the player is looking at the vegetables,
-                                            //todo deviate from that slightly then launch the veggies with MoveVel
         findNearestStableGround(veggie.attachedRigidbody);
+        
     }
 
     private static void findNearestStableGround(Rigidbody veggie) {
         var vegPos = veggie.position;
+        var pPos = Character_Controller.getPlayerBody().position;
         veggie.useGravity = true;
-        veggie.velocity = Character_Controller.getPlayerBody().position -
-                          new Vector3(vegPos.x + getRNG(), vegPos.y + 2f, vegPos.z + getRNG());
-        //var distanceAngle = (Character_Controller.getPlayerBody().position - new Vector3(vegPos.x + getRNG(), vegPos.y+ 2f, vegPos.z + getRNG())) * (float)Character_Controller.MoveVel;
-        //veggie.position += distanceAngle; //todo create a formula that launches the veggie using velocity (and gravity, toggling it on and off) instead of targeting a spot
-        //todo the idea here is there should be a script that listens when a given veggie makes a collision, if that happens turn off the gravity
-        //var ray = new Ray(vegPos, distanceAngle); //in theory this is the distance the veggie needs to go
-
+        veggie.velocity = new Vector3(pPos.x - (vegPos.x + 5 * getRNG()), vegPos.y + 25f, pPos.z - (vegPos.z + 5 * getRNG()));
     }
 
     private static float getRNG() {
-        var rand = new Random();
-        var next = (float)rand.Next(1, 5);
+        var next = (float)new Random().Next(2, 6);
         if (next % 2 != 0) {
             next *= -0.1f;
         } return next;
