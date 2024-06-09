@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ public class InputController : Character_Controller {
      */
     public static Vector3 checkForButtonPress() {
         var isMenuOpen = MenuHandler.isMenuOpen(out var whichMenu); //checking if any of the menu is open. The idea here is there should not be any overlapping menu popping up
-        if (!Extras.isTimerRunning) {
+        if (!Extras.isTimerRunning[1]) {
             if (checkForExit(!isMenuOpen || !whichMenu) || checkForPauseMenu(!isMenuOpen || whichMenu)) { //if pause / escape is pressed, pots
                 Extras.runTimer(0.1d); //UI interactions should be restricted to a reduced speed to not give the player a stroke
                 return Vector3.zero;
@@ -35,14 +36,29 @@ public class InputController : Character_Controller {
      * <summary>Runs a wait script that escapes from the loop
      * the first frame the player releases a given button</summary>
      */
-    public static async void runButtonCooldown() {
-        while (!Input.GetKeyUp(KeyCode.E) && Input.GetKey(KeyCode.E)) {
+    public static async Task runButtonCooldown() {
+        while (!Input.GetKeyUp(KeyCode.E) && Input.GetKey(KeyCode.E)) { //as long as the player doesn't release the E key OR holds the E key
             if (!isActionPressed) {
                 isActionPressed = true;
                 await Task.Delay(100);
                 continue;
             } await Task.Yield();
         } isActionPressed = false;
+    }
+    
+    /**
+     * <summary>Checks if the player can hold the button for as long as the timer is running
+     * <para>If so, the veggie will be pulled</para></summary>
+     */
+    public static IEnumerator holdButtonDown(Collider veggie) {
+        var cooldown = runButtonCooldown(); //note: this is used to not copy the Input.GetKeyUp() logic from above. Also, this ensures the player can't spam the action BUT will be refreshed
+        while (!cooldown.IsCompleted) { //while the player haven't released the action key
+            if (!Extras.isTimerRunning[0]) { //
+                VegetablePull.pullVegetable(veggie);
+                cooldown.Dispose();
+                isActionPressed = false;
+            } yield return null;
+        }
     }
 
     /**

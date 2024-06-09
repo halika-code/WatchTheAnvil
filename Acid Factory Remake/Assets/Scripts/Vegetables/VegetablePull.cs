@@ -11,7 +11,6 @@ public class VegetablePull : MonoBehaviour {
     public static void pullVegetable(Collider veggie) {
         RootVeg.getRoot().removeVeg(veggie.attachedRigidbody, out _);
         findNearestStableGround(veggie.attachedRigidbody);
-        
     }
 
     private static void findNearestStableGround(Rigidbody veggie) {
@@ -45,13 +44,12 @@ public class VegetablePull : MonoBehaviour {
      */
     public static int getProfileOfVeggie(List<string> parentList) {
         var score = 1;
-        foreach (var parents in parentList) {
+        foreach (var parents in parentList) { //checks the entire hiearchy of the veggie, applying a multiplier usually once or multiple times.
             switch (parents) {
                 case "Small" or "Carrot" or "Vegetables": {
-                    break; //tryin to avoid default with basic plants
+                    break; //returns usually a score of 1
                 } case "Beetroot": { //if this case is entered the calculations are hijacked a bit
-                    score++;
-                    RootVeg.updateBeetPoints(score); //score diverted to here
+                    RootVeg.updateBeetPoints(1 + score); //score diverted to here
                     score = 0;  //and a 0 is sent to keep the score to a pure all-carrots
                     break;      //it is assumed that if a beetroot is pulled the parentList MUST contain a "Beetroot" entry
                 } case "Medium": {

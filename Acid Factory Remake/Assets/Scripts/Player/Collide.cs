@@ -148,11 +148,11 @@ public class Collide : MonoBehaviour {
          * <remarks>It is assumed that an object with a trigger flag set is a kind of tool</remarks>
          */
         private void OnTriggerStay(Collider other) {
-            if (checkForActionButton()) {
-                runButtonCooldown();
-                if (VegetablePull.validateVegetable(other.gameObject)) {
+            if (checkForActionButton()) { //if the player haven't been mashing the action button in the last couple of frames
+                _ = runButtonCooldown();
+                if (VegetablePull.validateVegetable(other.gameObject)) { //if the object the player wants to pick up is a veggie
                     processVegetables(other);
-                } else if (Toolbelt.checkForCorrectToolType(other.name)) {
+                } else if (Toolbelt.checkForCorrectToolType(other.name)) { //if the object is a tool
                     processTools(other.gameObject);
                 } 
             }
@@ -164,9 +164,16 @@ public class Collide : MonoBehaviour {
      * <para>A beetroot is twice as valuable</para></summary>
      * <remarks>This might break (or get exploited) if the vegetable's name is not correctly parsed</remarks>
      */
-    private static void processVegetables(Collider veggie) {
-        UI.updatePoints(VegetablePull.getProfileOfVeggie(getParentName(veggie.transform)));
-        VegetablePull.pullVegetable(veggie);
+    private void processVegetables(Collider veggie) {
+        if (RootVeg.getRoot().doesContainVeggie(veggie.attachedRigidbody)) { //if the player is attempting to pull out a fresh veggie
+            Debug.Log($"Pulling veggie for ");
+            StartCoroutine(Extras.runTimer()); //todo try to use VegetablePull.getProfileOfVeggie(string name) to convert the name of the veggie into increments of time
+                                               //todo (3 secs for small, small * 2 for medium, small * 3 for large. 
+                                               //todo Could do something like (int)(score / 2)+1
+            StartCoroutine(holdButtonDown(veggie)); 
+        } else if (!veggie.attachedRigidbody.useGravity) { //if the veggie have landed successfully (the frame the veggie lands, the gravity is disabled)
+            UI.updatePoints(VegetablePull.getProfileOfVeggie(getParentName(veggie.transform))); //if the player is attempting to pick up an already pulled veggie
+        }
     }
 
     /**

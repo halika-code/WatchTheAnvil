@@ -1,26 +1,25 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Script.Tools.ToolType;
 using UnityEngine;
+using static VegetableVisibility;
 
 public class RootVeg : MonoBehaviour {
-    private List<Rigidbody> cBodyCollective; 
-    private List<VegetableVisibility.VegState> vegStateCollective;
+    private Dictionary<Rigidbody, VegState> collective;
     private static RootVeg root;
     private static int beetPoints = 0;
 
     public void OnEnable() {
         root = this; //if null, assign as this
-        cBodyCollective = new List<Rigidbody>();
-        vegStateCollective = new List<VegetableVisibility.VegState>();
+        collective = new Dictionary<Rigidbody, VegState>();
     }
 
     /**
      * <summary>Wipes the list from the previous level</summary>
      */
     public void OnDisable() {
-        cBodyCollective.Clear();
-        vegStateCollective.Clear();
+        collective.Clear();
         root = null;
     }
 
@@ -34,52 +33,48 @@ public class RootVeg : MonoBehaviour {
     public void init(Rigidbody[] bCol, out bool terminate) {
         terminate = bCol.Length is 0; //idea here is if there is no vegetables under this parent script, the script should disable
         foreach (var bodyCollective in bCol) {
-            cBodyCollective.Add(bodyCollective);
-        } for (var i = 0; i < bCol.Length; i++) {
-            vegStateCollective.Add(VegetableVisibility.VegState.Hidden);
+            collective.Add(bodyCollective, VegState.Hidden);
         } if (LevelManager.getLevelLoader().levelType is "Level") {
             GameObject.Find("Flowers").GetComponent<FlowerController>().prepFlowers(); 
         }
+    }
+
+    public bool doesContainVeggie(Rigidbody veg) {
+        return collective.ContainsKey(veg);
     }
 
     /**
      * <summary>Returns the collection the RigidBodies are kept that are vegetables</summary>
      */
     public List<Rigidbody> getBodyCollective() {
-        return cBodyCollective;
+        return collective.Keys.ToList();
     }
 
     /**
      * <summary>Returns the collection of the states registered for each RigidBodies kept in <see cref="cBodyCollective"/></summary>
      */
-    public List<VegetableVisibility.VegState> getVegStates() { 
-        return vegStateCollective;
+    public List<VegState> getVegStates() { 
+        return collective.Values.ToList();
     }
 
-    public void updateCollective(int index, VegetableVisibility.VegState state) {
-        vegStateCollective[index] = state;
+    public void updateCollective(int index, VegState state) {
+        collective[collective.Keys.ToList()[index]] = state;
     }
 
     /**
      * <summary>Adds a single vegetable into the list to be animated upon the player's proximity </summary>
      */
     public void addVeg(Rigidbody veg) {
-        cBodyCollective.Add(veg);
-        vegStateCollective.Add(VegetableVisibility.VegState.Hidden);
+        collective.Add(veg, VegState.Hidden);
     }
 
     /**
      * <summary>Removes a given vegetable from an entry</summary>
      */
     public void removeVeg(Rigidbody veg, out bool didItSucceed) {
-        didItSucceed = false;
-        for (var i = 0; i < cBodyCollective.Count; i++) {
-            if (cBodyCollective[i] == veg) {
-                didItSucceed = cBodyCollective.Remove(veg);
-                vegStateCollective.RemoveAt(i);
-                break;
-            }
-        }
+        if (doesContainVeggie(veg)) {
+            collective.Remove(veg);
+        } didItSucceed = doesContainVeggie(veg);
     }
 
     /**

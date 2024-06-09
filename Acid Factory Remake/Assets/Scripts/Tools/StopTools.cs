@@ -2,9 +2,10 @@ using System;
 using System.Collections;
 using UnityEngine;
 using static Character_Controller;
+using static VelocityManipulation;
 
 public class StopTools : MonoBehaviour {
-    public void OnTriggerEnter(Collider other) { //todo idae: use the velocity along with this distance check (angled towards a wall) to check if the veggie have collided with anything ... wall-like
+    public void OnTriggerEnter(Collider other) {
         if (getParentName(other.gameObject) is not "Player") { //if the object is not the player
             if (isFarFromGround(gameObject)) { //if the ground underneath is far
                 handleWallInteraction();
@@ -27,7 +28,7 @@ public class StopTools : MonoBehaviour {
         for (var i = 0; i < 3; i++) {
             if (body.velocity[i] is 0) { //if the speed we are checking is 0, skip a cycle
                 continue;
-            } position[i] = VelocityManipulation.absRound(body.velocity.x) < 0.5f ? 0f : Math.Sign(body.velocity.x);
+            } position[i] = absRound(body.velocity.x) < 0.5f ? 0f : Math.Sign(body.velocity.x);
             if (!isFarFromGround(gameObject, position.x, position.y, position.z)) {
                 var speed = body.velocity; //hate this implementation
                 speed[i] *= i is 1 ? 1.1f : -0.8f; //gives a small speed penalty or a small boost (if colliding with a ceiling)
@@ -40,11 +41,12 @@ public class StopTools : MonoBehaviour {
     /**
      * <summary>Slows the landing of the object in question</summary>
      */
-    private IEnumerator dampenLanding() {
+    private IEnumerator dampenLanding() { //todo finetune this
         var speed = gameObject.GetComponent<Rigidbody>();
-        while (!speed.velocity.) { //todo have a check that checks if the speed is close enough to 0. Could be a separate function
+        var vel = speed.velocity;
+        while (absRound(vel.x) > 0.2f || absRound(vel.y) > 0.2 || absRound(vel.z) > 0.2f) {
             speed.velocity *= 0.8f;
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForFixedUpdate();
         } speed.velocity = Vector3.zero;
     }
 }
