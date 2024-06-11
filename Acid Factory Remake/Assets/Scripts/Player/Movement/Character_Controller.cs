@@ -115,7 +115,7 @@ public class Character_Controller : MonoBehaviour {
      * <summary>Fetches the name of the root parent of the gameObject</summary>
      * <param name="obj">The transform of the original object</param>
      * <returns>The name of the root parent</returns>
-     * <remarks>Will find the name no matter how deep the object is in the hierarchy</remarks>
+     * <remarks>Note: for the function that gives a List-string, please supply a Transform</remarks>
      */
     public static string getParentName(GameObject obj) {
         return getParentName(obj.transform)[^1];

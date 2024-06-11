@@ -23,7 +23,7 @@ public class LevelManager : MonoBehaviour {
         var maxPoints = 0;
         foreach (var veggie in RootVeg.getRoot().getBodyCollective()) {
             if (veggie.name is not "Flower") {
-                maxPoints += VegetablePull.getProfileOfVeggie(getParentName(veggie.transform)[1]);
+                maxPoints += VegetablePull.calculatePoints(getParentName(veggie.transform));
             }
         } return maxPoints;
     }

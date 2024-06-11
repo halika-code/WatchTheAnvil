@@ -6,11 +6,14 @@ public class VegetablePull : MonoBehaviour {
     private static readonly int padding = 2;
     
     /**
-     * <summary>Disables the vegetable</summary>
+     * <summary>Attempts to launch the vegetable in a random angle with random speed</summary>
      */
     public static void pullVegetable(Collider veggie) {
         RootVeg.getRoot().removeVeg(veggie.attachedRigidbody, out _);
         findNearestStableGround(veggie.attachedRigidbody);
+        var parent = Character_Controller.getParentName(veggie.transform)[1];
+        veggie.gameObject.GetComponentsInChildren<MeshRenderer>()[1].material = Resources.Load<Material>(
+            $"Sprites/Animatables/Veggies/Carrots/Carrot{parent}/Materials/Outside");;
     }
 
     private static void findNearestStableGround(Rigidbody veggie) {
@@ -34,44 +37,43 @@ public class VegetablePull : MonoBehaviour {
         var parent = Character_Controller.getParentName(veg.transform); //breakdown of the chain in an intended state: Veggie1 -> Small -> Carrot -> Vegetable
         return parent != null && parent.Contains("Vegetables");
     }
+    
+    // ReSharper disable Unity.PerformanceAnalysis
+    /**
+     * <summary>Gets a point value based on the size of a given veggie</summary>
+     * <param name="parents">The name of the veggie that should be inspected</param>
+     * <returns>A value ranging from 1 to 3</returns>
+     * <remarks>If an object with an unexpected name is passed down, an error message will get popped alongside a return value of 0</remarks>
+     */
+    public static int getProfileOfVeggie(string parents) {
+        switch (parents) {
+            case "Carrot" or "Vegetables": {
+                goto default;
+            } case "Small": {
+                return 1;  //returns usually a score of 1
+            } case "Medium": {
+                return 2;
+            } case "Large": {
+                return 3;
+            } default: {
+                Debug.Log($"Whoopy while trying to decide the score of the object of name {parents}");
+                return 0;
+            }
+        }
+    }
 
     /**
      * <summary>Based on the parent-list of a given vegetable,
      * calculates a score of what the object the player have pulled is worth</summary>
-     * <param name="parentList">The list (of type string) of gameObjects that are parent to the vegetable</param>
+     * <param name="parentList">The name of the gameObject that are parent to the vegetable</param>
      * <returns>A point value based on the worth of the vegetable</returns>
      * <remarks>It is assumed that the parentList contains the "family tree" of a vegetable</remarks>
      */
-    public static int getProfileOfVeggie(List<string> parentList) {
-        var score = 1;
-        foreach (var parents in parentList) { //checks the entire hiearchy of the veggie, applying a multiplier usually once or multiple times.
-            switch (parents) {
-                case "Small" or "Carrot" or "Vegetables": {
-                    break; //returns usually a score of 1
-                } case "Beetroot": { //if this case is entered the calculations are hijacked a bit
-                    RootVeg.updateBeetPoints(1 + score); //score diverted to here
-                    score = 0;  //and a 0 is sent to keep the score to a pure all-carrots
-                    break;      //it is assumed that if a beetroot is pulled the parentList MUST contain a "Beetroot" entry
-                } case "Medium": {
-                    score *= 2;
-                    break;
-                } case "Large": {
-                    score *= 5;
-                    break;
-                } default: {
-                    if (parents.Contains("Veggie")) {
-                        continue; //making sure the loop will not break out thanks to a rouge Veggie
-                    } Debug.Log("Whoopy while trying to decide the score of the object of name " + parentList[0]);
-                    break;
-                }
-            }
-        } return score;
-    }
-
-    /**
-     * <summary>A replica of the <see cref="getProfileOfVeggie(System.Collections.Generic.List{string})"/> but for single vegetables</summary>
-     */
-    public static int getProfileOfVeggie(string parent) {
-        return getProfileOfVeggie(new List<string>{ parent });
+    public static int calculatePoints(List<string> parentList) {
+        var vegProf = getProfileOfVeggie(parentList[1]);
+        if (parentList.Contains("Beetroot")) {
+            RootVeg.updateBeetPoints(1 * vegProf);
+            return 0;
+        } return vegProf is 3 ? vegProf + 2 : vegProf;
     }
 }

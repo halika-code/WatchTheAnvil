@@ -41,10 +41,11 @@ public class StopTools : MonoBehaviour {
     /**
      * <summary>Slows the landing of the object in question</summary>
      */
-    private IEnumerator dampenLanding() { //todo finetune this
+    private IEnumerator dampenLanding() {
         var speed = gameObject.GetComponent<Rigidbody>();
         var vel = speed.velocity;
-        while (absRound(vel.x) > 0.2f || absRound(vel.y) > 0.2 || absRound(vel.z) > 0.2f) {
+        speed.velocity = new Vector3(vel.x, 0f, vel.z);
+        while (absRound(vel.x) > 0.2f || absRound(vel.z) > 0.2f) {
             speed.velocity *= 0.8f;
             yield return new WaitForFixedUpdate();
         } speed.velocity = Vector3.zero;

@@ -90,7 +90,7 @@ public class Anvil {
      * <para>False otherwise</para></returns>
      */
     private bool haveLanded() {
-        return !isFlying || VelocityManipulation.absRound(aBody.velocity.y) < 0.1f;
+        return !isFlying || VelocityManipulation.absRound(aBody.velocity.y) < 1f;
 
     }
     

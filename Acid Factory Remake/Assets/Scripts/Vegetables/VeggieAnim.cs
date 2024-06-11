@@ -56,7 +56,6 @@ public static class VeggieAnim {
      * <summary>Toggles the enabled status of the spriteHolders for a given veggie</summary>
      */
     private static void changeSprites(Component vegBody, VegState state) {
-        Debug.Log("Changing sprites to " + (state is VegState.Visible ? "Bush" : "GeneralSprite") + " for " + vegBody.name);
         var sprites = new List<Transform>();
         for (var i = 0; i < vegBody.transform.childCount; i++) { //a touch bit overkill
             sprites.Add(vegBody.transform.GetChild(i));

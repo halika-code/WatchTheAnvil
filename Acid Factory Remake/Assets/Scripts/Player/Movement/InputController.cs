@@ -1,8 +1,5 @@
 using System;
 using System.Collections;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 using static GravAmplifier;
 using static VelocityManipulation;
@@ -33,10 +30,13 @@ public class InputController : Character_Controller {
     }
     
     /**
-     * <summary>Runs a wait script that escapes from the loop
-     * the first frame the player releases a given button</summary>
+     * <summary>Keeps an eye on if the player have released a select key</summary>
+     * <returns>A reference to the while loop running.
+     * <para>The given loop will only fall through if the player stops holding the given button for longer than 1/10th of a frame</para></returns>
+     * <remarks>This function is built to handle the inconsistency that comes with Input.GetKey()</remarks>
      */
-    public static async Task runButtonCooldown() {
+    public static async Task runButtonCooldown(Move.CanMove move) {
+        Move.updateMovement(Move.CanMove.Cant);
         while (!Input.GetKeyUp(KeyCode.E) && Input.GetKey(KeyCode.E)) { //as long as the player doesn't release the E key OR holds the E key
             if (!isActionPressed) {
                 isActionPressed = true;
@@ -44,21 +44,28 @@ public class InputController : Character_Controller {
                 continue;
             } await Task.Yield();
         } isActionPressed = false;
+        if (Move.getMove() is Move.CanMove.Cant) {
+            Move.updateMovement(move); //restores the original movement 
+        }
     }
     
     /**
-     * <summary>Checks if the player can hold the button for as long as the timer is running
-     * <para>If so, the veggie will be pulled</para></summary>
+     * <summary>Runs a timer that check if the player can hold a button for a given time based on the given vegetable
+     * <para>If the player satisfies the timer, the given veggie will get pulled</para></summary>
      */
-    public static IEnumerator holdButtonDown(Collider veggie) {
-        var cooldown = runButtonCooldown(); //note: this is used to not copy the Input.GetKeyUp() logic from above. Also, this ensures the player can't spam the action BUT will be refreshed
-        while (!cooldown.IsCompleted) { //while the player haven't released the action key
-            if (!Extras.isTimerRunning[0]) { //
+    public IEnumerator holdButtonDown(Collider veggie) {
+        var move = Move.getMove();
+        StartCoroutine(Extras.runTimer(VegetablePull.getProfileOfVeggie(getParentName(veggie.transform)[1]))); 
+        var cooldown = runButtonCooldown(move); //note: this is used to not copy the Input.GetKeyUp() logic from above. Also, this ensures the player can't spam the action BUT will be refreshed
+        while (!cooldown.IsCompleted) { //while the player haven't released the action key todo this isn't correct
+            if (!Extras.isTimerRunning[0]) { //if the player have held the button for long enough
+                Debug.Log($"Pulling {veggie.transform.parent.name} {veggie.name}");
                 VegetablePull.pullVegetable(veggie);
-                cooldown.Dispose();
                 isActionPressed = false;
+                Move.updateMovement(move); //restores the original movement 
+                yield break;
             } yield return null;
-        }
+        } Debug.Log("Player released button prematurely");
     }
 
     /**
