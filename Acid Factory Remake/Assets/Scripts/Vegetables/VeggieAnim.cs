@@ -99,19 +99,24 @@ public static class VeggieAnim {
      * </summary>
      */
     private static float getModifier(Component targetBody, VegState state) {
+        int index;
         switch (getParentName(targetBody.transform)[1]) {
             case "Large": {
-                return state is VegState.Visible ? RaiseHeights[0] * -1 : RaiseHeights[0];
+                index = 0;
+                break;
             } case "Medium": {
-                return state is VegState.Visible ? RaiseHeights[1] * -1 : RaiseHeights[1];
+                index = 1;
+                break;
             } case "Small": {
-                return state is VegState.Visible ? RaiseHeights[2] * -1 : RaiseHeights[2];
+                index = 2;
+                break;
             } case "Flowers": {
-                return state is VegState.Visible ? RaiseHeights[3] * -1 : RaiseHeights[3];
+                index = 3;
+                break;
             } default: {
                 goto case "Small";
             }
-        }
+        } return state is VegState.Visible ? RaiseHeights[index] * -1 : RaiseHeights[index];
     }
 
     /**

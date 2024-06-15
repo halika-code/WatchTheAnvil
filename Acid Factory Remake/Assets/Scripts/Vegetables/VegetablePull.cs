@@ -1,6 +1,9 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
+using static VelocityManipulation;
 
 public class VegetablePull : MonoBehaviour {
     private static readonly int padding = 2;
@@ -75,5 +78,20 @@ public class VegetablePull : MonoBehaviour {
             RootVeg.updateBeetPoints(1 * vegProf);
             return 0;
         } return vegProf is 3 ? vegProf + 2 : vegProf;
+    }
+
+    public static IEnumerator rotateVeg(Rigidbody vegBod) { //rotate x by -80, y by -90, z by -70, change direction by 
+        var vegVel = vegBod.velocity;
+        var sprite = vegBod.GetComponentInChildren<MeshRenderer>().gameObject; //todo in the StopTool add a public static component for GameObject which intializes early
+        var rotation = vegBod.rotation;
+        var angle = rotation.eulerAngles;
+        var targetAngle = vegVel + new Vector3(-80, Math.Sign(vegVel.x) * 90, Math.Sign(vegVel.x) * -70);
+        while (absRound(angle.x) < absRound(targetAngle.x) * 0.8f || absRound(angle.y) < 
+               absRound(targetAngle.y) * 0.8f || absRound(angle.z) < absRound(targetAngle.z) * 0.8f) { //todo the vegVel doesn't work here, need to use the SpriteHolder's rotation
+            Debug.Log("started rotating");                                          //todo note: there are no Rigidbodies attached to any of the spriteHolder
+            rotation.eulerAngles = Vector3.Lerp(angle, targetAngle, 0.1f);
+            yield return null;
+            vegBod.rotation = rotation;
+        } Debug.Log("Done rotating");
     }
 }

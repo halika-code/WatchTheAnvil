@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using static GravAmplifier;
 using static VelocityManipulation;
@@ -57,10 +58,10 @@ public class InputController : Character_Controller {
         var move = Move.getMove();
         StartCoroutine(Extras.runTimer(VegetablePull.getProfileOfVeggie(getParentName(veggie.transform)[1]))); 
         var cooldown = runButtonCooldown(move); //note: this is used to not copy the Input.GetKeyUp() logic from above. Also, this ensures the player can't spam the action BUT will be refreshed
-        while (!cooldown.IsCompleted) { //while the player haven't released the action key todo this isn't correct
+        while (!cooldown.IsCompleted) { //while the player haven't released the action key
             if (!Extras.isTimerRunning[0]) { //if the player have held the button for long enough
-                Debug.Log($"Pulling {veggie.transform.parent.name} {veggie.name}");
                 VegetablePull.pullVegetable(veggie);
+                StartCoroutine(VegetablePull.rotateVeg(veggie.attachedRigidbody));
                 isActionPressed = false;
                 Move.updateMovement(move); //restores the original movement 
                 yield break;
